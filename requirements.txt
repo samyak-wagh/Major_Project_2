@@ -1,0 +1,48 @@
+# ── LangChain Core ─────────────────────────────────────────────
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# ── LangChain Integrations ──────────────────────────────────────
+langchain-qdrant>=0.1.1
+langchain-huggingface>=0.0.3
+
+# ── Qdrant Vector Store ────────────────────────────────────────
+qdrant-client>=1.9.0
+
+# ── PDF Processing ─────────────────────────────────────────────
+pypdf>=4.2.0
+pymupdf>=1.24.0
+
+# ── Environment & Config ───────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Utilities ──────────────────────────────────────────────────
+tenacity>=8.3.0
+
+# ── Web App ────────────────────────────────────────────────────
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.9
+streamlit>=1.31.0
+requests>=2.31.0
+sentence-transformers>=2.2.0
+
+# ── HuggingFace Local Model (OS-Tutor) ─────────────────────────
+# TinyLlama base + rohit21789/OS-tutor LoRA adapter
+transformers>=4.40.0
+torch>=2.0.0
+accelerate>=0.29.0
+peft>=0.10.0
+
+# ── Groq Cloud API (open-source model inference) ───────────────────
+groq>=0.9.0
+langchain-groq>=0.1.0
+
+# ── Evaluation (uses Gemini only as evaluator, not for the main app) ───
+langchain-google-genai>=1.0.5
+google-generativeai>=0.7.0
+ragas==0.4.3
+datasets>=2.18.0
+pandas>=2.2.0

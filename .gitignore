@@ -1,0 +1,23 @@
+hf_cache/
+nodes_modules/
+venv/
+.env
+*.gguf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp files created during PDF upload
+temp_*.pdf
+
+# Large PDF files (too big for GitHub)
+ostxtbook.pdf
+sample.pdf
+
+# Qdrant local storage (if any)
+qdrant_storage/
+
+# HuggingFace model cache
+.cache/
