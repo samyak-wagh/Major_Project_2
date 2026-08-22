@@ -38,14 +38,16 @@ def export_one(base_name: str, root: Path):
         for ex in data:
             f.write(json.dumps(ex, ensure_ascii=False) + "\n")
 
-    # ── CSV (system, prompt, completion) ────────────────────────────
+    # ── CSV (category, difficulty, system, prompt, completion) ─────────
     csv_path = root / f"{base_name}.csv"
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["system", "prompt", "completion"])
+        writer.writerow(["category", "difficulty", "system", "prompt", "completion"])
         for ex in data:
             msgs = {m["role"]: m["content"] for m in ex["messages"]}
             writer.writerow([
+                ex.get("category", ""),
+                ex.get("difficulty", ""),
                 msgs.get("system", ""),
                 msgs.get("user", ""),
                 msgs.get("assistant", ""),

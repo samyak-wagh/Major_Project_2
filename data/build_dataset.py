@@ -29,6 +29,27 @@ from build_conceptual import build_all as build_conceptual_examples
 from numerical_gen import GENERATORS
 
 
+# Numericals are inherently 'applied' (a scenario + specific data the model
+# must apply a known procedure to), tagged 'applied_numerical' specifically
+# (not just 'applied') to keep them distinguishable downstream from
+# build_conceptual.py's 'applied_conceptual' examples -- the two come from
+# entirely different pipelines (simulation vs hand-authored KB) and
+# collapsing them into one label made it impossible to split them apart
+# later without re-deriving the split via content heuristics. Difficulty is
+# a rough per-category heuristic based on how many steps/variables are
+# typically involved. Floor is 'medium' -- category='applied_numerical' can
+# never be 'easy' (enforced by build_conceptual.py's _make_example guard),
+# since even the simplest numerical (memory addressing arithmetic) still
+# requires applying a procedure to a specific scenario, not bare recall.
+NUMERICAL_DIFFICULTY = {
+    "memory_addressing": "medium",
+    "page_replacement": "medium",
+    "disk_scheduling": "medium",
+    "cpu_scheduling": "medium",
+    "bankers": "hard",
+}
+
+
 def build_numerical_examples(rng: random.Random, per_category: int) -> list:
     from build_conceptual import _make_example  # reuse the exact wrapper
 
@@ -37,6 +58,7 @@ def build_numerical_examples(rng: random.Random, per_category: int) -> list:
     for name, gen_fn in GENERATORS.items():
         made = 0
         attempts = 0
+        difficulty = NUMERICAL_DIFFICULTY.get(name, "medium")
         # Generate more than needed and de-dup on the rendered question text,
         # since random parameters can occasionally repeat.
         while made < per_category and attempts < per_category * 3:
@@ -45,7 +67,7 @@ def build_numerical_examples(rng: random.Random, per_category: int) -> list:
             if question in seen_questions:
                 continue
             seen_questions.add(question)
-            examples.append(_make_example(context, question, answer))
+            examples.append(_make_example(context, question, answer, "applied_numerical", difficulty))
             made += 1
         print(f"  {name:20s}: {made} / {per_category} requested")
     return examples

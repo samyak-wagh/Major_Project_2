@@ -72,6 +72,28 @@ CHAPTERS = [
                      "utilities, system libraries, and user interface components "
                      "built on top of it."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A new operating system is being designed for a low-power IoT sensor with "
+                                "extremely limited CPU and memory, and no user ever interacts with it "
+                                "directly. Between the OS's two core goals of convenience and efficiency, "
+                                "which should the design prioritize, and why?"
+                            ),
+                            "answer": (
+                                "Efficiency should be prioritized. The OS's two core goals are convenience "
+                                "(a user-friendly, easy-to-use environment for executing programs) and "
+                                "efficiency (ensuring hardware resources are used effectively). Since this "
+                                "IoT sensor has no direct user interaction at all, the 'convenience' goal "
+                                "has essentially no audience to serve — there's no one who benefits from a "
+                                "friendlier interface. Meanwhile, the sensor's constrained CPU and memory "
+                                "make efficient resource use critical just to keep the device functional. "
+                                "So the design should lean almost entirely toward the efficiency goal, "
+                                "minimizing overhead from any convenience-oriented features that would "
+                                "consume scarce resources without benefiting anyone."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "os_types",
@@ -116,6 +138,28 @@ CHAPTERS = [
                      "and coordinated computation across multiple physical "
                      "machines."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A hospital's patient-monitoring system must guarantee that a heart-rate "
+                                "alarm is raised within a strict, guaranteed time window every time — a "
+                                "missed alarm is unacceptable. Which type of operating system does this "
+                                "need, and why would a standard time-sharing OS be unsuitable?"
+                            ),
+                            "answer": (
+                                "This system needs a hard real-time operating system, since a hard "
+                                "real-time system must meet its deadlines absolutely — missing a deadline "
+                                "is considered a total system failure, which matches the requirement that "
+                                "a missed alarm is unacceptable. A standard time-sharing OS is unsuitable "
+                                "because it is designed to rapidly switch the CPU among multiple users' "
+                                "processes to give each the illusion of a dedicated system, with no "
+                                "guarantee about exactly when any particular process will next get the "
+                                "CPU — it optimizes for overall fairness and responsiveness across many "
+                                "processes, not for guaranteeing a specific process meets a strict "
+                                "deadline every single time."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "os_structure",
@@ -156,6 +200,27 @@ CHAPTERS = [
                      "shipped with the OS (e.g. a file manager, compiler, or text "
                      "editor) that itself may use several system calls internally."),
                 ],
+                "negative": [{
+                            "question": (
+                                "Does choosing a microkernel architecture over a monolithic kernel always "
+                                "make every individual operation slower?"
+                            ),
+                            "answer": (
+                                "Not necessarily as an absolute rule. The stated trade-off is that a "
+                                "microkernel's main advantage is improved reliability and security — a "
+                                "failure in a user-mode service doesn't crash the kernel — 'at the cost of "
+                                "extra message-passing overhead between components.' That overhead "
+                                "specifically applies to operations that must cross between the kernel and "
+                                "a user-mode service (e.g. a file system or driver call), not to every "
+                                "operation an OS performs in general. So while microkernel designs do "
+                                "introduce overhead for those specific cross-component interactions, the "
+                                "passage doesn't state that a microkernel makes literally every operation "
+                                "slower than a monolithic kernel — only that this particular class of "
+                                "interaction pays a message-passing cost."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "system_calls",
@@ -195,6 +260,30 @@ CHAPTERS = [
                      "access to all instructions and hardware, entered only via "
                      "system calls, interrupts, or exceptions."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why must a system call switch the CPU into kernel mode via a trap "
+                                "instead of the user program simply calling the kernel's function "
+                                "directly, the way it would call any other function in its own code?"
+                            ),
+                            "answer": (
+                                "System calls require the transition specifically so the switch to kernel "
+                                "mode is controlled and verified at a single, fixed entry point rather "
+                                "than the user program being able to jump into arbitrary kernel code. The "
+                                "trap instruction transfers control to a fixed kernel entry point, at "
+                                "which point the processor mode bit switches to kernel mode and the kernel "
+                                "itself dispatches to the correct handler — the user program never gets to "
+                                "decide directly what kernel code runs or with what privileges. If a user "
+                                "program could simply 'call' kernel functions the way it calls its own "
+                                "functions, user mode and kernel mode would offer no real protection "
+                                "boundary at all, since user code could invoke privileged operations "
+                                "however it liked; the trap mechanism is what makes user mode's "
+                                "restriction (no direct execution of privileged instructions) actually "
+                                "enforceable."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -245,6 +334,27 @@ CHAPTERS = [
                      "are mapped to by the Memory Management Unit (MMU) at run "
                      "time."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A running process on a single-CPU system issues a read() call to a slow "
+                                "disk device and must wait for the data. Walk through which process state "
+                                "it moves out of, which state it moves into, and what happens to the CPU "
+                                "it was using."
+                            ),
+                            "answer": (
+                                "The process moves out of the Running state (its instructions were being "
+                                "executed by the CPU) and into the Waiting/Blocked state, since it is now "
+                                "waiting for an event — the I/O completion of its disk read — before it "
+                                "can continue. Because a single CPU can only run one process's "
+                                "instructions at a time and this process can make no progress until its "
+                                "I/O finishes, the CPU it was using becomes free for the scheduler to "
+                                "allocate to a different process that is in the Ready state (waiting to "
+                                "be assigned to the CPU), rather than sitting idle while this process "
+                                "waits."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "process_scheduling_queues",
@@ -275,6 +385,28 @@ CHAPTERS = [
                      "used to improve the process mix and free up memory when the "
                      "system is overloaded."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why does the long-term scheduler run far less frequently than the "
+                                "short-term (CPU) scheduler?"
+                            ),
+                            "answer": (
+                                "The long-term scheduler controls the degree of multiprogramming by "
+                                "deciding which processes are admitted from secondary storage into the "
+                                "ready queue in memory — this is a comparatively rare, coarse-grained "
+                                "decision, since a process typically stays resident in memory for its "
+                                "entire lifetime once admitted, so there's no need to re-run this decision "
+                                "often. The short-term scheduler, by contrast, decides which "
+                                "already-resident, ready process gets the CPU next — a decision that must "
+                                "be made constantly, every time the currently running process is "
+                                "preempted, blocks, or finishes, which happens on the order of "
+                                "milliseconds. Because CPU allocation must be re-decided vastly more often "
+                                "than memory admission, the short-term scheduler necessarily runs far more "
+                                "frequently than the long-term one."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "threads",
@@ -322,6 +454,32 @@ CHAPTERS = [
                      "flexibility while letting the OS create enough kernel "
                      "threads for parallelism."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A web server needs to handle thousands of simultaneous client "
+                                "connections on a multicore machine, where any single client's blocking "
+                                "I/O call must never stall the handling of other clients, and true "
+                                "parallel execution across cores is required. Which multithreading model "
+                                "(many-to-one, one-to-one, or many-to-many) best fits this requirement, "
+                                "and why do the other two fall short?"
+                            ),
+                            "answer": (
+                                "One-to-one fits best here, since it maps each user thread to its own "
+                                "kernel thread, meaning a blocking call from one thread's connection "
+                                "doesn't block any other thread, and multiple threads can run in true "
+                                "parallel across cores — both hard requirements in this scenario. "
+                                "Many-to-one falls short because it maps many user threads onto a single "
+                                "kernel thread: one blocking call blocks all threads, and there is no "
+                                "true parallelism at all, since the kernel only ever sees one schedulable "
+                                "thread. Many-to-many could also satisfy both requirements in principle, "
+                                "since it multiplexes user threads onto multiple kernel threads, but it "
+                                "adds implementation complexity for the flexibility it offers; for a "
+                                "requirement stated as simply as this one, one-to-one is the most direct, "
+                                "guaranteed fit."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "process_creation_ipc",
@@ -373,6 +531,27 @@ CHAPTERS = [
                      "operation — much faster for large or frequent data exchange, "
                      "but requires explicit application-level synchronization."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a parent process calls fork() and then exits immediately, while its "
+                                "child is still running normally (not yet finished), does the "
+                                "still-running child become a zombie process?"
+                            ),
+                            "answer": (
+                                "No. A zombie process is specifically one that has already finished "
+                                "execution but whose entry remains in the process table because its "
+                                "parent hasn't yet called wait() to read its exit status — zombie status "
+                                "requires the CHILD to have finished. Here, the child is described as "
+                                "still running normally, not finished, so it cannot be a zombie. Instead, "
+                                "since its parent terminated first, the still-running child becomes an "
+                                "orphan process — one whose parent terminated before it did — and it is "
+                                "typically re-parented to a special system process (like init/PID 1 on "
+                                "Unix), which will later call wait() on it once it does finish, "
+                                "preventing it from ever becoming a zombie."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -412,6 +591,32 @@ CHAPTERS = [
                      "(e.g. when a higher-priority process arrives or a time "
                      "quantum expires) and give it to another process."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why can't a scheduler simultaneously maximize CPU utilization/throughput "
+                                "and minimize every individual process's waiting time in all cases?"
+                            ),
+                            "answer": (
+                                "Maximizing CPU utilization and throughput generally means keeping the "
+                                "CPU as continuously busy as possible and completing as many processes "
+                                "per unit time as possible — objectives best served by favoring whichever "
+                                "process can run efficiently right now. Minimizing an individual "
+                                "process's waiting time, though, is about how long ONE specific process "
+                                "sits in the ready queue before it gets the CPU. These pull in different "
+                                "directions once multiple processes compete: keeping the CPU maximally "
+                                "busy processing whichever jobs are convenient can mean a specific "
+                                "process (e.g. one with a long burst) is deliberately made to wait longer "
+                                "while other, shorter jobs run in front of it. Since the listed criteria "
+                                "(utilization, throughput, turnaround time, waiting time, response time) "
+                                "are being optimized simultaneously for potentially conflicting goals "
+                                "across an entire mix of processes, no single scheduling policy can be "
+                                "strictly best on every criterion for every workload at once — this is "
+                                "exactly why different algorithms exist, each favoring a different "
+                                "criterion."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "fcfs",
@@ -435,6 +640,28 @@ CHAPTERS = [
                      "average waiting time even though the short processes "
                      "individually need very little CPU time."),
                 ],
+                "applied": [{
+                            "question": (
+                                "Three processes arrive in this order: P1 needs 20ms of CPU time, P2 "
+                                "needs 2ms, and P3 needs 3ms, all arriving at essentially the same time. "
+                                "Under FCFS scheduling, describe what happens to P2 and P3, and name the "
+                                "phenomenon."
+                            ),
+                            "answer": (
+                                "Under FCFS, the CPU is allocated strictly in arrival order, so P1 runs "
+                                "first and occupies the CPU for its full 20ms even though P2 and P3 each "
+                                "need only a few milliseconds. P2 and P3 — despite being very short jobs "
+                                "— must sit in the ready queue doing nothing until P1 finishes, so P2 "
+                                "finishes at 22ms and P3 at 25ms, even though if either had run first "
+                                "they could have completed in just 2-3ms. This is the convoy effect: a "
+                                "long CPU-bound process (P1) running first forces much shorter processes "
+                                "behind it to wait far longer than their own execution time would "
+                                "require, drastically increasing their waiting time even though they "
+                                "individually need very little CPU time."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "sjf",
@@ -473,6 +700,27 @@ CHAPTERS = [
                      "effective priority) of a process the longer it waits, "
                      "guaranteeing it eventually gets scheduled."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If every process currently in the ready queue happens to have exactly "
+                                "the same CPU burst time, does SJF scheduling produce a different "
+                                "execution order than FCFS scheduling?"
+                            ),
+                            "answer": (
+                                "Not necessarily. SJF selects the process with the smallest CPU burst "
+                                "time among those in the ready queue — but if every process has the "
+                                "identical burst time, there is no single 'smallest' to distinguish "
+                                "between them, so SJF's selection rule provides no distinguishing "
+                                "information in this case. In practice, ties are broken by some "
+                                "secondary rule (commonly arrival order), which means SJF ends up "
+                                "selecting processes in the same order FCFS would anyway. SJF's "
+                                "advantage over FCFS specifically comes from being able to favor shorter "
+                                "jobs over longer ones — when burst times don't differ at all, that "
+                                "advantage has nothing to act on."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "priority_scheduling",
@@ -496,6 +744,27 @@ CHAPTERS = [
                      "eventually becomes the highest priority and gets "
                      "scheduled."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A low-priority background process has been sitting in the ready queue "
+                                "for a long time because higher-priority processes keep arriving ahead "
+                                "of it. Describe how aging resolves this, referencing what actually "
+                                "changes about the process."
+                            ),
+                            "answer": (
+                                "Aging resolves this by gradually increasing the waiting process's "
+                                "priority the longer it continues to wait, rather than leaving its "
+                                "priority fixed. As new higher-priority processes keep arriving and "
+                                "jumping ahead of it, the background process's priority number keeps "
+                                "being adjusted upward (toward higher priority) over time. Eventually, "
+                                "its aged priority becomes higher than that of newly-arriving processes, "
+                                "at which point the scheduler will select it for the CPU instead of "
+                                "continuing to pass it over — guaranteeing it eventually runs, which is "
+                                "exactly the starvation problem aging is designed to solve."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "round_robin",
@@ -527,6 +796,27 @@ CHAPTERS = [
                      "bounded share of CPU time repeatedly, giving good response "
                      "time to interactive users even under heavy load."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A system administrator sets the Round Robin time quantum extremely high "
+                                "(larger than any process's total burst time). What does the scheduling "
+                                "behavior effectively become, and why?"
+                            ),
+                            "answer": (
+                                "With a quantum larger than any process's total burst time, no process "
+                                "ever actually gets preempted for running out of its time slice — each "
+                                "process that starts running will finish its entire burst before the "
+                                "quantum would expire. Since the quantum is never the limiting factor, "
+                                "processes effectively just run to completion in whatever order they "
+                                "were taken from the ready queue, which is exactly how FCFS behaves. This "
+                                "matches the stated behavior directly: 'if the quantum is too large, RR "
+                                "behaves like FCFS,' with the associated downside of poor response time "
+                                "for interactive processes, since a process at the back of the queue must "
+                                "wait for every process ahead of it to run to completion, uninterrupted."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "multilevel_queue",
@@ -552,6 +842,29 @@ CHAPTERS = [
                      "unlike plain multilevel queue scheduling where the "
                      "assignment is fixed."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why is a process being permanently assigned to a single queue a real "
+                                "limitation of plain multilevel queue scheduling, motivating the move to "
+                                "multilevel feedback queue scheduling?"
+                            ),
+                            "answer": (
+                                "In plain multilevel queue scheduling, each process is permanently "
+                                "assigned to one queue (e.g. based on process type), and that assignment "
+                                "never changes even if the process's actual behavior changes over time — "
+                                "for example, if a process placed in a background/batch queue later "
+                                "starts behaving more interactively, it stays stuck in the batch queue's "
+                                "scheduling treatment regardless. Multilevel feedback queue scheduling "
+                                "fixes exactly this limitation by allowing processes to move between "
+                                "queues based on their observed behavior — demoting a process that uses "
+                                "too much CPU time to a lower-priority queue, and promoting one that "
+                                "waits a lot (I/O-bound) — so the scheduling treatment adapts dynamically "
+                                "to how a process actually behaves, instead of being locked in by a "
+                                "one-time, permanent classification."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "scheduling_comparison",
@@ -578,6 +891,32 @@ CHAPTERS = [
                      "processes if the running one holds the CPU for a long "
                      "time."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A system handles a mix of short interactive user commands and long "
+                                "batch computation jobs, and needs consistently low response times for "
+                                "the interactive commands even while batch jobs are running. Based on "
+                                "the responsiveness/overhead trade-off, should this system favor a "
+                                "preemptive or non-preemptive scheduling policy, and what cost does that "
+                                "choice accept?"
+                            ),
+                            "answer": (
+                                "This system should favor a preemptive scheduling policy, since "
+                                "preemptive scheduling gives better responsiveness for interactive "
+                                "systems because a time-sensitive process (here, an interactive command) "
+                                "can interrupt whatever is currently running — including a long batch "
+                                "job — rather than having to wait for it to finish or voluntarily yield. "
+                                "The cost accepted is more context-switching overhead, and the need for "
+                                "careful synchronization to avoid race conditions on shared data, since a "
+                                "running process (including the batch job) can now be interrupted at "
+                                "points a non-preemptive design wouldn't need to guard against. A "
+                                "non-preemptive policy would have lower overhead but would let a long "
+                                "batch job hold the CPU for its entire run, directly violating the "
+                                "requirement for consistently low interactive response times."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -618,6 +957,88 @@ CHAPTERS = [
                      "adding 1, and writing it back; if both read the same old "
                      "value before either writes, one increment is lost."),
                 ],
+                # Topic ids (from this file or kb_advanced.py) this topic is
+                # commonly compared/contrasted with in exams. Consumed by
+                # build_comparative_examples() via the COMPARISONS list below
+                # — listed here too so the relationship is discoverable from
+                # either side when scanning the KB.
+                "related": ["deadlock_conditions"],
+                "applied": [
+                    {
+                        "question": (
+                            "A ticket-booking system runs three server processes that all handle "
+                            "requests against the same 'seats_available' counter: each process reads "
+                            "the counter, decrements it if the value is greater than zero, and writes "
+                            "it back — with no locking. During a flash sale, all three processes read "
+                            "the counter at nearly the same instant. What problem can occur, and why?"
+                        ),
+                        "answer": (
+                            "This is a race condition on the shared 'seats_available' counter, caused "
+                            "by the read-decrement-write sequence not being protected as a critical "
+                            "section. If all three processes read the same value (say, 2 seats "
+                            "available) before any of them writes back, each independently computes "
+                            "'2 - 1 = 1' and writes 1 back — even though three separate bookings were "
+                            "made. Instead of the counter correctly dropping to -1 (oversold, which the "
+                            "check should have prevented for the third booking) or being correctly "
+                            "serialized down to 0 with the third request rejected, it ends at 1: two "
+                            "decrements are silently lost, and the system may believe more seats remain "
+                            "than actually exist, or fail to detect that it oversold. The fix is to make "
+                            "the entire read-decrement-write sequence a critical section, protected so "
+                            "only one process can execute it at a time — e.g. with a mutex."
+                        ),
+                        "difficulty": "medium",
+                    },
+                ],
+                "analytical": [
+                    {
+                        "question": (
+                            "Why can't a race condition be fixed just by making each individual read "
+                            "and each individual write atomic on their own, without protecting the "
+                            "whole read-modify-write sequence as a single unit?"
+                        ),
+                        "answer": (
+                            "Making each individual read and each individual write atomic only "
+                            "guarantees that no other process can observe a torn/partial value during "
+                            "that single operation — it says nothing about what can happen BETWEEN "
+                            "operations. The critical section problem exists precisely because a "
+                            "read-modify-write sequence is multiple separate steps, and another process "
+                            "is free to run its own steps in the gap between them. For example, even if "
+                            "each read and each write is individually atomic, one process can still read "
+                            "a value, then be interrupted before it writes back, while a second process "
+                            "reads the same (still-unmodified) value and writes its own update — both "
+                            "processes end up basing their update on the same stale value. Correctness "
+                            "requires the entire sequence to be treated as one indivisible critical "
+                            "section (only one process executing any part of it at a time), not just "
+                            "each individual memory access."
+                        ),
+                        "difficulty": "hard",
+                    },
+                ],
+                "negative": [
+                    {
+                        "question": (
+                            "If a shared variable is only ever read by multiple concurrent threads and "
+                            "is never written by any of them after initialization, can a race condition "
+                            "occur on that variable?"
+                        ),
+                        "answer": (
+                            "No. A race condition requires the outcome to depend on the unpredictable "
+                            "ORDER of accesses, which only matters when at least one of the concurrent "
+                            "accesses is a write that changes the data — as in the classic example of two "
+                            "processes incrementing a shared counter, where the danger comes specifically "
+                            "from each process reading, modifying, and writing the value back. If every "
+                            "concurrent access is a pure read of a value that never changes after "
+                            "initialization, there is no write to interleave with, so no matter what order "
+                            "the reads happen in, every thread observes the exact same, unchanging value. "
+                            "This is also why a solution to the critical-section problem is unnecessary "
+                            "here: mutual exclusion, progress, and bounded waiting exist specifically to "
+                            "protect a critical section where shared data is being modified — a block of "
+                            "code that only reads unchanging data has no critical section to protect in "
+                            "the first place, since there is nothing concurrent access could corrupt."
+                        ),
+                        "difficulty": "easy",
+                    },
+                ],
             },
             {
                 "id": "peterson",
@@ -639,6 +1060,31 @@ CHAPTERS = [
                      "the exact instruction ordering (an issue on modern "
                      "out-of-order/optimizing hardware)."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why does Peterson's solution, despite being logically correct on paper, "
+                                "fail to guarantee mutual exclusion on modern out-of-order processors?"
+                            ),
+                            "answer": (
+                                "Peterson's solution's correctness depends on the two shared-variable "
+                                "writes (setting flag[i] = true and turn = j) actually being visible to "
+                                "the other process in that exact order before the busy-wait check runs, "
+                                "and on the busy-wait's read of flag[j] and turn happening after those "
+                                "writes are visible. It 'only works correctly on architectures that "
+                                "preserve the exact instruction ordering' — but modern out-of-order/"
+                                "optimizing hardware and compilers are explicitly allowed to reorder "
+                                "independent-looking memory operations for performance, as long as a "
+                                "SINGLE thread's own view of its own instructions still looks "
+                                "sequential. If the hardware reorders when flag[i] or turn actually "
+                                "become visible to the OTHER process relative to how the code was "
+                                "written, the other process's busy-wait check can observe stale values "
+                                "and both processes can end up believing it's safe to enter the critical "
+                                "section simultaneously — breaking the exact ordering guarantee the "
+                                "algorithm's correctness proof silently assumes."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "semaphores",
@@ -680,6 +1126,27 @@ CHAPTERS = [
                      "where the low-priority holder temporarily inherits the "
                      "higher priority until it releases the lock."),
                 ],
+                "negative": [{
+                            "question": (
+                                "A resource pool has 5 identical, interchangeable printers, but the "
+                                "counting semaphore protecting access to them is initialized to 3. Is "
+                                "this semaphore correctly configured for this resource pool?"
+                            ),
+                            "answer": (
+                                "No. A counting semaphore's value is used to control access to a "
+                                "resource with multiple identical instances, and its value 'represents "
+                                "the number of available instances.' Initializing it to 3 when there are "
+                                "actually 5 identical, interchangeable printers means the semaphore "
+                                "under-represents the true available capacity: it will block a 4th and "
+                                "5th requesting process even while 2 real printers sit completely idle "
+                                "and unused, since wait() only allows access while the semaphore's count "
+                                "is positive, and it was set to 3 rather than 5. The semaphore's initial "
+                                "value should match the actual number of interchangeable resource "
+                                "instances it is protecting."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "classic_sync_problems",
@@ -739,6 +1206,34 @@ CHAPTERS = [
                      "correct concurrent code structurally easier to write and "
                      "verify than using raw semaphores directly."),
                 ],
+                "analytical": [
+                    {
+                        "question": (
+                            "Why does the readers-writers problem require a different locking "
+                            "discipline than plain mutual exclusion, instead of just wrapping every "
+                            "access to the shared data in one ordinary mutex?"
+                        ),
+                        "answer": (
+                            "Plain mutual exclusion treats every access as equally exclusive: only one "
+                            "process may be inside the critical section at a time, full stop. But in the "
+                            "readers-writers setting, multiple readers can safely access the shared data "
+                            "SIMULTANEOUSLY without any conflict, since none of them modify it — forcing "
+                            "readers to take turns one-at-a-time behind a single mutex would be strictly "
+                            "more restrictive than necessary and needlessly hurt concurrency, since "
+                            "reads alone can never produce a race condition. What the problem actually "
+                            "requires is an asymmetric rule: any number of readers may proceed together, "
+                            "OR exactly one writer may proceed alone, but readers and a writer (or two "
+                            "writers) can never be active at the same time, since a writer changing the "
+                            "data while a reader observes it (or two writers changing it concurrently) "
+                            "would corrupt the data or produce an inconsistent read. A single plain mutex "
+                            "cannot express 'many readers OR one writer' — it can only express 'one "
+                            "process at a time' — so the problem needs its own dedicated construction "
+                            "(e.g. counting how many readers are currently active, and only having the "
+                            "first reader lock out writers and the last reader unlock them)."
+                        ),
+                        "difficulty": "hard",
+                    },
+                ],
             },
         ],
     },
@@ -780,6 +1275,34 @@ CHAPTERS = [
                      "exists; if resources have multiple instances, a cycle is "
                      "necessary but not sufficient for deadlock."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why must all four conditions (mutual exclusion, hold-and-wait, no "
+                                "preemption, circular wait) hold simultaneously for deadlock to occur — "
+                                "what breaks if just one of them is absent?"
+                            ),
+                            "answer": (
+                                "Each condition removes a specific way processes could otherwise escape "
+                                "a stuck waiting cycle, so if even one is absent, that escape route "
+                                "reopens. Without mutual exclusion, a resource could be shared freely, so "
+                                "no process would ever need to wait for exclusive access to it at all. "
+                                "Without hold-and-wait, a process would never hold one resource while "
+                                "blocked waiting for another, so it couldn't be 'stuck' holding "
+                                "something another waiting process needs. Without no-preemption, the "
+                                "resource a process is waiting for could simply be forcibly taken from "
+                                "whoever holds it and handed over, breaking the wait immediately rather "
+                                "than letting it persist. And without circular wait, the waiting "
+                                "relationships among processes couldn't form a closed loop back to the "
+                                "starting process, so at least one process in any chain would eventually "
+                                "be able to get everything it needs and finish, freeing its resources "
+                                "for the rest. Because deadlock specifically requires the situation "
+                                "where no process can ever proceed, removing any one of these conditions "
+                                "reopens some path to progress, which is why all four together are "
+                                "necessary."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "deadlock_handling",
@@ -827,6 +1350,33 @@ CHAPTERS = [
                      "this requires advance knowledge of each process's maximum "
                      "resource needs."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A safety-critical embedded system controlling industrial machinery "
+                                "cannot tolerate the 'ignore the problem' approach to deadlocks, since an "
+                                "undetected deadlock could leave machinery in a dangerous state. Which of "
+                                "the four general strategies for handling deadlocks would be "
+                                "inappropriate here, and which are viable alternatives?"
+                            ),
+                            "answer": (
+                                "Deadlock ignorance — assuming deadlocks never happen and doing nothing "
+                                "about them, as most general-purpose OSes like Windows/Linux do — is "
+                                "inappropriate here, since the scenario explicitly cannot tolerate an "
+                                "undetected deadlock. The viable alternatives are deadlock prevention "
+                                "(designing the system so at least one of the four necessary conditions "
+                                "can never hold, structurally ruling deadlock out), deadlock avoidance "
+                                "(dynamically checking whether granting a resource request could lead to "
+                                "an unsafe state before granting it, e.g. via the Banker's algorithm), or "
+                                "deadlock detection and recovery (allowing deadlocks to occur but "
+                                "periodically checking for them and recovering, e.g. by aborting or "
+                                "preempting processes). For a safety-critical system, prevention or "
+                                "avoidance would generally be preferred over detection-and-recovery, "
+                                "since they stop a deadlock from ever actually occurring rather than "
+                                "reacting after machinery may already be stuck."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "bankers_conceptual",
@@ -865,6 +1415,29 @@ CHAPTERS = [
                      "allocation/request matrix analysis), then triggers recovery "
                      "only if a deadlock is actually found."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a process declares a Maximum resource need that is larger than the "
+                                "total number of instances of that resource type that will ever exist in "
+                                "the system, can the system still reach a safe state with respect to "
+                                "that process?"
+                            ),
+                            "answer": (
+                                "No. A state is safe only if there exists a safe sequence in which each "
+                                "process's remaining resource Need can eventually be satisfied using "
+                                "currently available resources plus resources freed by processes earlier "
+                                "in the sequence — but the most that could ever become available to any "
+                                "process, even in the best case, is the total number of instances of "
+                                "that resource type that exist in the system. If a process's declared "
+                                "Maximum need exceeds that total, no amount of waiting or sequencing "
+                                "could ever supply enough of that resource to satisfy it, since the "
+                                "resource simply doesn't exist in sufficient quantity anywhere in the "
+                                "system. No safe sequence could ever complete for that process, so the "
+                                "system could never be considered safe with respect to it."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "deadlock_recovery",
@@ -891,6 +1464,27 @@ CHAPTERS = [
                      "in the selection cost, ensuring no process is picked an "
                      "unlimited number of times."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a system recovers from deadlock using resource preemption rather "
+                                "than process termination, does the victim process necessarily have to "
+                                "be killed?"
+                            ),
+                            "answer": (
+                                "No. The two main approaches to deadlock recovery are described as "
+                                "distinct alternatives: process termination (aborting one or more "
+                                "deadlocked processes) and resource preemption (successively preempting "
+                                "resources from some processes and giving them to others until the "
+                                "deadlock cycle is broken). Resource preemption specifically takes back "
+                                "a process's held resources rather than ending the process itself — the "
+                                "process can, in principle, continue running later (potentially after "
+                                "being rolled back to an earlier state) once the deadlock is resolved "
+                                "and it can reacquire what it needs. Termination and preemption are "
+                                "presented as two separate strategies, not as one implying the other."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -938,6 +1532,28 @@ CHAPTERS = [
                      "process from accessing another process's or the OS's "
                      "memory."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A process attempts to access a logical address that falls outside the "
+                                "range covered by its limit register. Using the base/limit protection "
+                                "mechanism, describe what the hardware does and why."
+                            ),
+                            "answer": (
+                                "The hardware checks every logical address the CPU generates against the "
+                                "condition '0 ≤ logical address < limit.' Since this access falls "
+                                "outside that range, the check fails, and the hardware raises a trap "
+                                "(addressing error) to the OS instead of allowing the access to proceed "
+                                "to physical memory. This happens specifically because the base and "
+                                "limit registers exist to prevent a process from accessing another "
+                                "process's or the OS's memory — the limit register defines the size of "
+                                "this process's legitimate address space, and any logical address at or "
+                                "beyond that limit is, by construction, outside memory that belongs to "
+                                "this process, so the hardware refuses to translate it into a physical "
+                                "address at all."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "contiguous_allocation",
@@ -976,6 +1592,30 @@ CHAPTERS = [
                      "expensive since it requires dynamic relocation and copying "
                      "live process memory."),
                 ],
+                "applied": [{
+                            "question": (
+                                "Free memory currently has one large 500KB hole and several tiny 5-10KB "
+                                "holes scattered elsewhere. A new process needs 480KB. Compare how "
+                                "first-fit and worst-fit would handle this specific request."
+                            ),
+                            "answer": (
+                                "First-fit scans from the start of memory and allocates the first hole "
+                                "large enough for the request — if the 500KB hole happens to be "
+                                "encountered before any other hole big enough (and none of the tiny "
+                                "5-10KB holes qualify, since they're too small for a 480KB request), "
+                                "first-fit would allocate into that 500KB hole, leaving a small ~20KB "
+                                "leftover fragment there. Worst-fit specifically allocates the largest "
+                                "available hole to reduce the number of tiny leftover fragments — here, "
+                                "the 500KB hole is almost certainly the largest hole available, so "
+                                "worst-fit would also choose it, again leaving roughly 20KB free. In "
+                                "this particular scenario, because only one hole is actually large "
+                                "enough to satisfy the request at all, first-fit and worst-fit converge "
+                                "on the same choice — their difference in strategy would only really "
+                                "diverge if multiple holes were large enough to hold the process."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "paging",
@@ -1036,6 +1676,44 @@ CHAPTERS = [
                      "(often requiring a hash table) since it's no longer indexed "
                      "directly by page number."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A process has a page table where page 5 maps to frame 12, and the "
+                                "system uses a page size of 4096 bytes. What is the physical address "
+                                "corresponding to logical address 20500, and what are the intermediate "
+                                "page number and offset?"
+                            ),
+                            "answer": (
+                                "The logical address is split into a page number and offset using the "
+                                "page size: page number = 20500 // 4096 = 5 (since 5×4096 = 20480, and "
+                                "20500 is within the next 4096-byte block), and offset = 20500 − 20480 = "
+                                "20. Looking up page 5 in the page table gives frame 12. The physical "
+                                "address is then computed as (frame number × page size) + offset = "
+                                "(12 × 4096) + 20 = 49152 + 20 = 49172."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
+                "negative": [{
+                            "question": (
+                                "In a paging system, can two different logical pages ever need to be "
+                                "placed in the same physical frame at the same time?"
+                            ),
+                            "answer": (
+                                "No. Paging works precisely because any page can be placed in any "
+                                "AVAILABLE frame — but 'available' means not already occupied. Each "
+                                "physical frame holds exactly one page's worth of data at a time; a page "
+                                "table entry maps a specific logical page to the one frame currently "
+                                "holding its data. If a second page needed to occupy a frame already "
+                                "holding a different page, the first page's data would simply be "
+                                "overwritten and lost (which is exactly what happens deliberately during "
+                                "page replacement, where an old page is evicted before a new one takes "
+                                "its frame) — but at any single instant, one frame holds at most one "
+                                "page, never two simultaneously."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "segmentation",
@@ -1073,6 +1751,25 @@ CHAPTERS = [
                      "(only small internal fragmentation in the last page of "
                      "each segment)."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a program's logical address has an offset exactly equal to a "
+                                "segment's limit value, is that a valid access?"
+                            ),
+                            "answer": (
+                                "No. The rule stated is: if the offset is less than the limit, the "
+                                "physical address is computed as base + offset; if the offset EXCEEDS "
+                                "the limit, a segmentation fault occurs. An offset exactly equal to the "
+                                "limit is neither 'less than' the limit, so it doesn't satisfy the valid "
+                                "condition — since segment sizes/limits are typically defined so valid "
+                                "offsets run from 0 up to (limit − 1), an offset equal to the limit "
+                                "value itself is one byte past the last valid byte in the segment, and "
+                                "would trigger a segmentation fault (trap) just as an offset that "
+                                "exceeds the limit would."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1117,6 +1814,25 @@ CHAPTERS = [
                      "record the frame number, and (5) restarts the instruction "
                      "that caused the fault."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A process references a page that is marked invalid in its page table "
+                                "(not currently in physical memory). Walk through what the OS does, in "
+                                "order, referencing the page fault handling steps."
+                            ),
+                            "answer": (
+                                "This triggers a page fault, a trap caused by referencing an invalid "
+                                "page. The OS then: (1) checks whether the reference is valid or an "
+                                "illegal access — assuming it's valid, (2) finds a free frame, or evicts "
+                                "a page using a replacement algorithm if none is free, (3) reads the "
+                                "required page in from disk into that frame, (4) updates the page table "
+                                "to mark the page valid and record its new frame number, and (5) "
+                                "restarts the very instruction that caused the fault, which now succeeds "
+                                "since the page table correctly reflects that the page is in memory."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "page_replacement_conceptual",
@@ -1177,6 +1893,26 @@ CHAPTERS = [
                      "paging behavior can affect the performance of unrelated "
                      "processes."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a system uses LRU or Optimal page replacement, and increases the "
+                                "number of available frames, can the number of page faults ever "
+                                "increase?"
+                            ),
+                            "answer": (
+                                "No. Belady's Anomaly — where increasing the number of frames can "
+                                "increase page faults instead of decreasing them — is specifically "
+                                "stated to occur under FIFO replacement; 'stack-based algorithms like "
+                                "LRU and Optimal never exhibit this anomaly.' For stack-based "
+                                "algorithms, the set of pages held with N frames is always a subset of "
+                                "what would be held with N+1 frames, so adding frames can only help or "
+                                "leave the fault count unchanged, never make it worse. So for LRU or "
+                                "Optimal specifically, increasing frames cannot increase the number of "
+                                "page faults."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1210,6 +1946,26 @@ CHAPTERS = [
                      "subdirectories/files via links, as long as no cycles are "
                      "created)."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A phone book application needs to instantly jump to any specific "
+                                "contact's record by contact ID, without scanning through unrelated "
+                                "contacts first. Which file access method fits this requirement, and why "
+                                "would sequential access be a poor fit?"
+                            ),
+                            "answer": (
+                                "Direct/random access fits this requirement, since it allows records to "
+                                "be read or written in any order using a fixed-length block/record "
+                                "number, like a disk — a contact ID can be used directly to jump "
+                                "straight to that record's location. Sequential access would be a poor "
+                                "fit because it only supports reading or writing records in order, one "
+                                "after another, like a tape — retrieving one specific contact by ID "
+                                "would require reading through every preceding record first, which is "
+                                "exactly the unrelated-scanning behavior the requirement rules out."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "file_allocation",
@@ -1252,6 +2008,26 @@ CHAPTERS = [
                      "large files) — but not the filename itself (filenames are "
                      "stored in directory entries that point to inode numbers)."),
                 ],
+                "negative": [{
+                            "question": (
+                                "Does linked allocation suffer from external fragmentation the way "
+                                "contiguous allocation does?"
+                            ),
+                            "answer": (
+                                "No. Linked allocation stores each file as a linked list of disk blocks "
+                                "scattered anywhere on disk, so a file's blocks never need to occupy one "
+                                "contiguous region — any free block anywhere can be linked into a file, "
+                                "regardless of its neighbors. This is explicitly stated as an advantage: "
+                                "linked allocation has 'no external fragmentation and files can grow "
+                                "easily.' External fragmentation specifically arises from needing a "
+                                "contiguous run of free space, which is a problem unique to allocation "
+                                "schemes (like contiguous allocation) that require a file's blocks to "
+                                "sit together — linked allocation avoids the requirement entirely, so "
+                                "the problem doesn't apply to it."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "free_space_management",
@@ -1275,6 +2051,29 @@ CHAPTERS = [
                      "contiguous chunks, store the address of the first free "
                      "block in a run plus a count of how many follow)."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why is a bit vector (bitmap) described as easy for finding contiguous "
+                                "free blocks, while a linked list of free blocks is described as slow to "
+                                "search?"
+                            ),
+                            "answer": (
+                                "A bit vector represents the entire disk's free/allocated status "
+                                "compactly as one bit per block, laid out in block order — scanning it "
+                                "for a run of consecutive 1-bits (free blocks) can be done efficiently "
+                                "in memory, often examining many blocks' status at once (e.g. a whole "
+                                "word of bits together), directly revealing contiguous stretches of "
+                                "free space. A linked list of free blocks, by contrast, only tells you "
+                                "the very next free block via a pointer stored in the current one — "
+                                "finding out whether several free blocks happen to be contiguous, or "
+                                "finding a free block with any particular property, requires following "
+                                "the chain one link at a time, with no way to jump ahead or examine "
+                                "multiple candidates simultaneously, which is inherently slower to "
+                                "traverse and search."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "file_system_extra",
@@ -1302,6 +2101,27 @@ CHAPTERS = [
                      "inconsistencies, typically run automatically at boot after "
                      "an unclean shutdown, or manually on demand."),
                 ],
+                "negative": [{
+                            "question": (
+                                "After an unclean shutdown, if the file system consistency checker finds "
+                                "no inconsistencies at all, does that mean the checker didn't need to "
+                                "run?"
+                            ),
+                            "answer": (
+                                "No. A consistency checker like fsck or chkdsk is 'typically run "
+                                "automatically at boot after an unclean shutdown' specifically because a "
+                                "crash or power failure CAN leave file system metadata in a partially-"
+                                "updated, inconsistent state — but whether it actually did so on any "
+                                "particular occasion isn't known in advance. The checker still needs to "
+                                "run to verify the state and confirm nothing is inconsistent; finding no "
+                                "problems is a valid, expected outcome of the check, not evidence that "
+                                "the check was unnecessary. The check is what establishes that the "
+                                "metadata is consistent — without running it, that fact simply isn't "
+                                "known after an unclean shutdown."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1338,6 +2158,28 @@ CHAPTERS = [
                      "directly reduces overall I/O completion time and increases "
                      "disk throughput."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why does total disk access time = seek time + rotational latency + "
+                                "transfer time, and why can't a disk begin transferring data before both "
+                                "seek time and rotational latency have elapsed?"
+                            ),
+                            "answer": (
+                                "Transferring the requested data requires the read/write head to be "
+                                "correctly positioned over the specific bit of the disk holding that "
+                                "data, which needs two separate physical alignments: the head must first "
+                                "be over the correct cylinder/track (seek time), and then the disk must "
+                                "rotate until the correct sector on that track passes under the head "
+                                "(rotational latency). Only once both of these physical positioning "
+                                "steps are complete can the head actually begin reading or writing the "
+                                "requested bits (transfer time) — data transfer literally cannot start "
+                                "correctly until the head is both radially and rotationally aligned with "
+                                "the target sector, which is why the three components are sequential "
+                                "contributors that sum together rather than overlapping."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "disk_scheduling_conceptual",
@@ -1392,6 +2234,31 @@ CHAPTERS = [
                      "throughput, but it can starve requests that are far from "
                      "the head if closer requests keep arriving."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A disk head is positioned at cylinder 50. Requests arrive for cylinders "
+                                "10, 90, and 55, in that arrival order. Using SSTF, which request is "
+                                "serviced first, and why might a request like cylinder 10 risk "
+                                "starvation under SSTF if a steady stream of nearby requests keeps "
+                                "arriving?"
+                            ),
+                            "answer": (
+                                "Under SSTF, the request whose cylinder is closest to the current head "
+                                "position (50) is serviced next — cylinder 55 (distance 5) is closer "
+                                "than cylinder 90 (distance 40) or cylinder 10 (distance 40), so "
+                                "cylinder 55 is serviced first. Request 10's risk of starvation comes "
+                                "from SSTF always favoring whatever is currently nearest to the head: if "
+                                "new requests keep arriving near the head's current location (e.g. "
+                                "clustered around cylinder 50-60), SSTF will keep servicing those "
+                                "instead of ever traveling the longer distance out to cylinder 10, since "
+                                "something closer is repeatedly available — exactly the drawback "
+                                "stated: SSTF 'can cause starvation of requests far from the current "
+                                "head position if a steady stream of requests keeps arriving near the "
+                                "head's current location.'"
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "raid",
@@ -1422,6 +2289,24 @@ CHAPTERS = [
                      "reconstructed from parity) while using less redundant "
                      "capacity than mirroring."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a single disk fails in a RAID 0 array, can the lost data be "
+                                "reconstructed from the remaining disks?"
+                            ),
+                            "answer": (
+                                "No. RAID 0 (striping) splits data evenly across multiple disks 'with no "
+                                "redundancy' — it stores no mirrored copies and no parity information "
+                                "anywhere. It 'maximizes performance and capacity but offers zero fault "
+                                "tolerance (any single disk failure loses all data).' Since there is no "
+                                "redundant data of any kind stored on the other disks to reconstruct "
+                                "from, a single disk failure in RAID 0 causes permanent, unrecoverable "
+                                "data loss for the portions of every file striped across the failed "
+                                "disk."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
             {
                 "id": "disk_extra",
@@ -1449,6 +2334,29 @@ CHAPTERS = [
                      "bad blocks in the file system's free-space structures so "
                      "they are never allocated to a file."),
                 ],
+                "analytical": [{
+                            "question": (
+                                "Why does sector sparing (transparently remapping bad sectors to spares "
+                                "during low-level formatting) mean the OS and file system usually never "
+                                "need to handle bad blocks themselves?"
+                            ),
+                            "answer": (
+                                "Sector sparing is handled entirely inside the disk controller, below "
+                                "the level the OS or file system ever interacts with: the controller "
+                                "maintains its own list of defective sectors and transparently redirects "
+                                "any access meant for a bad sector to a spare sector set aside during "
+                                "low-level formatting. Because this remapping happens automatically at "
+                                "the hardware level before a logical block number is even translated to "
+                                "a physical location, the OS and file system continue addressing the "
+                                "disk using its normal logical block numbers with no awareness that some "
+                                "of the underlying physical sectors are actually spares standing in for "
+                                "defective ones — the substitution is invisible above the controller, "
+                                "which is exactly why 'the OS and file system usually never see the bad "
+                                "sectors at all.'"
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1500,6 +2408,27 @@ CHAPTERS = [
                      "as a cache if it holds the only copy of data currently in "
                      "use."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A device transfers a very large file (megabytes) into memory. Using "
+                                "DMA, describe what the CPU actually does during this transfer, and "
+                                "contrast it with what the CPU would have to do without DMA."
+                            ),
+                            "answer": (
+                                "With DMA, the CPU only sets up the transfer — specifying the source, "
+                                "destination, and length — and then is free to do other useful work "
+                                "while a DMA controller handles moving the data directly between the "
+                                "device and main memory. The CPU is interrupted only once, when the "
+                                "entire transfer completes. Without DMA, the CPU would need to be "
+                                "involved in each individual byte transfer itself, which for a "
+                                "multi-megabyte file means an enormous number of individual "
+                                "CPU-mediated transfers, consuming CPU cycles that could otherwise be "
+                                "spent on other work — exactly the overhead DMA is designed to eliminate "
+                                "for large data transfers."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1549,6 +2478,31 @@ CHAPTERS = [
                      "component with limited privileges can do limited harm even "
                      "if exploited."),
                 ],
+                "negative": [{
+                            "question": (
+                                "If a legitimate, authenticated user misuses file permissions they were "
+                                "correctly granted (e.g. reading a file they're allowed to read, but for "
+                                "a purpose the owner didn't intend), is that a protection failure or a "
+                                "security failure by the definitions given?"
+                            ),
+                            "answer": (
+                                "It's a protection concern, not necessarily a security failure by these "
+                                "definitions. Protection is described as dealing with 'legitimate users "
+                                "misusing their granted access' — internal mechanisms controlling access "
+                                "according to policy. Security is described as defending against threats "
+                                "that are unauthorized or malicious, from both inside and outside the "
+                                "system — but here, the user IS authorized (correctly authenticated, "
+                                "correctly granted read access) and isn't described as acting "
+                                "maliciously or without authorization; they're simply using a "
+                                "legitimately-granted permission in a way the file owner didn't "
+                                "anticipate. Since the access itself was authorized and within the "
+                                "granted permissions, this scenario is squarely the protection concern "
+                                "the definitions describe, rather than the unauthorized/malicious access "
+                                "security is defined around."
+                            ),
+                            "difficulty": "hard",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1583,6 +2537,27 @@ CHAPTERS = [
                      "running on Windows/Linux), which is easier to set up but "
                      "adds an extra layer of overhead."),
                 ],
+                "applied": [{
+                            "question": (
+                                "A cloud provider wants to run many customers' virtual machines on bare "
+                                "physical servers with maximum performance, with no separate host "
+                                "operating system involved at all. Which hypervisor type fits this "
+                                "requirement, and why would the other type be a worse fit?"
+                            ),
+                            "answer": (
+                                "A Type 1 (bare-metal) hypervisor fits this requirement, since it runs "
+                                "directly on the physical hardware with no underlying host OS — it IS "
+                                "the 'OS' for the VMs, and is generally described as giving better "
+                                "performance, matching the goal of maximum performance with no separate "
+                                "host OS. A Type 2 (hosted) hypervisor would be a worse fit here because "
+                                "it runs as an application on top of a conventional host operating "
+                                "system, meaning there IS a separate host OS layer between the hardware "
+                                "and the hypervisor — directly contradicting the stated requirement, and "
+                                "adding the extra overhead that comes with that additional layer."
+                            ),
+                            "difficulty": "medium",
+                            "status": "REVIEWED",
+                        }],
             },
         ],
     },
@@ -1624,4 +2599,320 @@ GLOSSARY = [
     ("Thrashing", "A state where a system spends more time swapping/paging than executing actual process instructions, caused by insufficient physical memory for the active working sets."),
     ("Priority inversion", "A scheduling anomaly where a higher-priority process is indirectly delayed by a lower-priority process holding a resource it needs, while an unrelated medium-priority process runs in between."),
     ("Race condition", "A flaw where the outcome of concurrent execution depends on the unpredictable timing/order of accesses to shared data by multiple processes or threads."),
+]
+
+
+# ══════════════════════════════════════════════════════════════════════
+# COMPARISONS — cross-topic COMPARATIVE questions. Each entry references two
+# existing topic ids (topic_a/topic_b, looked up by build_comparative_
+# examples() in build_conceptual.py, from either kb_conceptual.py or
+# kb_advanced.py's CHAPTERS). Both topics' context passages are concatenated
+# into the "Textbook passages:" block, and the answer must be grounded ONLY
+# in facts drawn from those two passages — no third-party facts invented.
+# ══════════════════════════════════════════════════════════════════════
+COMPARISONS = [
+    {
+        "topic_a": "critical_section",
+        "topic_b": "deadlock_conditions",
+        "question": (
+            "How does a race condition differ from a deadlock in terms of the "
+            "necessary conditions that produce it?"
+        ),
+        "answer": (
+            "A race condition needs only concurrent, unsynchronized access to shared "
+            "data where at least one access is a write — no locking or resource-holding "
+            "is required at all for it to occur; the bug is simply the ABSENCE of mutual "
+            "exclusion around a critical section, so the final result depends on "
+            "whatever order the accesses happen to interleave in. A deadlock is the "
+            "opposite kind of failure: it requires synchronization (resource-holding) to "
+            "already be in place, and specifically requires four conditions to hold "
+            "simultaneously — mutual exclusion, hold-and-wait, no preemption, and "
+            "circular wait — so that a set of processes end up permanently blocked "
+            "waiting on each other. In short: a race condition is what can go wrong when "
+            "there is too LITTLE synchronization around shared data, while a deadlock is "
+            "what can go wrong when there is synchronization (locks/resources being "
+            "held), but it is acquired and ordered in a way that creates a circular "
+            "waiting dependency. Fixing a race condition means ADDING mutual exclusion "
+            "around the critical section; fixing/avoiding a deadlock means removing (or "
+            "carefully managing) one of the four Coffman conditions that mutual-exclusion "
+            "-style locking can itself introduce."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "topic_a": "semaphores",
+        "topic_b": "deadlock_conditions",
+        "question": (
+            "How can improper semaphore usage lead to a deadlock, and which of the four "
+            "necessary deadlock conditions does a semaphore create by construction?"
+        ),
+        "answer": (
+            "A semaphore used as a lock (initialized to 1) inherently creates the Mutual "
+            "Exclusion condition by design — it restricts a resource to being held by only "
+            "one process at a time, exactly what wait()/signal() are built to enforce. "
+            "Deadlock arises on top of this when multiple semaphores are acquired in "
+            "inconsistent order across different processes: for example, if Thread A "
+            "executes wait(S1) then wait(S2), while Thread B executes wait(S2) then "
+            "wait(S1), and both threads execute their first wait() at nearly the same "
+            "time, Thread A ends up holding S1 while waiting for S2, and Thread B ends up "
+            "holding S2 while waiting for S1. This single scenario satisfies all four "
+            "necessary conditions at once: Mutual Exclusion (each semaphore is held "
+            "exclusively), Hold-and-Wait (each thread holds one semaphore while waiting "
+            "for another), No Preemption (neither semaphore can be forcibly taken away), "
+            "and Circular Wait (A waits on B's semaphore, B waits on A's) — so the two "
+            "threads deadlock permanently. The standard prevention technique is to impose "
+            "a consistent global ordering on semaphore acquisition (e.g. always acquire "
+            "S1 before S2, in every thread), which eliminates the circular-wait condition."
+        ),
+        "difficulty": "hard",
+    },
+    {
+            "topic_a": "fcfs",
+            "topic_b": "sjf",
+            "question": (
+                "Compare FCFS and SJF scheduling in terms of what each needs to know about "
+                "a process in advance, and what problem that creates for SJF."
+            ),
+            "answer": (
+                "FCFS needs no advance knowledge about a process at all beyond its arrival "
+                "time — it maintains a simple FIFO queue of processes ordered by arrival "
+                "time, and whichever arrives first runs first, regardless of how long it "
+                "will take. SJF, by contrast, needs to know the length of each process's "
+                "next CPU burst in advance in order to select the shortest one — but this "
+                "is generally not knowable exactly for real workloads, which is stated as "
+                "SJF's main practical limitation; it is approximated in practice using "
+                "techniques like exponential averaging of past burst times. So while SJF is "
+                "provably optimal for minimizing average waiting time, it pays for that "
+                "optimality with a predictive requirement FCFS never has to satisfy at all."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "round_robin",
+            "topic_b": "priority_scheduling",
+            "question": (
+                "Compare Round Robin and priority scheduling in terms of how each achieves "
+                "(or fails to achieve) fairness among processes."
+            ),
+            "answer": (
+                "Round Robin achieves fairness by construction: every process in the ready "
+                "queue is given a fixed time quantum in turn, cycling through the circular "
+                "queue, so every process gets a fair, bounded share of CPU time repeatedly "
+                "regardless of when it arrived. Priority scheduling has no such built-in "
+                "fairness — the CPU is allocated to whichever process has the highest "
+                "priority, which means a low-priority process can be passed over "
+                "indefinitely if higher-priority processes keep arriving, causing "
+                "starvation. Priority scheduling only regains a form of fairness through an "
+                "added mechanism, aging, which artificially increases a waiting process's "
+                "priority over time until it eventually gets scheduled — fairness that "
+                "Round Robin provides structurally, without needing a separate corrective "
+                "mechanism."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "paging",
+            "topic_b": "segmentation",
+            "question": (
+                "Compare paging and segmentation in terms of what determines the size of "
+                "each allocation unit, and how that choice affects external fragmentation."
+            ),
+            "answer": (
+                "In paging, the allocation unit (a page/frame) has a fixed size chosen by "
+                "the system design, unrelated to the logical structure of any particular "
+                "program — because every page is the same size and any page can be placed "
+                "in any available frame, a process's memory need not be contiguous, which "
+                "eliminates external fragmentation entirely (though it can still cause "
+                "internal fragmentation in the last page). In segmentation, the allocation "
+                "unit (a segment) has a variable size that matches a logically meaningful "
+                "part of the program itself — code, data, stack, each with its own base and "
+                "limit — which matches the programmer's logical view of the program, but "
+                "because segments vary in size and must each occupy contiguous memory, "
+                "segmentation can suffer from external fragmentation the way paging cannot. "
+                "The fixed-vs-variable sizing choice is exactly what produces this "
+                "difference in fragmentation behavior."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "deadlock_handling",
+            "topic_b": "bankers_conceptual",
+            "question": (
+                "How does the Banker's algorithm specifically implement the 'deadlock "
+                "avoidance' strategy described among the four general strategies for "
+                "handling deadlocks?"
+            ),
+            "answer": (
+                "Deadlock avoidance is described as dynamically checking whether granting a "
+                "resource request could lead to an unsafe state before granting it, giving "
+                "the Banker's algorithm as the example. The Banker's algorithm implements "
+                "this exactly: it requires each process's Maximum claim, current "
+                "Allocation, and Need (Max − Allocation), plus the Available vector; before "
+                "granting any request, it tentatively allocates the requested resources and "
+                "runs the safety algorithm to check whether the resulting state is still "
+                "safe — a safe sequence must exist in which every process's remaining Need "
+                "can eventually be satisfied. If the resulting state is safe, the request is "
+                "granted; otherwise, the process must wait. This is precisely the 'dynamic "
+                "check before granting' that defines avoidance as a strategy, made concrete "
+                "with the specific data (Max/Allocation/Need/Available) and the specific "
+                "safety-check procedure the Banker's algorithm provides."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "contiguous_allocation",
+            "topic_b": "paging",
+            "question": (
+                "Compare contiguous allocation and paging in terms of how each handles (or "
+                "fails to handle) external fragmentation, and what remedy each relies on."
+            ),
+            "answer": (
+                "Contiguous allocation requires each process to occupy a single contiguous "
+                "block of memory; over time, as processes come and go, free memory becomes "
+                "scattered into small non-contiguous holes even when the total free space "
+                "would be enough — this is external fragmentation, and its stated remedy is "
+                "compaction: shuffling memory contents to relocate allocated blocks "
+                "together and consolidate free memory into one large block, at the expense "
+                "of the overhead of dynamic relocation and copying live process memory. "
+                "Paging avoids the problem structurally instead of remedying it after the "
+                "fact: because logical memory is divided into fixed-size pages that can be "
+                "placed in any available physical frame, a process's memory never needs to "
+                "be contiguous in physical RAM, so external fragmentation is eliminated "
+                "entirely — paging needs no compaction-style remedy because the problem "
+                "compaction solves for contiguous allocation doesn't arise for it in the "
+                "first place."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "sjf",
+            "topic_b": "round_robin",
+            "question": (
+                "Compare SJF and Round Robin in terms of which specific scheduling "
+                "criterion each is designed to optimize."
+            ),
+            "answer": (
+                "SJF is designed to optimize average waiting time — it is stated to be "
+                "'provably optimal for minimizing average waiting time for a given set of "
+                "processes,' by always running whichever ready process has the smallest "
+                "burst time next, so other jobs spend the least total time waiting behind "
+                "long ones. Round Robin is designed to optimize response time and fairness "
+                "for interactive systems, not minimum average waiting time — it 'suits "
+                "time-sharing systems because every process gets a fair, bounded share of "
+                "CPU time repeatedly, giving good response time to interactive users even "
+                "under heavy load,' at the cost of not necessarily minimizing waiting time "
+                "the way SJF does. The two algorithms optimize for genuinely different "
+                "criteria: SJF for the shortest possible average wait assuming burst times "
+                "are known, and RR for consistently good responsiveness across many "
+                "processes regardless of burst length."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "disk_scheduling_conceptual",
+            "topic_b": "sjf",
+            "question": (
+                "How is SSTF disk scheduling analogous to SJF CPU scheduling, and how are "
+                "their respective drawbacks similar?"
+            ),
+            "answer": (
+                "SSTF disk scheduling is explicitly described as being 'similar to SJF for "
+                "CPU scheduling': just as SJF always selects the ready process with the "
+                "smallest CPU burst time next, SSTF always services the pending disk "
+                "request whose cylinder is closest to the current head position next — both "
+                "algorithms greedily pick whatever looks 'cheapest' to service right now, "
+                "based on a size/distance measure, rather than respecting arrival order. "
+                "Their drawbacks are similarly shaped, too: SJF's short jobs can "
+                "indefinitely delay a long-burst process if shorter jobs keep arriving "
+                "(addressed via aging), and SSTF 'can cause starvation of requests far from "
+                "the current head position if a steady stream of requests keeps arriving "
+                "near the head's current location' — in both cases, the greedy 'shortest/"
+                "closest first' strategy can starve whichever item is unlucky enough to "
+                "look expensive relative to a constant stream of cheaper alternatives."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "deadlock_conditions",
+            "topic_b": "bankers_conceptual",
+            "question": (
+                "How does a cycle in the Resource Allocation Graph relate to the Banker's "
+                "algorithm's concept of a 'safe state' — are they describing the same "
+                "thing?"
+            ),
+            "answer": (
+                "They are related but not the same thing, and they come from two different "
+                "approaches to the deadlock problem. A Resource Allocation Graph cycle is a "
+                "DETECTION-style concept: if the graph contains a cycle and each resource in "
+                "it has only one instance, a deadlock EXISTS — it's a way of recognizing a "
+                "deadlock that has already happened, and with multiple instances a cycle is "
+                "necessary but not sufficient for deadlock. A safe state is an AVOIDANCE-"
+                "style concept: it asks whether a safe sequence exists in which every "
+                "process's remaining Need can eventually be satisfied, checked BEFORE "
+                "granting a request, specifically so a deadlock never gets the chance to "
+                "occur in the first place. So a RAG cycle is a symptom examined after (or "
+                "as) resources are actually allocated, while a safe state is a predictive "
+                "check performed before a request is granted — one detects, the other "
+                "prevents."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "memory_basics",
+            "topic_b": "virtual_memory_basics",
+            "question": (
+                "Compare swapping and demand paging as two different techniques for "
+                "handling processes that don't fully fit in available physical memory."
+            ),
+            "answer": (
+                "Swapping operates at whole-process granularity: it temporarily moves a "
+                "process's ENTIRE memory image out to secondary storage (a backing store) "
+                "to free up main memory for other processes, later swapping the whole thing "
+                "back in to continue execution — it increases the degree of "
+                "multiprogramming but adds significant I/O overhead, since the full image "
+                "moves at once. Demand paging operates at per-page granularity instead: "
+                "rather than moving whole processes, it loads (or evicts) individual pages "
+                "only when actually referenced (demanded) by the running process, meaning a "
+                "process's rarely-used parts (like error-handling code) may never be loaded "
+                "at all. Both techniques let the system handle more total memory demand "
+                "than physical RAM alone could hold, but swapping does so by relocating "
+                "entire processes wholesale, while demand paging does so by keeping only "
+                "the actively-used slice of each process resident at any given time."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
+    {
+            "topic_a": "peterson",
+            "topic_b": "semaphores",
+            "question": (
+                "Compare Peterson's solution and semaphores in terms of how many processes "
+                "each is described as handling, and what that implies about their "
+                "practical scope."
+            ),
+            "answer": (
+                "Peterson's solution is specifically described as 'a classic software-based "
+                "algorithm for two processes,' using exactly two shared variables (an "
+                "integer turn and a boolean array flag[2]) sized for exactly that case — "
+                "its construction is inherently tied to coordinating two participants. "
+                "Semaphores, by contrast, are described more generally as being 'used to "
+                "control access to shared resources among concurrent processes,' with "
+                "counting semaphores specifically supporting 'a resource with multiple "
+                "identical instances' — nothing in their description limits them to two "
+                "processes. This implies a real difference in practical scope: Peterson's "
+                "solution as described is a two-process construction, while semaphores are "
+                "described as a general-purpose mechanism usable across an arbitrary number "
+                "of concurrent processes and resource instances."
+            ),
+            "difficulty": "hard",
+            "status": "REVIEWED",
+        },
 ]
