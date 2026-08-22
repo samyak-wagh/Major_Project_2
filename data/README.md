@@ -88,6 +88,25 @@ matches the production distribution (important for a 1.1B model):
 
 This is a drop-in replacement for the old `dataset.json`'s schema.
 
+## File formats
+
+`build_dataset.py` writes the canonical chat-messages JSON (`dataset_v2*.json`)
+— this is the format most chat/instruction fine-tuning frameworks (axolotl,
+LLaMA-Factory, Unsloth, HF `SFTTrainer`, OpenAI's own fine-tuning API) expect
+natively, and it's the same schema the original `dataset.json` already used.
+
+Run `python export_formats.py` afterward to also produce, for tools that
+want a different shape:
+- **`.jsonl`** — the same examples, one JSON object per line (required by
+  some tools instead of a single JSON array).
+- **`.csv`** — flattened to three columns: `system`, `prompt`, `completion`
+  (for tools/UIs that only accept a flat table). Values with embedded
+  commas/newlines are properly quoted per RFC 4180 — open with a real CSV
+  reader (`csv.DictReader`, pandas, Excel), not a naive split on `,`.
+
+All three formats are byte-for-byte equivalent in content — pick whichever
+your training tool expects.
+
 ## Regenerating / expanding
 
 ```bash
