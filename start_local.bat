@@ -3,7 +3,7 @@ title OS Tutor Launcher
 color 0A
 
 echo ============================================================
-echo    OS Tutor - Powered by TinyLlama + rohit21789/OS-tutor
+echo    OS Tutor - Powered by Qwen2.5-1.5B + qwen-os-tutor-lora
 echo ============================================================
 echo.
 
@@ -21,8 +21,8 @@ if %errorlevel% NEQ 0 (
 
 echo.
 echo [2/3] Starting OS Tutor API backend (loads model + ingests textbook)...
-echo     NOTE: First run downloads ~2.2 GB from HuggingFace. Please wait.
-start "OS Tutor API" cmd /k "python api.py"
+echo     NOTE: First run downloads ~3 GB from HuggingFace. Please wait.
+start "OS Tutor API" cmd /k ""D:\New folder\Samyak\venv\genai\Scripts\python.exe" api.py"
 
 echo.
 echo [3/3] Waiting 15 seconds for backend to initialize...
@@ -30,7 +30,7 @@ timeout /t 15 /nobreak >nul
 
 echo.
 echo Starting Streamlit UI...
-start "OS Tutor UI" cmd /k "streamlit run app.py"
+start "OS Tutor UI" cmd /k ""D:\New folder\Samyak\venv\genai\Scripts\python.exe" -m streamlit run app.py"
 
 echo.
 echo ============================================================

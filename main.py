@@ -59,14 +59,16 @@ GREY    = "\033[90m"
 def c(text: str, colour: str) -> str:
     return f"{colour}{text}{RESET}"
 
-def banner(backend: str = "local"):
+def banner(backend: str = "qwen"):
     print()
     print(c("╔══════════════════════════════════════════════════════════╗", CYAN))
     print(c("║", CYAN) + c("   🎓  OS Tutor  —  Your AI Study Tutor (CLI)            ", BOLD + WHITE) + c("║", CYAN))
     if backend == "groq":
         print(c("║", CYAN) + c("      Groq Cloud API · LangChain · Qdrant               ", DIM + GREY) + c("║", CYAN))
-    else:
+    elif backend == "local":
         print(c("║", CYAN) + c("      TinyLlama + OS-tutor · LangChain · Qdrant          ", DIM + GREY) + c("║", CYAN))
+    else:  # qwen (default)
+        print(c("║", CYAN) + c("      Qwen2.5 + OS-Tutor LoRA · LangChain · Qdrant       ", DIM + GREY) + c("║", CYAN))
     print(c("╚══════════════════════════════════════════════════════════╝", CYAN))
     print()
 
@@ -121,30 +123,37 @@ def spinner_dots(label: str):
 
 def load_config() -> dict:
     return {
-        "qdrant_url":      os.getenv("QDRANT_URL", ""),
-        "qdrant_api_key":  os.getenv("QDRANT_API_KEY", ""),
-        "qdrant_host":     os.getenv("QDRANT_HOST", "localhost"),
-        "qdrant_port":     int(os.getenv("QDRANT_PORT", "6333")),
-        "collection":      os.getenv("QDRANT_COLLECTION", "os_tutor"),
-        "chunk_size":      int(os.getenv("CHUNK_SIZE", "1000")),
-        "chunk_overlap":   int(os.getenv("CHUNK_OVERLAP", "200")),
-        "top_k":           int(os.getenv("TOP_K", "5")),
-        "score_threshold": float(os.getenv("SCORE_THRESHOLD", "0.35")),
-        "temperature":     float(os.getenv("TEMPERATURE", "0.1")),
-        "max_new_tokens":  int(os.getenv("MAX_NEW_TOKENS", "512")),
-        "local_base":      os.getenv("LOCAL_BASE_MODEL", "TinyLlama/TinyLlama-1.1B-Chat-v1.0"),
-        "local_adapter":   os.getenv("LOCAL_ADAPTER", "rohit21789/OS-tutor"),
+        "qdrant_url":         os.getenv("QDRANT_URL", ""),
+        "qdrant_api_key":     os.getenv("QDRANT_API_KEY", ""),
+        "qdrant_host":        os.getenv("QDRANT_HOST", "localhost"),
+        "qdrant_port":        int(os.getenv("QDRANT_PORT", "6333")),
+        "collection":         os.getenv("QDRANT_COLLECTION", "os_tutor"),
+        "chunk_size":         int(os.getenv("CHUNK_SIZE", "1000")),
+        "chunk_overlap":      int(os.getenv("CHUNK_OVERLAP", "200")),
+        "top_k":              int(os.getenv("TOP_K", "5")),
+        "score_threshold":    float(os.getenv("SCORE_THRESHOLD", "0.35")),
+        "temperature":        float(os.getenv("TEMPERATURE", "0.1")),
+        "max_new_tokens":     int(os.getenv("MAX_NEW_TOKENS", "512")),
+        # ── Local TinyLlama backend (kept as secondary fallback) ───────────────
+        "local_base":         os.getenv("LOCAL_BASE_MODEL", "TinyLlama/TinyLlama-1.1B-Chat-v1.0"),
+        "local_adapter":      os.getenv("LOCAL_ADAPTER", "rohit21789/OS-tutor"),
+        # ── Qwen2.5 fine-tuned backend (PRIMARY local model) ──────────────────
+        # LOCAL_ADAPTER_PATH: path to the qwen-os-tutor-lora directory (checked into repo)
+        "local_adapter_path": os.getenv("LOCAL_ADAPTER_PATH", "qwen-os-tutor-lora"),
+        "qwen_base_model":    os.getenv("QWEN_BASE_MODEL", "Qwen/Qwen2.5-1.5B-Instruct"),
         # Path to the Galvin textbook (auto-ingest on startup if present)
-        "default_pdf":     os.getenv("DEFAULT_PDF", "ostxtbook.pdf"),
+        "default_pdf":        os.getenv("DEFAULT_PDF", "ostxtbook.pdf"),
         # Device: "cpu" = force CPU, "cuda" = force GPU, "auto" = auto-detect
-        "device":          os.getenv("DEVICE", "cpu"),
-        # ── Groq cloud backend ─────────────────────────────────────────────────
-        # Set LLM_BACKEND=groq (or local) in .env to switch backends
-        "llm_backend":     os.getenv("LLM_BACKEND", "local"),
-        "groq_api_key":    os.getenv("GROQ_API_KEY", ""),
-        "groq_model":      os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        "device":             os.getenv("DEVICE", "cpu"),
+        # ── LLM backend selector ──────────────────────────────────────────────
+        # qwen  → Qwen2.5-1.5B + Yash LoRA (primary, default)
+        # local → TinyLlama + rohit21789/OS-tutor (secondary fallback)
+        # groq  → Groq cloud API (cloud fallback)
+        "llm_backend":        os.getenv("LLM_BACKEND", "qwen"),
+        "groq_api_key":       os.getenv("GROQ_API_KEY", ""),
+        "groq_model":         os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
         # Gemini key (used only by eval/run_eval.py — never removed)
-        "gemini_api_key":  os.getenv("GEMINI_PAID_API_KEY", ""),
+        "gemini_api_key":     os.getenv("GEMINI_PAID_API_KEY", ""),
     }
 
 
@@ -177,31 +186,47 @@ def build_qa_chain(cfg: dict, qdrant_store, embeddings,
     """
     Build a QA chain from the current vector store state.
 
-    backend: 'groq' | 'local' | None (None → use cfg['llm_backend'])
+    backend: 'qwen' | 'groq' | 'local' | None  (None → use cfg['llm_backend'])
+      • 'qwen'  — Qwen2.5-1.5B + Yash LoRA adapter (PRIMARY local model)
+      • 'local' — TinyLlama + rohit21789/OS-tutor   (secondary local fallback)
+      • 'groq'  — Groq cloud API                    (cloud fallback)
     groq_model: Groq model name override (e.g. 'mixtral-8x7b-32768')
     """
-    resolved_backend = (backend or cfg.get("llm_backend", "local")).lower()
+    resolved_backend = (backend or cfg.get("llm_backend", "qwen")).lower()
 
-    query_emb = embeddings.get_query_embeddings_instance()
+    query_emb    = embeddings.get_query_embeddings_instance()
     vector_store = qdrant_store.get_vector_store(query_emb)
-    retriever = vector_store.as_retriever(
+    retriever    = vector_store.as_retriever(
         search_type="similarity_score_threshold",
         search_kwargs={
-            "k": cfg["top_k"],
+            "k":               cfg["top_k"],
             "score_threshold": cfg["score_threshold"],
         },
     )
 
-    if resolved_backend == "groq":
+    if resolved_backend == "qwen":
+        # ── PRIMARY: Qwen2.5-1.5B + Yash fine-tuned LoRA ──────────────────────
+        from rag.qwen_chain import QwenOSTutorChain
+        chain = QwenOSTutorChain(
+            retriever=retriever,
+            adapter_path=cfg.get("local_adapter_path", "qwen-os-tutor-lora"),
+            base_model=cfg.get("qwen_base_model", "Qwen/Qwen2.5-1.5B-Instruct"),
+            temperature=cfg["temperature"],
+            max_new_tokens=cfg["max_new_tokens"],
+            device=cfg.get("device", "auto"),
+        )
+    elif resolved_backend == "groq":
+        # ── CLOUD FALLBACK: Groq API ───────────────────────────────────────────
         from rag.groq_chain import GroqOSTutorChain
         chain = GroqOSTutorChain(
             retriever=retriever,
             api_key=cfg.get("groq_api_key", ""),
-            model=groq_model or cfg.get("groq_model", "llama-3.3-70b-versatile"),
+            model=groq_model or cfg.get("groq_model", "openai/gpt-oss-20b"),
             temperature=cfg["temperature"],
             max_tokens=cfg["max_new_tokens"],
         )
     else:
+        # ── SECONDARY LOCAL FALLBACK: TinyLlama + rohit21789/OS-tutor ─────────
         from rag.qa_chain import OSTutorChain
         chain = OSTutorChain(
             retriever=retriever,
@@ -308,17 +333,20 @@ def run_repl(cfg: dict, preload_pdfs: list):
     for pdf_path in preload_pdfs:
         ingest_pdf(pdf_path, cfg, qdrant_store, embeddings, processor)
 
-    # ── Build QA chain ────────────────────────────────────────────────────────
+    # ── Build QA chain ────────────────────────────────────────────────────
     qa_chain = None
     docs = qdrant_store.list_ingested_documents()
     if docs:
-        backend = cfg.get("llm_backend", "local")
+        backend = cfg.get("llm_backend", "qwen")
         if backend == "groq":
             section("Initialising Groq Chain")
-            info(f"Backend: {c('Groq', CYAN)}  Model: {c(cfg.get('groq_model', 'llama-3.3-70b-versatile'), YELLOW)}")
-        else:
-            section("Loading OS-Tutor Model")
+            info(f"Backend: {c('Groq', CYAN)}  Model: {c(cfg.get('groq_model', 'openai/gpt-oss-20b'), YELLOW)}")
+        elif backend == "local":
+            section("Loading TinyLlama Model (secondary fallback)")
             info("Loading TinyLlama + OS-tutor adapter (first run downloads ~2.2 GB)…")
+        else:  # qwen (default)
+            section("Loading Qwen2.5 OS-Tutor Model (primary)")
+            info(f"Loading Qwen2.5-1.5B + {c(cfg.get('local_adapter_path', 'qwen-os-tutor-lora'), YELLOW)} adapter…")
         qa_chain = build_qa_chain(cfg, qdrant_store, embeddings)
         success(f"Ready — {len(docs)} document(s) in knowledge base.")
         for d in docs:

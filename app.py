@@ -203,7 +203,7 @@ if "groq_model" not in st.session_state:
 _backend_label = (
     f"⚡ Groq / {st.session_state.groq_model}"
     if st.session_state.llm_backend == "groq"
-    else "🤖 Local · TinyLlama + OS-tutor LoRA · Offline"
+    else "🤖 Local · Qwen2.5-1.5B + OS-tutor LoRA · Offline"
 )
 st.markdown(f"""
 <div class="os-header">
@@ -242,7 +242,7 @@ with st.sidebar:
     backend_choice = st.radio(
         "Choose model backend",
         options=["local", "groq"],
-        format_func=lambda x: "🤖 Local (TinyLlama — Offline)" if x == "local" else "⚡ Groq (Cloud — Fast)",
+        format_func=lambda x: "🤖 Local (Qwen2.5-1.5B — Offline)" if x == "local" else "⚡ Groq (Cloud — Fast)",
         index=0 if st.session_state.llm_backend == "local" else 1,
         key="backend_radio",
         label_visibility="collapsed",
@@ -335,6 +335,21 @@ for message in st.session_state.messages:
                     )
 
 # ── Helper: send question ─────────────────────────────────────────────────────
+
+def _fix_latex(text: str) -> str:
+    """Convert LLM LaTeX delimiters to Streamlit-compatible format."""
+    import re
+    # \[ ... \]  →  $$ ... $$  (display/block math)
+    text = re.sub(r'\\\[(.+?)\\\]', lambda m: '$$' + m.group(1).strip() + '$$', text, flags=re.DOTALL)
+    # \( ... \)  →  $ ... $   (inline math)
+    text = re.sub(r'\\\((.+?)\\\)', lambda m: '$' + m.group(1).strip() + '$', text, flags=re.DOTALL)
+    # [ ... ]  style (Groq sometimes uses bare brackets for math)
+    text = re.sub(r'(?<![\w\]])\ ?\[([^\[\]]{5,}?)\]\ ?(?![\w\[])',
+                  lambda m: '$$' + m.group(1).strip() + '$$' if any(c in m.group(1) for c in ['\\', '^', '_', '=']) else '[' + m.group(1) + ']',
+                  text)
+    return text
+
+
 def send_question(prompt: str):
     if not prompt.strip():
         return
@@ -349,7 +364,7 @@ def send_question(prompt: str):
         if backend == "groq":
             placeholder.markdown("*⚡ Querying Groq...*")
         else:
-            placeholder.markdown("*⏳ Thinking... (30–90s on CPU)*")
+            placeholder.markdown("*⏳ Thinking... (30–90s)*")
 
         try:
             payload = {
@@ -361,16 +376,22 @@ def send_question(prompt: str):
 
             if res.status_code == 200:
                 data = res.json()
-                answer  = data["answer"]
+                answer  = _fix_latex(data["answer"])
                 sources = data.get("sources", [])
 
-                full_response = ""
                 placeholder.empty()
-                for word in answer.split(" "):
-                    full_response += word + " "
-                    placeholder.markdown(full_response + "▌")
-                    time.sleep(0.025)
-                placeholder.markdown(full_response.strip())
+                # Skip word-by-word streaming when answer contains math (avoids broken formulas)
+                has_math = '$$' in answer or '$' in answer or '|' in answer
+                if has_math:
+                    placeholder.markdown(answer)
+                    full_response = answer
+                else:
+                    full_response = ""
+                    for word in answer.split(" "):
+                        full_response += word + " "
+                        placeholder.markdown(full_response + "◌")
+                        time.sleep(0.02)
+                    placeholder.markdown(full_response.strip())
 
                 if sources and not any("no source" in s.lower() for s in sources):
                     with st.expander("📚 View Source References"):

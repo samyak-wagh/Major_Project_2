@@ -26,12 +26,13 @@ from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
 
-# ── System instruction (same as local chain) ──────────────────────────────────
+# ── System instruction ───────────────────────────────────────────────────────
 _SYSTEM_INSTRUCTION = (
-    "You are an Operating Systems tutor. "
-    "Answer ONLY using the exact textbook passages provided below. "
-    "Do NOT add your own examples, do NOT invent information. "
-    "If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+    "You are an expert Operating Systems tutor. "
+    "When textbook passages are provided, use them as your PRIMARY source and cite them. "
+    "If the textbook does not contain enough information, use your general knowledge to give a complete, accurate answer. "
+    "NEVER reply with 'OUT_OF_CONTEXT'. Always provide a helpful answer. "
+    "Keep answers clear, structured, and educational."
 )
 
 # Words per chunk fed to Groq (Groq models have large context windows, so we

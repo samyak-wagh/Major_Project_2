@@ -1,10 +1,9 @@
 """
 api.py — FastAPI Backend for OS Tutor
 LLM Priority Order:
-  1. Fine-tuned local model (TinyLlama + rohit21789/OS-tutor LoRA) — primary / frontier
-  2. Groq cloud API (llama-3.3-70b-versatile)  — fallback if local fails to load or errors
-  3. Gemini                                     — fallback if question is out of textbook scope
-Gemini API key is also preserved for use by eval/run_eval.py.
+  1. Qwen2.5-1.5B + Yash LoRA (qwen-os-tutor-lora)  — PRIMARY local model
+  2. Groq cloud API (openai/gpt-oss-20b)         — secondary fallback
+  3. Gemini                                           — eval only (never shown to user)
 """
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import uvicorn, os, logging
@@ -27,9 +26,15 @@ class RAGState:
         print("\n🚀 Initializing OS Tutor backend...")
         self.cfg = load_config()
         self.qdrant_store, self.embeddings, self.processor = init_components(self.cfg)
-        self.local_chain = None   # Fine-tuned TinyLlama — primary model
-        self.groq_chain  = None   # Groq cloud model — fallback if local fails
-        self.local_ok    = False  # True once local chain loads without error
+
+        # Chain slots — two-tier priority
+        self.qwen_chain  = None   # Qwen2.5-1.5B + Yash LoRA   — PRIMARY
+        self.local_chain = None   # (Deprecated)
+        self.groq_chain  = None   # Groq cloud                  — secondary fallback
+
+        # Tracks which local model is live
+        self.qwen_ok  = False
+        self.local_ok = False   # Kept for legacy compatibility
 
         # Auto-ingest Galvin textbook if knowledge base is empty
         docs = self.qdrant_store.list_ingested_documents()
@@ -45,37 +50,38 @@ class RAGState:
         self._boot_local_chain()
 
     def _boot_local_chain(self):
-        """Try to load the fine-tuned local chain. On failure, mark local_ok=False
-        so the /ask endpoint knows to use Groq instead."""
+        """Boot the primary local chain (Qwen2.5)."""
         docs = self.qdrant_store.list_ingested_documents()
         if not docs:
             return
+
+        # ── 1. Try Qwen2.5 + Yash LoRA (PRIMARY) ───────────────────────────
         try:
-            print("\n🤖 Loading fine-tuned local model (TinyLlama + OS-tutor adapter)...")
-            print("   (First run downloads ~2.2 GB — cached after that)")
-            self.local_chain = build_qa_chain(self.cfg, self.qdrant_store,
-                                              self.embeddings, backend="local")
-            self.local_ok = True
-            print("✅ Local model ready — it is the primary model.\n")
+            print("\n🤖 Loading Qwen2.5-1.5B + OS-Tutor LoRA (primary model)...")
+            print("   (First run downloads ~3 GB — cached after that)")
+            self.qwen_chain = build_qa_chain(self.cfg, self.qdrant_store,
+                                             self.embeddings, backend="qwen")
+            self.qwen_ok = True
+            print("✅ Qwen2.5 primary model ready.\n")
         except Exception as e:
-            print(f"\n⚠️  Local model failed to load: {e}")
-            print("   ➡  Groq will be used as the primary fallback.\n")
-            self.local_ok = False
+            print(f"\n⚠️  Qwen chain failed to load: {e}")
+            print("   ➡  Groq will be used as the secondary fallback.\n")
+            self.qwen_ok = False
 
     def _get_groq_chain(self):
-        """Lazily initialise the Groq fallback chain."""
+        """Lazily initialise the Groq cloud fallback chain."""
         if self.groq_chain is None:
-            print("⚡ Initialising Groq fallback chain...")
+            print("⚡ Initialising Groq cloud fallback chain...")
             self.groq_chain = build_qa_chain(self.cfg, self.qdrant_store,
                                              self.embeddings, backend="groq")
             print("⚡ Groq fallback ready.")
         return self.groq_chain
 
-    # legacy helper kept for /upload endpoint
     def _build_chain_if_ready(self):
-        if not self.local_ok:
+        """Legacy helper kept for the /upload endpoint."""
+        if not self.qwen_ok and not self.local_ok:
             self._boot_local_chain()
-        if not self.local_ok:
+        if not self.qwen_ok and not self.local_ok:
             self._get_groq_chain()
 
 
@@ -98,20 +104,23 @@ class QuestionRequest(BaseModel):
 @app.get("/status")
 async def get_status():
     state = get_rag_state()
-    docs = state.qdrant_store.list_ingested_documents()
-    if state.local_ok:
-        model_info = "TinyLlama-1.1B + rohit21789/OS-tutor (local — primary)"
-        active_backend = "local"
+    docs  = state.qdrant_store.list_ingested_documents()
+
+    if state.qwen_ok:
+        model_info     = "Qwen2.5-1.5B + qwen-os-tutor-lora (local — primary)"
+        active_backend = "qwen"
     else:
-        model_info = f"Groq / {state.cfg.get('groq_model', 'llama-3.3-70b-versatile')} (fallback — local model unavailable)"
+        model_info     = f"Groq / {state.cfg.get('groq_model', 'openai/gpt-oss-20b')} (cloud — secondary fallback)"
         active_backend = "groq"
+
     return {
         "status":        "ok",
         "model":         model_info,
         "backend":       active_backend,
+        "qwen_ok":       state.qwen_ok,
         "local_ok":      state.local_ok,
         "documents":     docs,
-        "chain_ready":   state.local_ok or state.groq_chain is not None,
+        "chain_ready":   state.qwen_ok or state.local_ok or state.groq_chain is not None,
     }
 
 
@@ -123,7 +132,7 @@ def ask_question(req: QuestionRequest):
         raise HTTPException(status_code=400,
                             detail="Knowledge base empty. Upload a PDF first.")
 
-    # ── Step 1: Choose which chain to call ──────────────────────────────────
+    # ── Step 1: Choose which chain to call ───────────────────────────────────────
     # Manual override from UI (e.g. user explicitly picks Groq in sidebar)
     force_backend = req.backend.lower() if req.backend else ""
 
@@ -134,33 +143,36 @@ def ask_question(req: QuestionRequest):
             chain = build_qa_chain(state.cfg, state.qdrant_store, state.embeddings,
                                    backend="groq", groq_model=req.groq_model)
             state.groq_chain = chain
-        response = chain.ask(req.question)
+        response       = chain.ask(req.question)
         active_backend = "groq"
-    else:
-        # Default: try fine-tuned local model first
-        if state.local_ok and state.local_chain:
+
+    elif force_backend in ("qwen", ""):
+        # Default path: Qwen2.5 (primary) → Groq (cloud secondary)
+        if state.qwen_ok and state.qwen_chain:
             try:
-                response = state.local_chain.ask(req.question)
-                active_backend = "local"
-            except Exception as local_err:
-                # Local model crashed mid-inference → fall back to Groq silently
-                import logging
-                logging.getLogger(__name__).warning(
-                    "Local chain error — falling back to Groq: %s", local_err)
-                state.local_ok = False
-                chain = state._get_groq_chain()
-                response = chain.ask(req.question)
+                response       = state.qwen_chain.ask(req.question)
+                active_backend = "qwen"
+            except Exception as qwen_err:
+                import logging as _log
+                _log.getLogger(__name__).warning(
+                    "Qwen chain error — falling back to Groq: %s", qwen_err)
+                state.qwen_ok = False
+                response       = state._get_groq_chain().ask(req.question)
                 active_backend = "groq (auto-fallback)"
         else:
-            # Local never loaded successfully → use Groq as primary
-            chain = state._get_groq_chain()
-            response = chain.ask(req.question)
+            response       = state._get_groq_chain().ask(req.question)
             active_backend = "groq (local unavailable)"
 
-    # ── Step 2: Pick the right chain for source formatting ───────────────────
-    fmt_chain = (
-        state.local_chain if active_backend == "local" else state.groq_chain
-    )
+    else:
+        # force_backend == "local" (legacy TinyLlama request)
+        response       = state._get_groq_chain().ask(req.question)
+        active_backend = "groq (legacy override ignored)"
+
+    # ── Step 2: Pick the right chain for source formatting ────────────────────
+    if active_backend == "qwen":
+        fmt_chain = state.qwen_chain
+    else:
+        fmt_chain = state.groq_chain
 
     # ── Step 3: Out-of-context → Groq fallback (general knowledge) ───────────
     # NOTE: Gemini fallback code is preserved in rag/gemini_fallback.py
@@ -171,7 +183,7 @@ def ask_question(req: QuestionRequest):
     if "OUT_OF_CONTEXT" in answer:
         # Route out-of-context questions to Groq for a general knowledge answer
         groq_chain = state._get_groq_chain()
-        groq_resp  = groq_chain.ask(req.question)
+        groq_resp  = groq_chain.ask_general(req.question)
         answer     = groq_resp.get("answer", "I couldn't find an answer.")
         # No textbook sources since this came from Groq general knowledge
         # -- Gemini fallback (kept for reference, currently disabled) --

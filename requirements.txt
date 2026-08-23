@@ -11,9 +11,10 @@ langchain-huggingface>=0.0.3
 # ── Qdrant Vector Store ────────────────────────────────────────
 qdrant-client>=1.9.0
 
-# ── PDF Processing ─────────────────────────────────────────────
+# ── PDF/Image Processing ───────────────────────────────────────
 pypdf>=4.2.0
 pymupdf>=1.24.0
+easyocr>=1.7.0
 
 # ── Environment & Config ───────────────────────────────────────
 python-dotenv>=1.0.0
@@ -29,12 +30,15 @@ streamlit>=1.31.0
 requests>=2.31.0
 sentence-transformers>=2.2.0
 
-# ── HuggingFace Local Model (OS-Tutor) ─────────────────────────
-# TinyLlama base + rohit21789/OS-tutor LoRA adapter
+# ── HuggingFace Local Models ────────────────────────────────────────────────
+# PRIMARY : Qwen2.5-1.5B-Instruct + qwen-os-tutor-lora (Yash fine-tune)
+# FALLBACK: TinyLlama-1.1B-Chat + rohit21789/OS-tutor LoRA (Rohit fine-tune)
 transformers>=4.40.0
 torch>=2.0.0
 accelerate>=0.29.0
 peft>=0.10.0
+safetensors>=0.4.0      # required for loading .safetensors adapter weights
+# bitsandbytes>=0.41.0  # optional: only needed if you want 4-bit quantized loading on GPU
 
 # ── Groq Cloud API (open-source model inference) ───────────────────
 groq>=0.9.0
