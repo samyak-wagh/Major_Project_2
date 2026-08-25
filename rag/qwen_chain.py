@@ -32,7 +32,9 @@ _SYSTEM_INSTRUCTION = (
     "When textbook passages are provided, use them as your PRIMARY source and cite them. "
     "If the textbook does not contain enough information, use your general knowledge to give a complete, accurate answer. "
     "NEVER reply with 'OUT_OF_CONTEXT'. Always provide a helpful answer. "
-    "Keep answers clear, structured, and educational."
+    "Keep answers clear, structured, and educational. "
+    "CRITICAL RULE: If the user asks for a diagram, DO NOT attempt to draw large ASCII art diagrams. "
+    "Instead, briefly describe the diagram in 1-2 sentences. If the provided textbook text explicitly mentions a figure number (like Figure X.Y), state it. If the text does not mention a figure number, DO NOT GUESS OR INVENT ONE."
 )
 
 # Qwen2.5-1.5B has a 32K context window — we can afford more than TinyLlama

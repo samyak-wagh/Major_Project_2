@@ -1,8 +1,9 @@
 import streamlit as st
 import requests
 import time
+import os
 
-API_URL = "http://127.0.0.1:8000"
+API_URL = os.getenv("API_URL", "http://localhost:8001")
 
 st.set_page_config(
     page_title="OS Tutor AI",
@@ -11,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Premium Dark UI ────────────────────────────────────────────────────────────
+# Premium Dark UI 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -401,11 +402,170 @@ def send_question(prompt: str):
                                 unsafe_allow_html=True,
                             )
 
+                # ── Image Retrieval ─────────────────────────────────────────
+                # If the user asked for a diagram/figure/image, search and display it
+                IMAGE_KEYWORDS = {
+                    "image", "diagram", "figure", "show", "draw", "picture",
+                    "illustration", "chart", "visual", "display", "depict",
+                    "sketch", "layout", "structure", "architecture", "schematic",
+                }
+                prompt_lower = prompt.lower()
+                wants_image = any(kw in prompt_lower for kw in IMAGE_KEYWORDS)
+
+                if wants_image:
+                    img_placeholder = st.empty()
+                    try:
+                        with st.spinner("🔍 Searching textbook visuals... (~30s first time)"):
+                            img_res = requests.post(
+                                f"{API_URL}/images/search",
+                                json={"query": prompt, "top_k": 1},
+                                timeout=120,
+                            )
+                        if img_res.status_code == 200:
+                            img_data = img_res.json().get("results", [])
+                            
+                            img_rec = None
+                            
+                            # ── Tier 1: CLIP visual match (only if highly confident) ──
+                            if img_data and img_data[0].get("score", 0) > 0.40:
+                                img_rec = img_data[0]
+                            
+                            # ── Tier 2: Figure Index exact lookup (Bypass AI Hallucination) ───
+                            if not img_rec:
+                                import re, json as _json
+                                
+                                # Pull the raw textbook chunks from the API response
+                                contexts = data.get("contexts", [])
+                                raw_textbook_text = " ".join(contexts)
+                                
+                                # Look for "Figure X.Y" in the raw textbook text first (Ground Truth)
+                                # If not found, fall back to what the AI answered or the user typed
+                                combined_text = raw_textbook_text + " " + full_response + " " + prompt
+                                
+                                fig_match = re.search(r'\bfig(?:ure|\.)\s*(\d+\.\d+)\b', combined_text, re.IGNORECASE)
+                                if fig_match:
+                                    fig_key = f"figure {fig_match.group(1).lower()}"
+                                    try:
+                                        with open("figure_index.json") as _f:
+                                            fig_index = _json.load(_f)
+                                        if fig_key in fig_index:
+                                            exact_page = fig_index[fig_key]
+                                            # PyMuPDF extracted page numbers are 1-indexed, but the saved images are 0-indexed.
+                                            # Wait, build_figure_index.py saved them using 1-indexed page_num from enumerate(start=1)
+                                            # Let's check how pdf_image_extractor.py saves them. It uses page.number (0-indexed).
+                                            # So we DO need exact_page - 1, BUT wait, let me look at build_figure_index.py again.
+                                            exact_path = f"images/ostxtbook_pages/page_{exact_page - 1}.png"
+                                            if not os.path.exists(exact_path):
+                                                # Fallback just in case of off-by-one errors between extractors
+                                                exact_path = f"images/ostxtbook_pages/page_{exact_page}.png"
+                                            if os.path.exists(exact_path):
+                                                img_rec = {
+                                                    "abs_path": exact_path,
+                                                    "page": exact_page,
+                                                    "score": fig_key.title(),
+                                                    "is_text_fallback": True
+                                                }
+                                    except Exception:
+                                        pass
+
+                            # ── Tier 2.5: Semantic Caption Search (Offline Fallback) ──
+                            if not img_rec:
+                                try:
+                                    with open("figure_captions.json") as _fc:
+                                        fig_captions = _json.load(_fc)
+                                    
+                                    # Extract keywords from user prompt
+                                    query_words = set(re.findall(r'\b\w+\b', prompt.lower()))
+                                    stopwords = {"show", "me", "the", "diagram", "of", "how", "works", "a", "an", "is", "what", "image", "picture", "figure", "visual", "layout", "in", "for", "to", "and", "or"}
+                                    keywords = query_words - stopwords
+                                    
+                                    best_match = None
+                                    max_overlap = 0
+                                    
+                                    if keywords:
+                                        for f_key, f_info in fig_captions.items():
+                                            cap_words = set(re.findall(r'\b\w+\b', f_info["caption"].lower()))
+                                            overlap = len(keywords & cap_words)
+                                            if overlap > max_overlap and overlap >= 2: # Require at least 2 matched words
+                                                max_overlap = overlap
+                                                best_match = (f_key, f_info)
+                                                
+                                    # Special case for 1-keyword queries (e.g., "TLB diagram")
+                                    if not best_match and len(keywords) == 1:
+                                        kw = list(keywords)[0]
+                                        for f_key, f_info in fig_captions.items():
+                                            if kw in f_info["caption"].lower():
+                                                best_match = (f_key, f_info)
+                                                break
+                                                
+                                    if best_match:
+                                        f_key, f_info = best_match
+                                        exact_page = f_info["page"]
+                                        exact_path = f"images/ostxtbook_pages/page_{exact_page - 1}.png"
+                                        if not os.path.exists(exact_path):
+                                            exact_path = f"images/ostxtbook_pages/page_{exact_page}.png"
+                                            
+                                        if os.path.exists(exact_path):
+                                            img_rec = {
+                                                "abs_path": exact_path,
+                                                "page": exact_page,
+                                                "score": f"{f_key.title()} (Caption Match)",
+                                                "is_text_fallback": True
+                                            }
+                                except Exception:
+                                    pass                            # ── Tier 3: Text page fallback (last resort) ───────────────
+                            if not img_rec and sources:
+                                match = re.search(r'page (\d+)', sources[0].lower())
+                                if match:
+                                    text_page = int(match.group(1))
+                                    for page_offset in [0, -1, 1, -2]:
+                                        candidate_page = text_page + page_offset
+                                        fallback_path = f"images/ostxtbook_pages/page_{candidate_page - 1}.png"
+                                        if os.path.exists(fallback_path):
+                                            img_rec = {
+                                                "abs_path": fallback_path,
+                                                "page": candidate_page,
+                                                "score": "Text Match",
+                                                "is_text_fallback": True
+                                            }
+                                            break
+
+                            if img_rec:
+                                abs_path = img_rec.get("abs_path", "")
+                                page     = img_rec.get("page", "?")
+                                score    = img_rec.get("score", 0)
+                                is_fallback = img_rec.get("is_text_fallback", False)
+                                
+                                from pathlib import Path as _Path
+                                if abs_path and _Path(abs_path).exists():
+                                    with img_placeholder.container():
+                                        score_str = f"CLIP Similarity: {score:.2f}" if not is_fallback else "Text Context Match"
+                                        st.markdown(
+                                            f"<div style='margin-top:12px;padding:10px 14px;"
+                                            f"background:rgba(88,166,255,0.07);border-left:3px solid #58a6ff;"
+                                            f"border-radius:6px;'>"
+                                            f"<strong>🖼️ Textbook Page {page}</strong> "
+                                            f"<span style='font-size:0.8em;color:gray;'>({score_str})</span></div>",
+                                            unsafe_allow_html=True,
+                                        )
+                                        st.image(abs_path, use_container_width=True)
+                                else:
+                                    img_placeholder.caption("ℹ️ No matching diagram found.")
+                            else:
+                                img_placeholder.caption("ℹ️ No matching diagram found.")
+                        else:
+                            img_placeholder.warning(f"Image search returned status {img_res.status_code}")
+                    except requests.exceptions.Timeout:
+                        img_placeholder.warning("⏱️ Image search timed out. Try again — CLIP may still be loading.")
+                    except Exception as e:
+                        img_placeholder.warning(f"⚠️ Image search error: {e}")
+
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": full_response.strip(),
                     "sources": sources,
                 })
+
             else:
                 err = res.json().get("detail", "Unknown error.")
                 placeholder.error(f"⚠️ {err}")

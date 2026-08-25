@@ -22,7 +22,7 @@ if %errorlevel% NEQ 0 (
 echo.
 echo [2/3] Starting OS Tutor API backend (loads model + ingests textbook)...
 echo     NOTE: First run downloads ~3 GB from HuggingFace. Please wait.
-start "OS Tutor API" cmd /k ""D:\New folder\Samyak\venv\genai\Scripts\python.exe" api.py"
+start "OS Tutor API" cmd /k "venv\Scripts\python.exe api.py"
 
 echo.
 echo [3/3] Waiting 15 seconds for backend to initialize...
@@ -30,13 +30,13 @@ timeout /t 15 /nobreak >nul
 
 echo.
 echo Starting Streamlit UI...
-start "OS Tutor UI" cmd /k ""D:\New folder\Samyak\venv\genai\Scripts\python.exe" -m streamlit run app.py"
+start "OS Tutor UI" cmd /k "venv\Scripts\python.exe -m streamlit run app.py"
 
 echo.
 echo ============================================================
 echo  OS Tutor is starting up!
 echo  Open your browser at: http://localhost:8501
-echo  API available at:     http://localhost:8000
+echo  API available at:     http://localhost:8001
 echo ============================================================
 echo.
 pause

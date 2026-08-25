@@ -147,7 +147,7 @@ def ask_question(req: QuestionRequest):
         active_backend = "groq"
 
     elif force_backend in ("qwen", ""):
-        # Default path: Qwen2.5 (primary) → Groq (cloud secondary)
+        # Default path: Qwen2.5 (primary) → Groq (cloud secondary, crash-only)
         if state.qwen_ok and state.qwen_chain:
             try:
                 response       = state.qwen_chain.ask(req.question)
@@ -157,11 +157,27 @@ def ask_question(req: QuestionRequest):
                 _log.getLogger(__name__).warning(
                     "Qwen chain error — falling back to Groq: %s", qwen_err)
                 state.qwen_ok = False
-                response       = state._get_groq_chain().ask(req.question)
-                active_backend = "groq (auto-fallback)"
+                try:
+                    response       = state._get_groq_chain().ask(req.question)
+                    active_backend = "groq (auto-fallback)"
+                except Exception as groq_err:
+                    err_str = str(groq_err)
+                    if "429" in err_str or "rate_limit" in err_str.lower():
+                        response = {"answer": "⚠️ Qwen encountered an error on this question, and the Groq backup is temporarily rate-limited (free tier: 200K tokens/day). Please wait ~20 minutes and try again, or restart the api.py server to reload Qwen.", "source_documents": []}
+                    else:
+                        response = {"answer": f"⚠️ Both Qwen and Groq encountered errors. Details: {groq_err}", "source_documents": []}
+                    active_backend = "error"
         else:
-            response       = state._get_groq_chain().ask(req.question)
-            active_backend = "groq (local unavailable)"
+            try:
+                response       = state._get_groq_chain().ask(req.question)
+                active_backend = "groq (local unavailable)"
+            except Exception as groq_err:
+                err_str = str(groq_err)
+                if "429" in err_str or "rate_limit" in err_str.lower():
+                    response = {"answer": "⚠️ Qwen is unavailable and Groq is rate-limited. Please restart api.py to reload Qwen, or wait ~20 minutes.", "source_documents": []}
+                else:
+                    response = {"answer": f"⚠️ Service error: {groq_err}", "source_documents": []}
+                active_backend = "error"
 
     else:
         # force_backend == "local" (legacy TinyLlama request)
@@ -180,20 +196,12 @@ def ask_question(req: QuestionRequest):
     answer = response.get("answer", "")
     sources, contexts = [], []
 
-    if "OUT_OF_CONTEXT" in answer:
-        # Route out-of-context questions to Groq for a general knowledge answer
-        groq_chain = state._get_groq_chain()
-        groq_resp  = groq_chain.ask_general(req.question)
-        answer     = groq_resp.get("answer", "I couldn't find an answer.")
-        # No textbook sources since this came from Groq general knowledge
-        # -- Gemini fallback (kept for reference, currently disabled) --
-        # from rag.gemini_fallback import ask_gemini
-        # answer = ask_gemini(req.question)
-    else:
-        if response.get("source_documents") and fmt_chain:
-            src_text = fmt_chain.format_source_references(response["source_documents"])
-            sources  = [s.strip() for s in src_text.split("\n") if s.strip()]
-            contexts = [doc.page_content for doc in response["source_documents"]]
+    # Qwen handles ALL questions (textbook + general knowledge).
+    # No Groq fallback — zero rate limits, fully offline.
+    if response.get("source_documents") and fmt_chain:
+        src_text = fmt_chain.format_source_references(response["source_documents"])
+        sources  = [s.strip() for s in src_text.split("\n") if s.strip()]
+        contexts = [doc.page_content for doc in response["source_documents"]]
 
     return {"answer": answer, "sources": sources, "contexts": contexts}
 
@@ -219,6 +227,76 @@ def upload_pdf(file: UploadFile = File(...)):
             os.remove(tmp)
 
 
+# ── Image Search ─────────────────────────────────────────────────────────────
+
+class ImageSearchRequest(BaseModel):
+    query: str
+    top_k: int = 3
+
+
+@app.post("/images/search")
+def search_images(req: ImageSearchRequest):
+    """
+    Search for images/diagrams using CLIP vector embeddings in Qdrant.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty.")
+
+    from rag.clip_embeddings import embed_text
+    import requests
+    try:
+        query_vector = embed_text(req.query)
+        
+        # Bypass broken qdrant-client python package and use raw REST API
+        q_host = os.getenv("QDRANT_HOST", "localhost")
+        q_port = os.getenv("QDRANT_PORT", 6333)
+        
+        url = f"http://{q_host}:{q_port}/collections/os_images_clip/points/search"
+        payload = {
+            "vector": query_vector,
+            "limit": req.top_k,
+            "with_payload": True
+        }
+        
+        res = requests.post(url, json=payload, timeout=10)
+        if res.status_code != 200:
+            return {"query": req.query, "results": []}
+            
+        search_result = res.json().get("result", [])
+        
+        out = []
+        for hit in search_result:
+            p = hit.get("payload", {})
+            out.append({
+                "page": p.get("page_human", "?"),
+                "pdf": p.get("pdf_file", "?"),
+                "score": hit.get("score", 0),
+                "abs_path": p.get("image_path", "")
+            })
+        return {"query": req.query, "results": out}
+    except Exception as e:
+        print(f"CLIP search failed: {e}")
+        return {"query": req.query, "results": []}
+
+
+
+@app.get("/images/check")
+def check_images_extracted():
+    """Check whether images have been ingested into the CLIP collection."""
+    from qdrant_client import QdrantClient
+    try:
+        client = QdrantClient(host=os.getenv("QDRANT_HOST", "localhost"), port=int(os.getenv("QDRANT_PORT", 6333)))
+        collections = [c.name for c in client.get_collections().collections]
+        if "os_images_clip" in collections:
+            count = client.count(collection_name="os_images_clip").count
+            if count > 0:
+                return {"ready": True, "count": count}
+        return {"ready": False, "count": 0}
+    except Exception:
+        return {"ready": False, "count": 0}
+
+
+
 if __name__ == "__main__":
     get_rag_state()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

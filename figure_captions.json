@@ -1,0 +1,1522 @@
+{
+  "figure 1.1": {
+    "page": 32,
+    "caption": "Abstract view of the components of a computer system."
+  },
+  "figure 1.2": {
+    "page": 35,
+    "caption": "A typical PC computer system."
+  },
+  "figure 1.3": {
+    "page": 36,
+    "caption": "Interrupt timeline for a single program doing output."
+  },
+  "figure 1.4": {
+    "page": 38,
+    "caption": "Interrupt-driven I/O cycle."
+  },
+  "figure 1.5": {
+    "page": 39,
+    "caption": "Intel processor event-vector table."
+  },
+  "figure 1.6": {
+    "page": 41,
+    "caption": "Storage-device hierarchy."
+  },
+  "figure 1.7": {
+    "page": 43,
+    "caption": "How a modern computer system works."
+  },
+  "figure 1.8": {
+    "page": 45,
+    "caption": "Symmetric multiprocessing architecture."
+  },
+  "figure 1.9": {
+    "page": 45,
+    "caption": "A dual-core design with two cores on the same chip."
+  },
+  "figure 1.10": {
+    "page": 47,
+    "caption": "NUMA multiprocessing architecture."
+  },
+  "figure 1.11": {
+    "page": 49,
+    "caption": "General structure of a clustered system."
+  },
+  "figure 1.12": {
+    "page": 51,
+    "caption": "Memory layout for a multiprogramming system."
+  },
+  "figure 1.13": {
+    "page": 53,
+    "caption": "Transition from user to kernel mode."
+  },
+  "figure 1.14": {
+    "page": 59,
+    "caption": "Characteristics of various types of storage."
+  },
+  "figure 1.15": {
+    "page": 60,
+    "caption": "Migration of integer A from disk to register."
+  },
+  "figure 1.16": {
+    "page": 63,
+    "caption": "A computer running (a) a single operating system and (b) three virtual"
+  },
+  "figure 1.17": {
+    "page": 65,
+    "caption": "Singly linked list."
+  },
+  "figure 1.18": {
+    "page": 65,
+    "caption": "Doubly linked list."
+  },
+  "figure 1.19": {
+    "page": 66,
+    "caption": "Circularly linked list."
+  },
+  "figure 1.20": {
+    "page": 67,
+    "caption": "Binary search tree."
+  },
+  "figure 1.21": {
+    "page": 67,
+    "caption": "Hash map."
+  },
+  "figure 1.22": {
+    "page": 70,
+    "caption": "General structure of a client\u2013server system."
+  },
+  "figure 1.23": {
+    "page": 72,
+    "caption": "Peer-to-peer system with no centralized service."
+  },
+  "figure 1.24": {
+    "page": 73,
+    "caption": "Cloud computing."
+  },
+  "figure 2.1": {
+    "page": 86,
+    "caption": "A view of operating system services."
+  },
+  "figure 2.2": {
+    "page": 89,
+    "caption": "The bash shell command interpreter in macOS."
+  },
+  "figure 2.3": {
+    "page": 90,
+    "caption": "The iPhone touch screen."
+  },
+  "figure 2.4": {
+    "page": 91,
+    "caption": "The macOS GUI."
+  },
+  "figure 2.5": {
+    "page": 93,
+    "caption": "Example of how system calls are used."
+  },
+  "figure 2.6": {
+    "page": 95,
+    "caption": "The handling of a user application invoking the open() system call."
+  },
+  "figure 2.7": {
+    "page": 96,
+    "caption": "Passing of parameters as a table."
+  },
+  "figure 2.8": {
+    "page": 97,
+    "caption": "Types of system calls."
+  },
+  "figure 2.9": {
+    "page": 100,
+    "caption": "Arduino execution. (a) At system startup. (b) Running a sketch."
+  },
+  "figure 2.10": {
+    "page": 101,
+    "caption": "FreeBSD running multiple programs."
+  },
+  "figure 2.11": {
+    "page": 106,
+    "caption": "The role of the linker and loader."
+  },
+  "figure 2.12": {
+    "page": 112,
+    "caption": "Traditional UNIX system structure."
+  },
+  "figure 2.13": {
+    "page": 113,
+    "caption": "Linux system structure."
+  },
+  "figure 2.14": {
+    "page": 114,
+    "caption": "A layered operating system."
+  },
+  "figure 2.15": {
+    "page": 115,
+    "caption": "Architecture of a typical microkernel."
+  },
+  "figure 2.16": {
+    "page": 117,
+    "caption": "Architecture of Apple\u2019s macOS and iOS operating systems."
+  },
+  "figure 2.17": {
+    "page": 118,
+    "caption": "The structure of Darwin."
+  },
+  "figure 2.18": {
+    "page": 120,
+    "caption": "Architecture of Google\u2019s Android."
+  },
+  "figure 2.19": {
+    "page": 127,
+    "caption": "The Windows 10 task manager."
+  },
+  "figure 2.20": {
+    "page": 129,
+    "caption": "The BCC and eBPF tracing tools."
+  },
+  "figure 2.21": {
+    "page": 135,
+    "caption": "Kernel module simple.c."
+  },
+  "figure 2.22": {
+    "page": 138,
+    "caption": "The /proc file-system kernel module, Part 1"
+  },
+  "figure 2.23": {
+    "page": 139,
+    "caption": "The /proc file system kernel module, Part 2"
+  },
+  "figure 3.1": {
+    "page": 144,
+    "caption": "Layout of a process in memory."
+  },
+  "figure 3.2": {
+    "page": 147,
+    "caption": "Diagram of process state."
+  },
+  "figure 3.3": {
+    "page": 147,
+    "caption": "Process control block (PCB)."
+  },
+  "figure 3.4": {
+    "page": 150,
+    "caption": "The ready queue and wait queues."
+  },
+  "figure 3.5": {
+    "page": 151,
+    "caption": "Queueing-diagram representation of process scheduling."
+  },
+  "figure 3.6": {
+    "page": 152,
+    "caption": "Diagram showing context switch from process to process."
+  },
+  "figure 3.7": {
+    "page": 154,
+    "caption": "A tree of processes on a typical Linux system."
+  },
+  "figure 3.8": {
+    "page": 156,
+    "caption": "Creating a separate process using the UNIX fork() system call."
+  },
+  "figure 3.9": {
+    "page": 157,
+    "caption": "Process creation using the fork() system call."
+  },
+  "figure 3.10": {
+    "page": 158,
+    "caption": "Creating a separate process using the Windows API."
+  },
+  "figure 3.11": {
+    "page": 163,
+    "caption": "Communications models. (a) Shared memory. (b) Message passing."
+  },
+  "figure 3.12": {
+    "page": 165,
+    "caption": "The producer process using shared memory."
+  },
+  "figure 3.13": {
+    "page": 165,
+    "caption": "The consumer process using shared memory."
+  },
+  "figure 3.14": {
+    "page": 169,
+    "caption": "The producer process using message passing."
+  },
+  "figure 3.15": {
+    "page": 169,
+    "caption": "The consumer process using message passing."
+  },
+  "figure 3.16": {
+    "page": 171,
+    "caption": "Producer process illustrating POSIX shared-memory API."
+  },
+  "figure 3.17": {
+    "page": 172,
+    "caption": "Consumer process illustrating POSIX shared-memory API."
+  },
+  "figure 3.18": {
+    "page": 175,
+    "caption": "Example program illustrating message passing in Mach."
+  },
+  "figure 3.19": {
+    "page": 177,
+    "caption": "Advanced local procedure calls in Windows."
+  },
+  "figure 3.20": {
+    "page": 178,
+    "caption": "File descriptors for an ordinary pipe."
+  },
+  "figure 3.21": {
+    "page": 196,
+    "caption": "How many processes are created?"
+  },
+  "figure 3.22": {
+    "page": 197,
+    "caption": "When will LINE J be reached?"
+  },
+  "figure 3.23": {
+    "page": 198,
+    "caption": "What are the pid values?"
+  },
+  "figure 3.24": {
+    "page": 199,
+    "caption": "What output will be at Line X and Line Y?"
+  },
+  "figure 3.25": {
+    "page": 183,
+    "caption": "Windows anonymous pipes\u2014child process."
+  },
+  "figure 3.26": {
+    "page": 185,
+    "caption": "Communication using sockets."
+  },
+  "figure 3.27": {
+    "page": 186,
+    "caption": "Date server."
+  },
+  "figure 3.28": {
+    "page": 187,
+    "caption": "Date client."
+  },
+  "figure 3.29": {
+    "page": 190,
+    "caption": "Execution of a remote procedure call (RPC)."
+  },
+  "figure 3.30": {
+    "page": 193,
+    "caption": "What output will be at Line A?"
+  },
+  "figure 3.31": {
+    "page": 194,
+    "caption": "How many processes are created?"
+  },
+  "figure 3.36": {
+    "page": 205,
+    "caption": "Outline of simple shell."
+  },
+  "figure 3.37": {
+    "page": 208,
+    "caption": "The proc write() function."
+  },
+  "figure 4.1": {
+    "page": 217,
+    "caption": "Single-threaded and multithreaded processes."
+  },
+  "figure 4.2": {
+    "page": 218,
+    "caption": "Multithreaded server architecture."
+  },
+  "figure 4.3": {
+    "page": 220,
+    "caption": "Concurrent execution on a single-core system."
+  },
+  "figure 4.4": {
+    "page": 220,
+    "caption": "Parallel execution on a multicore system."
+  },
+  "figure 4.5": {
+    "page": 222,
+    "caption": "Data and task parallelism."
+  },
+  "figure 4.6": {
+    "page": 223,
+    "caption": "User and kernel threads."
+  },
+  "figure 4.7": {
+    "page": 223,
+    "caption": "Many-to-one model."
+  },
+  "figure 4.8": {
+    "page": 224,
+    "caption": "One-to-one model."
+  },
+  "figure 4.9": {
+    "page": 224,
+    "caption": "Many-to-many model."
+  },
+  "figure 4.10": {
+    "page": 225,
+    "caption": "Two-level model."
+  },
+  "figure 4.11": {
+    "page": 227,
+    "caption": "Multithreaded C program using the Pthreads API."
+  },
+  "figure 4.12": {
+    "page": 228,
+    "caption": "Pthread code for joining ten threads."
+  },
+  "figure 4.13": {
+    "page": 229,
+    "caption": "Multithreaded C program using the Windows API."
+  },
+  "figure 4.14": {
+    "page": 233,
+    "caption": "Illustration of Java Executor framework API."
+  },
+  "figure 4.15": {
+    "page": 237,
+    "caption": "Creating a thread pool in Java."
+  },
+  "figure 4.16": {
+    "page": 238,
+    "caption": "Fork-join parallelism."
+  },
+  "figure 4.17": {
+    "page": 239,
+    "caption": "Fork-join in Java."
+  },
+  "figure 4.18": {
+    "page": 240,
+    "caption": "Fork-join calculation using the Java API."
+  },
+  "figure 4.19": {
+    "page": 241,
+    "caption": "UML class diagram for Java\u2019s fork-join."
+  },
+  "figure 4.20": {
+    "page": 250,
+    "caption": "Lightweight process (LWP)."
+  },
+  "figure 4.21": {
+    "page": 252,
+    "caption": "Data structures of a Windows thread."
+  },
+  "figure 4.22": {
+    "page": 258,
+    "caption": "C program for Exercise 4.19."
+  },
+  "figure 4.23": {
+    "page": 259,
+    "caption": "C program for Exercise 4.21."
+  },
+  "figure 4.25": {
+    "page": 261,
+    "caption": "Monte Carlo technique for calculating \u03c0."
+  },
+  "figure 4.26": {
+    "page": 262,
+    "caption": "Solution to a 9 \u00d7 9 Sudoku puzzle."
+  },
+  "figure 4.27": {
+    "page": 264,
+    "caption": "Multithreaded sorting."
+  },
+  "figure 5.1": {
+    "page": 267,
+    "caption": "Alternating sequence of CPU and I/O bursts."
+  },
+  "figure 5.2": {
+    "page": 268,
+    "caption": "Histogram of CPU-burst durations."
+  },
+  "figure 5.3": {
+    "page": 270,
+    "caption": "The role of the dispatcher."
+  },
+  "figure 5.4": {
+    "page": 275,
+    "caption": "Prediction of the length of the next CPU burst."
+  },
+  "figure 5.5": {
+    "page": 278,
+    "caption": "How a smaller time quantum increases context switches."
+  },
+  "figure 5.6": {
+    "page": 279,
+    "caption": "How turnaround time varies with the time quantum."
+  },
+  "figure 5.7": {
+    "page": 281,
+    "caption": "Separate queues for each priority."
+  },
+  "figure 5.8": {
+    "page": 282,
+    "caption": "Multilevel queue scheduling."
+  },
+  "figure 5.9": {
+    "page": 283,
+    "caption": "Multilevel feedback queues."
+  },
+  "figure 5.10": {
+    "page": 286,
+    "caption": "Pthread scheduling API."
+  },
+  "figure 5.11": {
+    "page": 288,
+    "caption": "Organization of ready queues."
+  },
+  "figure 5.12": {
+    "page": 289,
+    "caption": "Memory stall."
+  },
+  "figure 5.13": {
+    "page": 289,
+    "caption": "Multithreaded multicore system."
+  },
+  "figure 5.14": {
+    "page": 290,
+    "caption": "Chip multithreading."
+  },
+  "figure 5.15": {
+    "page": 291,
+    "caption": "Two levels of scheduling."
+  },
+  "figure 5.16": {
+    "page": 293,
+    "caption": "NUMA and CPU scheduling."
+  },
+  "figure 5.17": {
+    "page": 294,
+    "caption": "Event latency."
+  },
+  "figure 5.18": {
+    "page": 295,
+    "caption": "Interrupt latency."
+  },
+  "figure 5.19": {
+    "page": 296,
+    "caption": "Dispatch latency."
+  },
+  "figure 5.20": {
+    "page": 297,
+    "caption": "Periodic task."
+  },
+  "figure 5.21": {
+    "page": 298,
+    "caption": "Scheduling of tasks when P2 has a higher priority than P1."
+  },
+  "figure 5.22": {
+    "page": 298,
+    "caption": "Rate-monotonic scheduling."
+  },
+  "figure 5.23": {
+    "page": 299,
+    "caption": "Missing deadlines with rate-monotonic scheduling."
+  },
+  "figure 5.24": {
+    "page": 300,
+    "caption": "Earliest-deadline-first scheduling."
+  },
+  "figure 5.25": {
+    "page": 302,
+    "caption": "POSIX real-time scheduling API."
+  },
+  "figure 5.26": {
+    "page": 305,
+    "caption": "Scheduling priorities on a Linux system."
+  },
+  "figure 5.27": {
+    "page": 305,
+    "caption": "NUMA-aware load balancing with Linux CFS scheduler."
+  },
+  "figure 5.28": {
+    "page": 307,
+    "caption": "Windows thread priorities."
+  },
+  "figure 5.29": {
+    "page": 310,
+    "caption": "Solaris dispatch table for time-sharing and interactive threads."
+  },
+  "figure 5.30": {
+    "page": 312,
+    "caption": "Solaris scheduling."
+  },
+  "figure 5.31": {
+    "page": 315,
+    "caption": "Evaluation of CPU schedulers by simulation."
+  },
+  "figure 6.1": {
+    "page": 335,
+    "caption": "General structure of a typical process."
+  },
+  "figure 6.2": {
+    "page": 336,
+    "caption": "Race condition when assigning a pid."
+  },
+  "figure 6.3": {
+    "page": 338,
+    "caption": "The structure of process Pi in Peterson\u2019s solution."
+  },
+  "figure 6.4": {
+    "page": 340,
+    "caption": "The effects of instruction reordering in Peterson\u2019s solution."
+  },
+  "figure 6.5": {
+    "page": 341,
+    "caption": "The definition of the atomic test and set() instruction."
+  },
+  "figure 6.6": {
+    "page": 342,
+    "caption": "Mutual-exclusion implementation with test and set()."
+  },
+  "figure 6.7": {
+    "page": 342,
+    "caption": "The definition of the atomic compare and swap() instruction."
+  },
+  "figure 6.8": {
+    "page": 343,
+    "caption": "Mutual exclusion with the compare and swap() instruction."
+  },
+  "figure 6.9": {
+    "page": 343,
+    "caption": "Bounded-waiting mutual exclusion with compare and swap()."
+  },
+  "figure 6.10": {
+    "page": 346,
+    "caption": "Solution to the critical-section problem using mutex locks."
+  },
+  "figure 6.11": {
+    "page": 352,
+    "caption": "Pseudocode syntax of a monitor."
+  },
+  "figure 6.12": {
+    "page": 353,
+    "caption": "Schematic view of a monitor."
+  },
+  "figure 6.13": {
+    "page": 354,
+    "caption": "Monitor with condition variables."
+  },
+  "figure 6.14": {
+    "page": 356,
+    "caption": "A monitor to allocate a single resource."
+  },
+  "figure 6.16": {
+    "page": 364,
+    "caption": "Array-based stack for Exercise 6.12."
+  },
+  "figure 6.17": {
+    "page": 365,
+    "caption": "Summing an array as a series of partial sums for Exercise 6.14."
+  },
+  "figure 6.18": {
+    "page": 366,
+    "caption": "Lock-free stack for Exercise 6.15."
+  },
+  "figure 6.19": {
+    "page": 368,
+    "caption": "The structure of process Pi in Dekker\u2019s algorithm."
+  },
+  "figure 6.20": {
+    "page": 369,
+    "caption": "The structure of process Pi in Eisenberg and McGuire\u2019s algorithm."
+  },
+  "figure 6.21": {
+    "page": 371,
+    "caption": "Allocating and releasing processes for Exercise 6.27."
+  },
+  "figure 7.1": {
+    "page": 376,
+    "caption": "The structure of the producer process."
+  },
+  "figure 7.2": {
+    "page": 377,
+    "caption": "The structure of the consumer process."
+  },
+  "figure 7.3": {
+    "page": 378,
+    "caption": "The structure of a writer process."
+  },
+  "figure 7.4": {
+    "page": 378,
+    "caption": "The structure of a reader process."
+  },
+  "figure 7.5": {
+    "page": 379,
+    "caption": "The situation of the dining philosophers."
+  },
+  "figure 7.6": {
+    "page": 380,
+    "caption": "The structure of philosopher i."
+  },
+  "figure 7.7": {
+    "page": 382,
+    "caption": "A monitor solution to the dining-philosophers problem."
+  },
+  "figure 7.8": {
+    "page": 383,
+    "caption": "Mutex dispatcher object."
+  },
+  "figure 7.9": {
+    "page": 390,
+    "caption": "Bounded buffer using Java synchronization."
+  },
+  "figure 7.10": {
+    "page": 390,
+    "caption": "Entry set for a lock."
+  },
+  "figure 7.12": {
+    "page": 393,
+    "caption": "Entry and wait sets."
+  },
+  "figure 7.13": {
+    "page": 396,
+    "caption": "Example using Java condition variables."
+  },
+  "figure 7.14": {
+    "page": 411,
+    "caption": "Outline of buffer operations."
+  },
+  "figure 7.15": {
+    "page": 411,
+    "caption": "Outline of skeleton program."
+  },
+  "figure 7.16": {
+    "page": 412,
+    "caption": "An outline of the producer and consumer threads."
+  },
+  "figure 8.1": {
+    "page": 418,
+    "caption": "Deadlock example."
+  },
+  "figure 8.2": {
+    "page": 420,
+    "caption": "Livelock example."
+  },
+  "figure 8.3": {
+    "page": 421,
+    "caption": "Resource-allocation graph for program in Figure 8.1."
+  },
+  "figure 8.4": {
+    "page": 422,
+    "caption": "Resource-allocation graph."
+  },
+  "figure 8.5": {
+    "page": 423,
+    "caption": "Resource-allocation graph with a deadlock."
+  },
+  "figure 8.6": {
+    "page": 423,
+    "caption": "Resource-allocation graph with a cycle but no deadlock."
+  },
+  "figure 8.7": {
+    "page": 428,
+    "caption": "Deadlock example with lock ordering."
+  },
+  "figure 8.8": {
+    "page": 430,
+    "caption": "Safe, unsafe, and deadlocked state spaces."
+  },
+  "figure 8.9": {
+    "page": 432,
+    "caption": "Resource-allocation graph for deadlock avoidance."
+  },
+  "figure 8.10": {
+    "page": 432,
+    "caption": "An unsafe state in a resource-allocation graph."
+  },
+  "figure 8.11": {
+    "page": 445,
+    "caption": "Traffic deadlock for Exercise 8.12."
+  },
+  "figure 8.12": {
+    "page": 446,
+    "caption": "Resource-allocation graphs for Exercise 8.18."
+  },
+  "figure 9.1": {
+    "page": 457,
+    "caption": "A base and a limit register define a logical address space."
+  },
+  "figure 9.2": {
+    "page": 458,
+    "caption": "Hardware address protection with base and limit registers."
+  },
+  "figure 9.3": {
+    "page": 459,
+    "caption": "Multistep processing of a user program."
+  },
+  "figure 9.4": {
+    "page": 460,
+    "caption": "Memory management unit (MMU)."
+  },
+  "figure 9.5": {
+    "page": 461,
+    "caption": "Dynamic relocation using a relocation register."
+  },
+  "figure 9.6": {
+    "page": 463,
+    "caption": "Hardware support for relocation and limit registers."
+  },
+  "figure 9.7": {
+    "page": 464,
+    "caption": "Variable partition."
+  },
+  "figure 9.8": {
+    "page": 467,
+    "caption": "Paging hardware."
+  },
+  "figure 9.9": {
+    "page": 468,
+    "caption": "Paging model of logical and physical memory."
+  },
+  "figure 9.10": {
+    "page": 469,
+    "caption": "Paging example for a 32-byte memory with 4-byte pages."
+  },
+  "figure 9.11": {
+    "page": 470,
+    "caption": "Free frames (a) before allocation and (b) after allocation."
+  },
+  "figure 9.12": {
+    "page": 473,
+    "caption": "Paging hardware with TLB."
+  },
+  "figure 9.13": {
+    "page": 475,
+    "caption": "Valid (v) or invalid (i) bit in a page table."
+  },
+  "figure 9.14": {
+    "page": 476,
+    "caption": "Sharing of standard C library in a paging environment."
+  },
+  "figure 9.15": {
+    "page": 478,
+    "caption": "A two-level page-table scheme."
+  },
+  "figure 9.16": {
+    "page": 479,
+    "caption": "Address translation for a two-level 32-bit paging architecture."
+  },
+  "figure 9.17": {
+    "page": 479,
+    "caption": "Hashed page table."
+  },
+  "figure 9.18": {
+    "page": 480,
+    "caption": "Inverted page table."
+  },
+  "figure 9.19": {
+    "page": 482,
+    "caption": "Standard swapping of two processes using a disk as a backing store."
+  },
+  "figure 9.20": {
+    "page": 484,
+    "caption": "Swapping with paging."
+  },
+  "figure 9.21": {
+    "page": 485,
+    "caption": "Logical to physical address translation in IA-32."
+  },
+  "figure 9.22": {
+    "page": 486,
+    "caption": "IA-32 segmentation."
+  },
+  "figure 9.23": {
+    "page": 487,
+    "caption": "Paging in the IA-32 architecture."
+  },
+  "figure 9.24": {
+    "page": 488,
+    "caption": "Page address extensions."
+  },
+  "figure 9.26": {
+    "page": 490,
+    "caption": "ARM 4-KB translation granule."
+  },
+  "figure 9.27": {
+    "page": 490,
+    "caption": "ARM four-level hierarchical paging."
+  },
+  "figure 10.1": {
+    "page": 503,
+    "caption": "Diagram showing virtual memory that is larger than physical memory."
+  },
+  "figure 10.2": {
+    "page": 503,
+    "caption": "Virtual address space of a process in memory."
+  },
+  "figure 10.3": {
+    "page": 504,
+    "caption": "Shared library using virtual memory."
+  },
+  "figure 10.4": {
+    "page": 505,
+    "caption": "Page table when some pages are not in main memory."
+  },
+  "figure 10.5": {
+    "page": 506,
+    "caption": "Steps in handling a page fault."
+  },
+  "figure 10.6": {
+    "page": 508,
+    "caption": "List of free frames."
+  },
+  "figure 10.7": {
+    "page": 512,
+    "caption": "Before process 1 modifies page C."
+  },
+  "figure 10.8": {
+    "page": 512,
+    "caption": "After process 1 modifies page C."
+  },
+  "figure 10.9": {
+    "page": 514,
+    "caption": "Need for page replacement."
+  },
+  "figure 10.10": {
+    "page": 515,
+    "caption": "Page replacement."
+  },
+  "figure 10.11": {
+    "page": 517,
+    "caption": "Graph of page faults versus number of frames."
+  },
+  "figure 10.12": {
+    "page": 517,
+    "caption": "FIFO page-replacement algorithm."
+  },
+  "figure 10.13": {
+    "page": 518,
+    "caption": "Page-fault curve for FIFO replacement on a reference string."
+  },
+  "figure 10.14": {
+    "page": 519,
+    "caption": "Optimal page-replacement algorithm."
+  },
+  "figure 10.15": {
+    "page": 520,
+    "caption": "LRU page-replacement algorithm."
+  },
+  "figure 10.16": {
+    "page": 521,
+    "caption": "Use of a stack to record the most recent page references."
+  },
+  "figure 10.17": {
+    "page": 523,
+    "caption": "Second-chance (clock) page-replacement algorithm."
+  },
+  "figure 10.18": {
+    "page": 529,
+    "caption": "Reclaiming pages."
+  },
+  "figure 10.19": {
+    "page": 530,
+    "caption": "NUMA multiprocessing architecture."
+  },
+  "figure 10.20": {
+    "page": 532,
+    "caption": "Thrashing."
+  },
+  "figure 10.21": {
+    "page": 533,
+    "caption": "Locality in a memory-reference pattern."
+  },
+  "figure 10.22": {
+    "page": 534,
+    "caption": "Working-set model."
+  },
+  "figure 10.23": {
+    "page": 536,
+    "caption": "Page-fault frequency."
+  },
+  "figure 10.24": {
+    "page": 537,
+    "caption": "Free-frame list before compression."
+  },
+  "figure 10.25": {
+    "page": 538,
+    "caption": "Free-frame list after compression"
+  },
+  "figure 10.26": {
+    "page": 540,
+    "caption": "Buddy system allocation."
+  },
+  "figure 10.27": {
+    "page": 540,
+    "caption": "Slab allocation."
+  },
+  "figure 10.28": {
+    "page": 547,
+    "caption": "The reason why frames used for I/O must be in memory."
+  },
+  "figure 10.29": {
+    "page": 549,
+    "caption": "The Linux active list and inactive list structures."
+  },
+  "figure 10.30": {
+    "page": 551,
+    "caption": "Solaris page scanner."
+  },
+  "figure 11.1": {
+    "page": 574,
+    "caption": "HDD moving-head disk mechanism."
+  },
+  "figure 11.2": {
+    "page": 575,
+    "caption": "A 3.5-inch HDD with cover removed."
+  },
+  "figure 11.3": {
+    "page": 576,
+    "caption": "A 3.5-inch SSD circuit board."
+  },
+  "figure 11.4": {
+    "page": 577,
+    "caption": "A NAND block with valid and invalid pages."
+  },
+  "figure 11.5": {
+    "page": 579,
+    "caption": "An LTO-6 Tape drive with tape cartridge inserted."
+  },
+  "figure 11.6": {
+    "page": 583,
+    "caption": "FCFS disk scheduling."
+  },
+  "figure 11.7": {
+    "page": 583,
+    "caption": "SCAN disk scheduling."
+  },
+  "figure 11.8": {
+    "page": 584,
+    "caption": "C-SCAN disk scheduling."
+  },
+  "figure 11.9": {
+    "page": 589,
+    "caption": "Windows 7 Disk Management tool showing devices, partitions, volumes,"
+  },
+  "figure 11.10": {
+    "page": 590,
+    "caption": "Booting from a storage device in Windows."
+  },
+  "figure 11.11": {
+    "page": 594,
+    "caption": "The data structures for swapping on Linux systems."
+  },
+  "figure 11.12": {
+    "page": 595,
+    "caption": "Network-attached storage."
+  },
+  "figure 11.13": {
+    "page": 596,
+    "caption": "Storage-area network."
+  },
+  "figure 11.14": {
+    "page": 597,
+    "caption": "A storage array."
+  },
+  "figure 11.15": {
+    "page": 600,
+    "caption": "RAID levels."
+  },
+  "figure 11.16": {
+    "page": 603,
+    "caption": "RAID 0 + 1 and 1 + 0 with a single disk failure."
+  },
+  "figure 11.17": {
+    "page": 606,
+    "caption": "ZFS checksums all metadata and data."
+  },
+  "figure 11.18": {
+    "page": 608,
+    "caption": "Traditional volumes and file systems compared with the ZFS model."
+  },
+  "figure 12.1": {
+    "page": 619,
+    "caption": "A typical PC bus structure."
+  },
+  "figure 12.2": {
+    "page": 620,
+    "caption": "Device I/O port locations on PCs (partial)."
+  },
+  "figure 12.3": {
+    "page": 622,
+    "caption": "Interrupt-driven I/O cycle."
+  },
+  "figure 12.4": {
+    "page": 623,
+    "caption": "Latency command on Mac OS X."
+  },
+  "figure 12.5": {
+    "page": 624,
+    "caption": "Intel Pentium processor event-vector table."
+  },
+  "figure 12.6": {
+    "page": 627,
+    "caption": "Steps in a DMA transfer."
+  },
+  "figure 12.7": {
+    "page": 629,
+    "caption": "A kernel I/O structure."
+  },
+  "figure 12.8": {
+    "page": 630,
+    "caption": "Characteristics of I/O devices."
+  },
+  "figure 12.9": {
+    "page": 635,
+    "caption": "Two I/O methods: (a) synchronous and (b) asynchronous."
+  },
+  "figure 12.10": {
+    "page": 637,
+    "caption": "Device-status table."
+  },
+  "figure 12.11": {
+    "page": 638,
+    "caption": "Common PC and data-center I/O device and interface speeds."
+  },
+  "figure 12.12": {
+    "page": 641,
+    "caption": "Use of a system call to perform I/O."
+  },
+  "figure 12.13": {
+    "page": 642,
+    "caption": "UNIX I/O kernel structure."
+  },
+  "figure 12.14": {
+    "page": 646,
+    "caption": "The life cycle of an I/O request."
+  },
+  "figure 12.15": {
+    "page": 648,
+    "caption": "The STREAMS structure."
+  },
+  "figure 12.16": {
+    "page": 650,
+    "caption": "Intercomputer communications."
+  },
+  "figure 12.17": {
+    "page": 651,
+    "caption": "Device functionality progression."
+  },
+  "figure 12.18": {
+    "page": 652,
+    "caption": "I/O performance of storage (and network latency)."
+  },
+  "figure 13.1": {
+    "page": 661,
+    "caption": "A file info window on macOS."
+  },
+  "figure 13.2": {
+    "page": 665,
+    "caption": "File-locking example in Java."
+  },
+  "figure 13.3": {
+    "page": 667,
+    "caption": "Common file types."
+  },
+  "figure 13.4": {
+    "page": 669,
+    "caption": "Sequential-access file."
+  },
+  "figure 13.5": {
+    "page": 671,
+    "caption": "Simulation of sequential access on a direct-access file."
+  },
+  "figure 13.6": {
+    "page": 672,
+    "caption": "Example of index and relative files."
+  },
+  "figure 13.7": {
+    "page": 673,
+    "caption": "Single-level directory."
+  },
+  "figure 13.8": {
+    "page": 673,
+    "caption": "Two-level directory structure."
+  },
+  "figure 13.9": {
+    "page": 675,
+    "caption": "Tree-structured directory structure."
+  },
+  "figure 13.10": {
+    "page": 677,
+    "caption": "Acyclic-graph directory structure."
+  },
+  "figure 13.11": {
+    "page": 680,
+    "caption": "General graph directory."
+  },
+  "figure 13.12": {
+    "page": 685,
+    "caption": "Windows 10 access-control list management."
+  },
+  "figure 13.13": {
+    "page": 687,
+    "caption": "Memory-mapped files."
+  },
+  "figure 13.14": {
+    "page": 687,
+    "caption": "Shared memory using memory-mapped I/O."
+  },
+  "figure 13.15": {
+    "page": 688,
+    "caption": "Producer writing to shared memory using the Windows API."
+  },
+  "figure 13.16": {
+    "page": 689,
+    "caption": "Consumer reading from shared memory using the Windows API."
+  },
+  "figure 14.1": {
+    "page": 696,
+    "caption": "Layered file system."
+  },
+  "figure 14.2": {
+    "page": 698,
+    "caption": "A typical file-control block."
+  },
+  "figure 14.3": {
+    "page": 700,
+    "caption": "In-memory file-system structures. (a) File open. (b) File read."
+  },
+  "figure 14.4": {
+    "page": 702,
+    "caption": "Contiguous allocation of disk space."
+  },
+  "figure 14.5": {
+    "page": 704,
+    "caption": "Linked allocation of disk space."
+  },
+  "figure 14.6": {
+    "page": 706,
+    "caption": "File-allocation table."
+  },
+  "figure 14.7": {
+    "page": 707,
+    "caption": "Indexed allocation of disk space."
+  },
+  "figure 14.8": {
+    "page": 708,
+    "caption": "The UNIX inode."
+  },
+  "figure 14.9": {
+    "page": 711,
+    "caption": "Linked free-space list on disk."
+  },
+  "figure 14.10": {
+    "page": 715,
+    "caption": "I/O without a unified buffer cache."
+  },
+  "figure 14.11": {
+    "page": 716,
+    "caption": "I/O using a unified buffer cache."
+  },
+  "figure 14.12": {
+    "page": 721,
+    "caption": "The WAFL file layout."
+  },
+  "figure 14.13": {
+    "page": 722,
+    "caption": "Snapshots in WAFL."
+  },
+  "figure 15.1": {
+    "page": 731,
+    "caption": "A typical storage device organization."
+  },
+  "figure 15.2": {
+    "page": 732,
+    "caption": "Solaris file systems."
+  },
+  "figure 15.3": {
+    "page": 733,
+    "caption": "File system. (a) Existing system. (b) Unmounted volume."
+  },
+  "figure 15.4": {
+    "page": 733,
+    "caption": "Volume mounted at /users."
+  },
+  "figure 15.5": {
+    "page": 737,
+    "caption": "Schematic view of a virtual file system."
+  },
+  "figure 15.6": {
+    "page": 744,
+    "caption": "Three independent file systems."
+  },
+  "figure 15.7": {
+    "page": 744,
+    "caption": "Mounting in NFS. (a) Mounts. (b) Cascading mounts."
+  },
+  "figure 15.8": {
+    "page": 747,
+    "caption": "Schematic view of the NFS architecture."
+  },
+  "figure 16.1": {
+    "page": 758,
+    "caption": "The four-layered model of security."
+  },
+  "figure 16.2": {
+    "page": 762,
+    "caption": "C program with buffer-overflow condition."
+  },
+  "figure 16.3": {
+    "page": 763,
+    "caption": "The possible outcomes of buffer overflows."
+  },
+  "figure 16.4": {
+    "page": 764,
+    "caption": "Trampoline to code execution when exploiting a buffer overflow."
+  },
+  "figure 16.5": {
+    "page": 767,
+    "caption": "A boot-sector computer virus."
+  },
+  "figure 16.6": {
+    "page": 769,
+    "caption": "Standard security attacks.1"
+  },
+  "figure 16.7": {
+    "page": 774,
+    "caption": "A secure communication over an insecure medium.2"
+  },
+  "figure 16.8": {
+    "page": 776,
+    "caption": "Encryption and decryption using RSA asymmetric cryptography.3"
+  },
+  "figure 16.9": {
+    "page": 779,
+    "caption": "A man-in-the-middle attack on asymmetric cryptography.4"
+  },
+  "figure 16.10": {
+    "page": 794,
+    "caption": "Domain separation via firewall."
+  },
+  "figure 17.1": {
+    "page": 806,
+    "caption": "Protection-ring structure."
+  },
+  "figure 17.2": {
+    "page": 807,
+    "caption": "Android uses of TrustZone."
+  },
+  "figure 17.3": {
+    "page": 808,
+    "caption": "ARM architecture."
+  },
+  "figure 17.4": {
+    "page": 809,
+    "caption": "System with three protection domains."
+  },
+  "figure 17.5": {
+    "page": 812,
+    "caption": "Access matrix."
+  },
+  "figure 17.6": {
+    "page": 813,
+    "caption": "Access matrix of Figure 17.5 with domains as objects."
+  },
+  "figure 17.7": {
+    "page": 813,
+    "caption": "Access matrix with copy rights."
+  },
+  "figure 17.8": {
+    "page": 814,
+    "caption": "Access matrix with owner rights."
+  },
+  "figure 17.9": {
+    "page": 815,
+    "caption": "Modified access matrix of Figure 17.6."
+  },
+  "figure 17.10": {
+    "page": 820,
+    "caption": "Role-based access control in Solaris 10."
+  },
+  "figure 17.11": {
+    "page": 822,
+    "caption": "Capabilities in POSIX.1e."
+  },
+  "figure 17.12": {
+    "page": 823,
+    "caption": "Apple Darwin entitlements"
+  },
+  "figure 17.13": {
+    "page": 826,
+    "caption": "A sandbox profile of a MacOS daemon denying most operations."
+  },
+  "figure 17.14": {
+    "page": 831,
+    "caption": "Stack inspection."
+  },
+  "figure 18.1": {
+    "page": 839,
+    "caption": "System models. (a) Nonvirtual machine. (b) Virtual machine."
+  },
+  "figure 18.2": {
+    "page": 845,
+    "caption": "Trap-and-emulate virtualization implementation."
+  },
+  "figure 18.3": {
+    "page": 846,
+    "caption": "Binary translation virtualization implementation."
+  },
+  "figure 18.4": {
+    "page": 849,
+    "caption": "Nested page tables."
+  },
+  "figure 18.5": {
+    "page": 851,
+    "caption": "Type 0 hypervisor."
+  },
+  "figure 18.6": {
+    "page": 853,
+    "caption": "Xen I/O via shared circular buffer.1"
+  },
+  "figure 18.7": {
+    "page": 856,
+    "caption": "Solaris 10 with two zones."
+  },
+  "figure 18.8": {
+    "page": 862,
+    "caption": "Live migration of a guest between two servers."
+  },
+  "figure 18.9": {
+    "page": 864,
+    "caption": "VMware Workstation architecture."
+  },
+  "figure 18.10": {
+    "page": 865,
+    "caption": "The Java virtual machine."
+  },
+  "figure 19.1": {
+    "page": 872,
+    "caption": "A client-server distributed system."
+  },
+  "figure 19.2": {
+    "page": 874,
+    "caption": "Local-area network."
+  },
+  "figure 19.3": {
+    "page": 875,
+    "caption": "Communication processors in a wide-area network."
+  },
+  "figure 19.4": {
+    "page": 878,
+    "caption": "Java program illustrating a DNS lookup."
+  },
+  "figure 19.5": {
+    "page": 879,
+    "caption": "Two computers communicating via the OSI network model."
+  },
+  "figure 19.6": {
+    "page": 881,
+    "caption": "The OSI protocol stack."
+  },
+  "figure 19.7": {
+    "page": 882,
+    "caption": "An OSI network message."
+  },
+  "figure 19.8": {
+    "page": 882,
+    "caption": "The OSI and TCP/IP protocol stacks."
+  },
+  "figure 19.9": {
+    "page": 884,
+    "caption": "An Ethernet packet."
+  },
+  "figure 19.10": {
+    "page": 885,
+    "caption": "Example of a UDP data transfer with dropped packet."
+  },
+  "figure 19.11": {
+    "page": 887,
+    "caption": "Example of a TCP data transfer with dropped packets."
+  },
+  "figure 19.12": {
+    "page": 896,
+    "caption": "Client\u2013server DFS model."
+  },
+  "figure 19.13": {
+    "page": 898,
+    "caption": "An example of a cluster-based DFS model"
+  },
+  "figure 20.1": {
+    "page": 921,
+    "caption": "Components of the Linux system."
+  },
+  "figure 20.2": {
+    "page": 934,
+    "caption": "Interrupt protection levels."
+  },
+  "figure 20.3": {
+    "page": 935,
+    "caption": "Relationship of zones and physical addresses in Intel x86-32."
+  },
+  "figure 20.4": {
+    "page": 936,
+    "caption": "Splitting of memory in the buddy system."
+  },
+  "figure 20.5": {
+    "page": 937,
+    "caption": "Slab allocator in Linux."
+  },
+  "figure 20.6": {
+    "page": 942,
+    "caption": "Memory layout for ELF programs."
+  },
+  "figure 20.8": {
+    "page": 950,
+    "caption": "Device-driver block structure."
+  },
+  "figure 21.1": {
+    "page": 976,
+    "caption": "Windows block diagram."
+  },
+  "figure 21.2": {
+    "page": 988,
+    "caption": "Windows x86 interrupt-request levels (IRLQs)."
+  },
+  "figure 21.3": {
+    "page": 995,
+    "caption": "Page-table layout."
+  },
+  "figure 21.4": {
+    "page": 996,
+    "caption": "Virtual-to-physical address translation on IA-32."
+  },
+  "figure 21.5": {
+    "page": 999,
+    "caption": "Page-file page-table entry. The valid bit is zero."
+  },
+  "figure 21.6": {
+    "page": 1007,
+    "caption": "File I/O."
+  },
+  "figure 21.7": {
+    "page": 1027,
+    "caption": "Code enabling a child to share an object by inheriting a handle."
+  },
+  "figure 21.8": {
+    "page": 1028,
+    "caption": "Code for sharing an object by name lookup."
+  },
+  "figure 21.9": {
+    "page": 1028,
+    "caption": "Code for sharing an object by passing a handle."
+  },
+  "figure 21.10": {
+    "page": 1033,
+    "caption": "User-mode scheduling."
+  },
+  "figure 21.11": {
+    "page": 1035,
+    "caption": "Code fragments for allocating virtual memory."
+  },
+  "figure 21.12": {
+    "page": 1035,
+    "caption": "Code fragments for memory mapping of a file."
+  },
+  "figure 21.13": {
+    "page": 1037,
+    "caption": "Code for dynamic thread-local storage."
+  }
+}

@@ -21,3 +21,10 @@ qdrant_storage/
 
 # HuggingFace model cache
 .cache/
+
+# Extracted textbook images (generated locally, not committed to git)
+images/
+
+# Temp scripts
+check_images.py
+check_dataset.py
