@@ -28,11 +28,14 @@ logger = logging.getLogger(__name__)
 
 # ── System instruction ───────────────────────────────────────────────────────
 _SYSTEM_INSTRUCTION = (
-    "You are an expert Operating Systems tutor. "
-    "When textbook passages are provided, use them as your PRIMARY source and cite them. "
-    "If the textbook does not contain enough information, use your general knowledge to give a complete, accurate answer. "
-    "NEVER reply with 'OUT_OF_CONTEXT'. Always provide a helpful answer. "
-    "Keep answers clear, structured, and educational."
+    "You are a concise Operating Systems tutor based on the Galvin textbook. "
+    "Answer DIRECTLY and SPECIFICALLY. "
+    "Do NOT ramble, speculate, or go off-topic. "
+    "If textbook passages are provided, base your answer strictly on them. "
+    "Keep answers short: 2-5 sentences maximum unless a step-by-step solution is needed. "
+    "For numerical problems, show only the key steps and the final answer. "
+    "NEVER invent figures, page numbers, or facts not in the context. "
+    "NEVER ask follow-up questions back to the student."
 )
 
 # Qwen2.5-1.5B has a 32K context window — we can afford more than TinyLlama
@@ -61,8 +64,8 @@ class QwenOSTutorChain:
         retriever: BaseRetriever,
         adapter_path: str = "qwen-os-tutor-lora",
         base_model: str = _DEFAULT_BASE_MODEL,
-        temperature: float = 0.1,
-        max_new_tokens: int = 512,
+        temperature: float = 0.05,
+        max_new_tokens: int = 256,
         memory_window: int = 5,
         device: str = "auto",
     ):
@@ -142,15 +145,15 @@ class QwenOSTutorChain:
             "text-generation",
             model=model,
             tokenizer=tokenizer,
-            max_new_tokens=min(max_new_tokens, 512),
+            max_new_tokens=min(max_new_tokens, 256),
             temperature=temperature if temperature > 0 else None,
             do_sample=temperature > 0,
-            top_p=0.9,
-            repetition_penalty=1.3,
-            no_repeat_ngram_size=4,
+            top_p=0.85,
+            repetition_penalty=1.4,
+            no_repeat_ngram_size=5,
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=tokenizer.eos_token_id,
-            return_full_text=False,   # Only return new tokens, not the prompt
+            return_full_text=False,
         )
 
         logger.info("Qwen model loaded successfully on %s.", use_device)
@@ -229,6 +232,23 @@ class QwenOSTutorChain:
             "Query:",
             "Response:",
             "Textbook Information",
+            # Anti-ramble additions
+            "In particular:",
+            "Note too that",
+            "a) Giving",
+            "b) Explaining",
+            "It's worth noting",
+            "That said,",
+            "However, it's important",
+            "This is because",
+            "As mentioned",
+            "To summarize,",
+            "In conclusion,",
+            "modern systems often",
+            "early operating-system",
+            "back before everything",
+            "rabbit holes",
+            "outdated terminology",
         ]
         for phrase in stop_phrases:
             if phrase in answer:
@@ -247,13 +267,15 @@ class QwenOSTutorChain:
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
-    def ask(self, question: str) -> Dict[str, Any]:
+    def ask(self, question: str, use_rag: bool = True) -> Dict[str, Any]:
         """
-        Ask a question — uses textbook context if available, falls back to general knowledge.
+        Ask a question.
+        use_rag=True  → retrieve textbook chunks then generate (normal RAG mode)
+        use_rag=False → generate with NO context (fine-tuned LLM-only baseline)
         Returns dict with keys: answer, source_documents, question.
         """
         try:
-            source_docs = self._retrieve(question)
+            source_docs = self._retrieve(question) if use_rag else []
             messages = self._build_messages(question, source_docs)
             answer   = self._generate(messages)
 

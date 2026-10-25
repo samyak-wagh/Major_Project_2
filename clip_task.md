@@ -1,0 +1,6 @@
+- [ ] Create `rag/clip_embeddings.py` for CLIP utility functions
+- [ ] Modify `rag/document_processor.py` to add CLIP ingestion (render PNGs, embed, upload to Qdrant)
+- [ ] Initialize Qdrant collection `os_images_clip` in `main.py`
+- [ ] Update `api.py` POST `/images/search` to use CLIP embedding search
+- [ ] Update `app.py` image display UI to render full page images correctly
+- [ ] Create a standalone ingestion script (`ingest_clip.py`) to process the PDF without blocking the main API startup
