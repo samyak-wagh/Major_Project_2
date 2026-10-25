@@ -1,0 +1,1082 @@
+[
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nPriority inversion occurs when a lower-priority task holds a resource a higher-priority task needs. Without a fix, an unrelated medium-priority task can indefinitely preempt the low-priority holder, delaying the high-priority task by an unbounded amount — this is the scenario the Priority Inheritance Protocol is designed to bound.\n\nQuestion: Three tasks run on a single-core real-time system: Low (L, lowest priority) locks a shared mutex M to access a resource; Medium (a CPU-bound task that never touches M); and High (H, highest priority), which needs to lock M. Trace what happens if H becomes ready while L holds M and Medium is also ready, under a naive locking scheme with no priority inheritance, and explain why this is called 'unbounded priority inversion'."
+      },
+      {
+        "role": "assistant",
+        "content": "(1) L acquires mutex M and begins its critical section. (2) H becomes ready and, being highest priority, preempts L; H then tries to lock M, but M is held by L, so H blocks and waits. (3) L is not immediately allowed to resume either — Medium is also ready and has higher priority than L, so the scheduler picks Medium to run instead of L. (4) Medium now runs for as long as it likes, never touching M and never itself blocked, so it can keep preempting L indefinitely. The net effect: H, the highest-priority task, is delayed not directly by L (a lower-priority task — an expected, bounded delay) but INDIRECTLY by Medium, a task with priority strictly between L and H that has no logical relationship to the resource H is waiting for. Since Medium's execution time is not bounded by the length of L's critical section, H's wait time has no upper bound — this is 'unbounded priority inversion'. The standard fix is the Priority Inheritance Protocol: while L holds a resource a higher-priority task is blocked on, L's priority is temporarily boosted to match the highest priority of any task blocked on it (here, to H's priority), so the scheduler runs L instead of letting Medium preempt it — bounding H's wait to, at most, the length of L's critical section."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nLOOK disk scheduling behaves like SCAN, but instead of travelling all the way to the physical end of the disk, the head reverses direction as soon as it services the last pending request in the current direction, avoiding unnecessary movement.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 103. The pending requests, in the order they arrived, are: 102, 171, 24, 47, 35, 122.\n\nUsing the LOOK (initial direction: decreasing cylinder numbers) disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 103 -> 102 -> 47 -> 35 -> 24 -> 122 -> 171\n\nHead movement per step: |102-103|=1 + |47-102|=55 + |35-47|=12 + |24-35|=11 + |122-24|=98 + |171-122|=49\n\nTotal head movement = 226 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nEarliest Deadline First (EDF): A dynamic-priority real-time scheduling algorithm that always runs the ready task with the nearest absolute deadline; it is provably optimal and can guarantee schedulability up to 100% CPU utilization.\n\nQuestion: What is Earliest Deadline First (EDF)?"
+      },
+      {
+        "role": "assistant",
+        "content": "A dynamic-priority real-time scheduling algorithm that always runs the ready task with the nearest absolute deadline; it is provably optimal and can guarantee schedulability up to 100% CPU utilization."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nThrashing: A state where a system spends more time swapping/paging than executing actual process instructions, caused by insufficient physical memory for the active working sets.\n\nQuestion: Explain the term Thrashing in the context of operating systems."
+      },
+      {
+        "role": "assistant",
+        "content": "A state where a system spends more time swapping/paging than executing actual process instructions, caused by insufficient physical memory for the active working sets."
+      }
+    ]
+  },
+  {
+    "category": "negative_edge_case",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nShortest Job First (SJF) scheduling selects the ready process with the smallest next CPU burst time. It can be implemented as non-preemptive (classic SJF) or preemptive (Shortest Remaining Time First, SRTF).\n\nQuestion: If every process currently in the ready queue happens to have exactly the same CPU burst time, does SJF scheduling produce a different execution order than FCFS scheduling?"
+      },
+      {
+        "role": "assistant",
+        "content": "Not necessarily. SJF selects the process with the smallest CPU burst time among those in the ready queue — but if every process has the identical burst time, there is no single 'smallest' to distinguish between them, so SJF's selection rule provides no distinguishing information in this case. In practice, ties are broken by some secondary rule (commonly arrival order), which means SJF ends up selecting processes in the same order FCFS would anyway. SJF's advantage over FCFS specifically comes from being able to favor shorter jobs over longer ones — when burst times don't differ at all, that advantage has nothing to act on."
+      }
+    ]
+  },
+  {
+    "category": "negative_edge_case",
+    "difficulty": "hard",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nProtection mechanisms control access of processes and users to system resources according to policy, while security defends the whole system against internal and external threats.\n\nQuestion: If a legitimate, authenticated user misuses file permissions they were correctly granted (e.g. reading a file they're allowed to read, but for a purpose the owner didn't intend), is that a protection failure or a security failure by the definitions given?"
+      },
+      {
+        "role": "assistant",
+        "content": "It's a protection concern, not necessarily a security failure by these definitions. Protection is described as dealing with 'legitimate users misusing their granted access' — internal mechanisms controlling access according to policy. Security is described as defending against threats that are unauthorized or malicious, from both inside and outside the system — but here, the user IS authorized (correctly authenticated, correctly granted read access) and isn't described as acting maliciously or without authorization; they're simply using a legitimately-granted permission in a way the file owner didn't anticipate. Since the access itself was authorized and within the granted permissions, this scenario is squarely the protection concern the definitions describe, rather than the unauthorized/malicious access security is defined around."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nIn contiguous memory allocation, free memory is organized as a list of holes (blocks). First-fit allocates a process into the first hole large enough to hold it (scanning from the start). Best-fit allocates into the smallest hole that is still large enough. Worst-fit allocates into the largest available hole. After allocation, the unused remainder of the chosen hole remains as a smaller free hole.\n\nQuestion: Free memory consists of the following holes, in this order: B0=160KB, B1=315KB, B2=99KB, B3=101KB. The following processes arrive in this order and must each be placed into a single contiguous free hole: P0=148KB, P1=227KB, P2=127KB, P3=128KB, P4=299KB.\n\nUsing the best-fit allocation strategy, determine which memory block (if any) each process is placed into, and the sizes of the remaining free blocks after all allocations."
+      },
+      {
+        "role": "assistant",
+        "content": "P0 (148KB): placed in B0 (was 160KB) -> B0 now has 12KB free\nP1 (227KB): placed in B1 (was 315KB) -> B1 now has 88KB free\nP2 (127KB): no free block is large enough -> CANNOT be allocated\nP3 (128KB): no free block is large enough -> CANNOT be allocated\nP4 (299KB): no free block is large enough -> CANNOT be allocated\n\nFinal remaining free block sizes: B0=12KB, B1=88KB, B2=99KB, B3=101KB"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nDisk scheduling algorithms decide the order in which pending I/O requests (each targeting a specific cylinder) are serviced, aiming to minimize total head movement and/or provide fairness.\n\nQuestion: Explain how the SCAN (elevator) disk scheduling algorithm works."
+      },
+      {
+        "role": "assistant",
+        "content": "The disk arm starts at one end of the disk and moves toward the other end, servicing every pending request it encounters along the way, then reverses direction at the far end and services requests on the way back — like an elevator. This bounds the maximum wait for any request and gives more uniform service than SSTF."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFragmentation: Wasted memory that accumulates over time due to allocation and deallocation patterns; can be internal (wasted space inside an allocated block) or external (wasted space between allocated blocks).\n\nQuestion: What is Fragmentation?"
+      },
+      {
+        "role": "assistant",
+        "content": "Wasted memory that accumulates over time due to allocation and deallocation patterns; can be internal (wasted space inside an allocated block) or external (wasted space between allocated blocks)."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nShortest Remaining Time First (SRTF) is the preemptive version of SJF: at every instant, the CPU runs whichever ready process has the smallest remaining burst time, preempting the current process if a process with a shorter remaining time becomes ready. Ties are broken by earliest arrival time, then process ID. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time\n-----------------------------------\nP1      | 0            | 10\nP2      | 5            | 4\nP3      | 0            | 2\n\nUsing Shortest Remaining Time First (SRTF, preemptive) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nP3[0-2] -> P1[2-5] -> P2[5-9] -> P1[9-16]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 16  | 16            | 6\nP2      | 9  | 4            | 0\nP3      | 2  | 2            | 0\n\nAverage Turnaround Time = (16 + 4 + 2) / 3 = 7.33 ms\nAverage Waiting Time = (6 + 0 + 0) / 3 = 2 ms"
+      }
+    ]
+  },
+  {
+    "category": "negative_edge_case",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOperating systems can be structured in several ways, including the simple/monolithic structure, layered approach, microkernel architecture, and modular approach, each trading off performance against maintainability and reliability.\n\nQuestion: Does choosing a microkernel architecture over a monolithic kernel always make every individual operation slower?"
+      },
+      {
+        "role": "assistant",
+        "content": "Not necessarily as an absolute rule. The stated trade-off is that a microkernel's main advantage is improved reliability and security — a failure in a user-mode service doesn't crash the kernel — 'at the cost of extra message-passing overhead between components.' That overhead specifically applies to operations that must cross between the kernel and a user-mode service (e.g. a file system or driver call), not to every operation an OS performs in general. So while microkernel designs do introduce overhead for those specific cross-component interactions, the passage doesn't state that a microkernel makes literally every operation slower than a monolithic kernel — only that this particular class of interaction pays a message-passing cost."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nWhen a page fault occurs and no free frame is available, the OS must select an existing page to evict from memory using a page-replacement algorithm, such as FIFO, LRU, or Optimal.\n\nQuestion: What is the difference between local and global page replacement?"
+      },
+      {
+        "role": "assistant",
+        "content": "In local replacement, a process can only replace pages that belong to itself (from its own allocated frame set) when it faults, ensuring predictable performance per process but limiting its allocation to a fixed number of frames. In global replacement, a process can select a victim frame from any process in the system, which can lead to better overall throughput but means one process's paging behavior can affect the performance of unrelated processes."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nSSTF (Shortest Seek Time First) disk scheduling always services the pending request whose cylinder is closest to the disk head's current position next, minimizing each individual seek.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 32. The pending requests, in the order they arrived, are: 163, 59, 13, 25, 105, 84, 183.\n\nUsing the SSTF disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 32 -> 25 -> 13 -> 59 -> 84 -> 105 -> 163 -> 183\n\nHead movement per step: |25-32|=7 + |13-25|=12 + |59-13|=46 + |84-59|=25 + |105-84|=21 + |163-105|=58 + |183-163|=20\n\nTotal head movement = 189 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nIn a paged memory system, a logical address is split into a page number and an offset: page number = logical address // page size; offset = logical address % page size. The page table maps each page number to a physical frame number. The physical address is computed as: physical address = (frame number x page size) + offset.\n\nQuestion: A system uses paging with a page size of 256 bytes. A process has 4 pages, with the following page table: page 0 -> frame 4, page 1 -> frame 3, page 2 -> frame 5, page 3 -> frame 2.\n\nFor the logical address 524, determine: (a) the page number, (b) the offset within the page, (c) the corresponding frame number, and (d) the resulting physical address."
+      },
+      {
+        "role": "assistant",
+        "content": "(a) Page number = logical address // page size = 524 // 256 = 2\n(b) Offset = logical address % page size = 524 % 256 = 12\n(c) From the page table, page 2 -> frame 5\n(d) Physical address = (frame number x page size) + offset = (5 x 256) + 12 = 1292"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOptimal (MIN/Belady's) page replacement evicts the page that will not be used again for the longest time in the future (or never used again), when a page fault occurs and all frames are full. It gives the theoretical minimum number of page faults but requires advance knowledge of the full reference string.\n\nQuestion: A system uses 4 page frames and the Optimal page replacement algorithm. Given the page reference string:\n3, 2, 5, 3, 5, 0, 2, 4, 2, 2\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n3   | [3]                   | Fault\n2   | [3, 2]                | Fault\n5   | [3, 2, 5]             | Fault\n3   | [3, 2, 5]             | Hit\n5   | [3, 2, 5]             | Hit\n0   | [3, 2, 5, 0]          | Fault\n2   | [3, 2, 5, 0]          | Hit\n4   | [2, 5, 0, 4]          | Fault\n2   | [2, 5, 0, 4]          | Hit\n2   | [2, 5, 0, 4]          | Hit\n\nTotal references = 10\nTotal page faults = 5\nTotal page hits = 5\nPage fault rate = 5/10 = 0.50"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nRace condition: A flaw where the outcome of concurrent execution depends on the unpredictable timing/order of accesses to shared data by multiple processes or threads.\n\nQuestion: Explain the term Race condition in the context of operating systems."
+      },
+      {
+        "role": "assistant",
+        "content": "A flaw where the outcome of concurrent execution depends on the unpredictable timing/order of accesses to shared data by multiple processes or threads."
+      }
+    ]
+  },
+  {
+    "category": "analytical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nAs processes enter the system, they are placed in a job queue. Processes in main memory waiting to run are in the ready queue, and processes waiting for a particular I/O device are placed in a device queue.\n\nQuestion: Why does the long-term scheduler run far less frequently than the short-term (CPU) scheduler?"
+      },
+      {
+        "role": "assistant",
+        "content": "The long-term scheduler controls the degree of multiprogramming by deciding which processes are admitted from secondary storage into the ready queue in memory — this is a comparatively rare, coarse-grained decision, since a process typically stays resident in memory for its entire lifetime once admitted, so there's no need to re-run this decision often. The short-term scheduler, by contrast, decides which already-resident, ready process gets the CPU next — a decision that must be made constantly, every time the currently running process is preempted, blocks, or finishes, which happens on the order of milliseconds. Because CPU allocation must be re-decided vastly more often than memory admission, the short-term scheduler necessarily runs far more frequently than the long-term one."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOptimal (MIN/Belady's) page replacement evicts the page that will not be used again for the longest time in the future (or never used again), when a page fault occurs and all frames are full. It gives the theoretical minimum number of page faults but requires advance knowledge of the full reference string.\n\nQuestion: A system uses 4 page frames and the Optimal page replacement algorithm. Given the page reference string:\n5, 2, 4, 4, 0, 4, 5, 1, 4, 4, 1\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n5   | [5]                   | Fault\n2   | [5, 2]                | Fault\n4   | [5, 2, 4]             | Fault\n4   | [5, 2, 4]             | Hit\n0   | [5, 2, 4, 0]          | Fault\n4   | [5, 2, 4, 0]          | Hit\n5   | [5, 2, 4, 0]          | Hit\n1   | [2, 4, 0, 1]          | Fault\n4   | [2, 4, 0, 1]          | Hit\n4   | [2, 4, 0, 1]          | Hit\n1   | [2, 4, 0, 1]          | Hit\n\nTotal references = 11\nTotal page faults = 5\nTotal page hits = 6\nPage fault rate = 5/11 = 0.45"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOperating systems can be structured in several ways, including the simple/monolithic structure, layered approach, microkernel architecture, and modular approach, each trading off performance against maintainability and reliability.\n\nQuestion: What is a microkernel and what is its main advantage?"
+      },
+      {
+        "role": "assistant",
+        "content": "A microkernel keeps only the most essential functions (basic IPC, minimal process/memory management) in kernel mode, moving services like file systems and device drivers to user-mode servers. Its main advantage is improved reliability and security — a failure in a user-mode service does not crash the kernel — at the cost of extra message-passing overhead between components."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nRCU (Read-Copy-Update): A synchronization technique letting readers access shared data with no locking at all, by having writers publish updates via an atomic pointer swap and deferring reclamation of old versions until a grace period guarantees no reader can still be using them.\n\nQuestion: Define RCU (Read-Copy-Update)."
+      },
+      {
+        "role": "assistant",
+        "content": "A synchronization technique letting readers access shared data with no locking at all, by having writers publish updates via an atomic pointer swap and deferring reclamation of old versions until a grace period guarantees no reader can still be using them."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFirst-Come, First-Served (FCFS) scheduling allocates the CPU to processes in the order they arrive in the ready queue. It is implemented with a simple FIFO queue and is non-preemptive.\n\nQuestion: How does FCFS scheduling work?"
+      },
+      {
+        "role": "assistant",
+        "content": "FCFS scheduling maintains a simple FIFO queue of processes ordered by arrival time. Whichever process arrives first is allocated the CPU first, and it runs to completion (or until it needs I/O) before the next process in the queue is scheduled. It is non-preemptive and easy to implement."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nProcesses are created dynamically using system calls such as fork() and exec() on Unix-like systems, and cooperating processes exchange data using inter-process communication (IPC) mechanisms such as shared memory and message passing.\n\nQuestion: What is the difference between fork() and exec() in process creation?"
+      },
+      {
+        "role": "assistant",
+        "content": "fork() creates a new process (the child) by duplicating the calling (parent) process — the child gets a copy of the parent's memory, and after fork() both continue executing from the same point, distinguished by the return value (0 in the child, the child's PID in the parent). exec() replaces the calling process's own memory image (code, data, stack) with a new program, without creating a new process — commonly, a child calls fork() then immediately calls exec() to run a completely different program in place of its copy of the parent."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nVirtual memory is a technique that allows the execution of processes that are not completely in main memory, giving each process the illusion of a large, contiguous address space backed by disk.\n\nQuestion: What is demand paging?"
+      },
+      {
+        "role": "assistant",
+        "content": "Demand paging is a virtual memory technique where a page is only loaded into physical memory when it is actually referenced (demanded) by the running process, rather than loading the entire process at start. This reduces memory usage and speeds up process start-up, since unused pages (e.g. rarely-executed error-handling code) are never loaded."
+      }
+    ]
+  },
+  {
+    "category": "comparative",
+    "difficulty": "hard",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nDisk scheduling algorithms decide the order in which pending I/O requests (each targeting a specific cylinder) are serviced, aiming to minimize total head movement and/or provide fairness.\n\nShortest Job First (SJF) scheduling selects the ready process with the smallest next CPU burst time. It can be implemented as non-preemptive (classic SJF) or preemptive (Shortest Remaining Time First, SRTF).\n\nQuestion: How is SSTF disk scheduling analogous to SJF CPU scheduling, and how are their respective drawbacks similar?"
+      },
+      {
+        "role": "assistant",
+        "content": "SSTF disk scheduling is explicitly described as being 'similar to SJF for CPU scheduling': just as SJF always selects the ready process with the smallest CPU burst time next, SSTF always services the pending disk request whose cylinder is closest to the current head position next — both algorithms greedily pick whatever looks 'cheapest' to service right now, based on a size/distance measure, rather than respecting arrival order. Their drawbacks are similarly shaped, too: SJF's short jobs can indefinitely delay a long-burst process if shorter jobs keep arriving (addressed via aging), and SSTF 'can cause starvation of requests far from the current head position if a steady stream of requests keeps arriving near the head's current location' — in both cases, the greedy 'shortest/closest first' strategy can starve whichever item is unlucky enough to look expensive relative to a constant stream of cheaper alternatives."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nBooting a computer and handling defective disk sectors are low-level responsibilities closely tied to disk and mass storage management.\n\nQuestion: What is the boot block, and how does the system boot?"
+      },
+      {
+        "role": "assistant",
+        "content": "The boot block is a small, fixed location on a bootable disk (typically the first sector) containing a bootstrap loader program. When the computer is powered on, the ROM-resident bootstrap code loads and executes this bootstrap loader, which in turn locates and loads the full operating system kernel into memory and transfers control to it."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nAging: A technique that gradually increases the priority of a process the longer it waits in the ready queue, to prevent starvation.\n\nQuestion: Define Aging."
+      },
+      {
+        "role": "assistant",
+        "content": "A technique that gradually increases the priority of a process the longer it waits in the ready queue, to prevent starvation."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nDisk scheduling algorithms decide the order in which pending I/O requests (each targeting a specific cylinder) are serviced, aiming to minimize total head movement and/or provide fairness.\n\nQuestion: Compare FCFS and SSTF disk scheduling algorithms."
+      },
+      {
+        "role": "assistant",
+        "content": "FCFS services disk requests strictly in arrival order regardless of their cylinder location, which is fair and starvation-free but can cause a lot of unnecessary head movement (poor throughput). SSTF always services the closest pending request to the current head position, minimizing head movement in the short term and improving throughput, but it can starve requests that are far from the head if closer requests keep arriving."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOnce a deadlock is detected, an operating system can recover from it either by terminating one or more deadlocked processes or by preempting resources from them.\n\nQuestion: What is starvation in the context of resource preemption during deadlock recovery, and how is it typically avoided?"
+      },
+      {
+        "role": "assistant",
+        "content": "If the same process is repeatedly chosen as the 'victim' for resource preemption, it may never complete — this is starvation. It is typically avoided by including the number of times a process has been picked as a victim as a factor in the selection cost, ensuring no process is picked an unlimited number of times."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFIFO page replacement evicts the page that has been resident in memory the longest, regardless of how recently or often it has been used, when a page fault occurs and all frames are full.\n\nQuestion: A system uses 4 page frames and the FIFO page replacement algorithm. Given the page reference string:\n4, 1, 3, 0, 1, 3, 2, 0, 3, 0, 3, 4, 2\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n4   | [4]                   | Fault\n1   | [4, 1]                | Fault\n3   | [4, 1, 3]             | Fault\n0   | [4, 1, 3, 0]          | Fault\n1   | [4, 1, 3, 0]          | Hit\n3   | [4, 1, 3, 0]          | Hit\n2   | [1, 3, 0, 2]          | Fault\n0   | [1, 3, 0, 2]          | Hit\n3   | [1, 3, 0, 2]          | Hit\n0   | [1, 3, 0, 2]          | Hit\n3   | [1, 3, 0, 2]          | Hit\n4   | [3, 0, 2, 4]          | Fault\n2   | [3, 0, 2, 4]          | Hit\n\nTotal references = 13\nTotal page faults = 6\nTotal page hits = 7\nPage fault rate = 6/13 = 0.46"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nLRU (Least Recently Used) page replacement evicts the page that has not been referenced for the longest time, when a page fault occurs and all frames are full — it uses the recent past as an approximation of the near future.\n\nQuestion: A system uses 4 page frames and the LRU page replacement algorithm. Given the page reference string:\n3, 3, 5, 0, 2, 3, 2, 5, 2, 2, 1, 5, 3\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n3   | [3]                   | Fault\n3   | [3]                   | Hit\n5   | [3, 5]                | Fault\n0   | [3, 5, 0]             | Fault\n2   | [3, 5, 0, 2]          | Fault\n3   | [5, 0, 2, 3]          | Hit\n2   | [5, 0, 3, 2]          | Hit\n5   | [0, 3, 2, 5]          | Hit\n2   | [0, 3, 5, 2]          | Hit\n2   | [0, 3, 5, 2]          | Hit\n1   | [3, 5, 2, 1]          | Fault\n5   | [3, 2, 1, 5]          | Hit\n3   | [2, 1, 5, 3]          | Hit\n\nTotal references = 13\nTotal page faults = 5\nTotal page hits = 8\nPage fault rate = 5/13 = 0.38"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFirst-Come, First-Served (FCFS) CPU scheduling allocates the CPU to processes strictly in order of arrival time, using a FIFO ready queue. It is non-preemptive: once a process starts running, it runs to completion. Ties in arrival time are broken by process ID order. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time\n-----------------------------------\nP1      | 4            | 8\nP2      | 8            | 10\nP3      | 7            | 5\nP4      | 6            | 9\n\nUsing First-Come, First-Served (FCFS) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nIdle[0-4] -> P1[4-12] -> P4[12-21] -> P3[21-26] -> P2[26-36]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 12  | 8            | 0\nP2      | 36  | 28            | 18\nP3      | 26  | 19            | 14\nP4      | 21  | 15            | 6\n\nAverage Turnaround Time = (8 + 28 + 19 + 15) / 4 = 17.50 ms\nAverage Waiting Time = (0 + 18 + 14 + 6) / 4 = 9.50 ms"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nIn contiguous memory allocation, free memory is organized as a list of holes (blocks). First-fit allocates a process into the first hole large enough to hold it (scanning from the start). Best-fit allocates into the smallest hole that is still large enough. Worst-fit allocates into the largest available hole. After allocation, the unused remainder of the chosen hole remains as a smaller free hole.\n\nQuestion: Free memory consists of the following holes, in this order: B0=126KB, B1=292KB, B2=54KB, B3=140KB. The following processes arrive in this order and must each be placed into a single contiguous free hole: P0=285KB, P1=98KB, P2=294KB, P3=191KB.\n\nUsing the first-fit allocation strategy, determine which memory block (if any) each process is placed into, and the sizes of the remaining free blocks after all allocations."
+      },
+      {
+        "role": "assistant",
+        "content": "P0 (285KB): placed in B1 (was 292KB) -> B1 now has 7KB free\nP1 (98KB): placed in B0 (was 126KB) -> B0 now has 28KB free\nP2 (294KB): no free block is large enough -> CANNOT be allocated\nP3 (191KB): no free block is large enough -> CANNOT be allocated\n\nFinal remaining free block sizes: B0=28KB, B1=7KB, B2=54KB, B3=140KB"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nLOOK disk scheduling behaves like SCAN, but instead of travelling all the way to the physical end of the disk, the head reverses direction as soon as it services the last pending request in the current direction, avoiding unnecessary movement.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 58. The pending requests, in the order they arrived, are: 49, 158, 134, 64, 90, 68, 101.\n\nUsing the LOOK (initial direction: increasing cylinder numbers) disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 58 -> 64 -> 68 -> 90 -> 101 -> 134 -> 158 -> 49\n\nHead movement per step: |64-58|=6 + |68-64|=4 + |90-68|=22 + |101-90|=11 + |134-101|=33 + |158-134|=24 + |49-158|=109\n\nTotal head movement = 209 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFirst-Come, First-Served (FCFS) CPU scheduling allocates the CPU to processes strictly in order of arrival time, using a FIFO ready queue. It is non-preemptive: once a process starts running, it runs to completion. Ties in arrival time are broken by process ID order. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time\n-----------------------------------\nP1      | 2            | 5\nP2      | 7            | 12\nP3      | 9            | 5\nP4      | 4            | 7\nP5      | 9            | 11\n\nUsing First-Come, First-Served (FCFS) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nIdle[0-2] -> P1[2-7] -> P4[7-14] -> P2[14-26] -> P3[26-31] -> P5[31-42]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 7  | 5            | 0\nP2      | 26  | 19            | 7\nP3      | 31  | 22            | 17\nP4      | 14  | 10            | 3\nP5      | 42  | 33            | 22\n\nAverage Turnaround Time = (5 + 19 + 22 + 10 + 33) / 5 = 17.80 ms\nAverage Waiting Time = (0 + 7 + 17 + 3 + 22) / 5 = 9.80 ms"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nCopy-on-Write (COW): A memory-management optimization where two processes (e.g. after fork()) share the same physical pages read-only until one attempts to write, at which point a private copy of just that page is made.\n\nQuestion: Explain the term Copy-on-Write (COW) in the context of operating systems."
+      },
+      {
+        "role": "assistant",
+        "content": "A memory-management optimization where two processes (e.g. after fork()) share the same physical pages read-only until one attempts to write, at which point a private copy of just that page is made."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nIn contiguous memory allocation, free memory is organized as a list of holes (blocks). First-fit allocates a process into the first hole large enough to hold it (scanning from the start). Best-fit allocates into the smallest hole that is still large enough. Worst-fit allocates into the largest available hole. After allocation, the unused remainder of the chosen hole remains as a smaller free hole.\n\nQuestion: Free memory consists of the following holes, in this order: B0=364KB, B1=53KB, B2=327KB, B3=71KB, B4=296KB. The following processes arrive in this order and must each be placed into a single contiguous free hole: P0=191KB, P1=282KB, P2=170KB, P3=281KB.\n\nUsing the worst-fit allocation strategy, determine which memory block (if any) each process is placed into, and the sizes of the remaining free blocks after all allocations."
+      },
+      {
+        "role": "assistant",
+        "content": "P0 (191KB): placed in B0 (was 364KB) -> B0 now has 173KB free\nP1 (282KB): placed in B2 (was 327KB) -> B2 now has 45KB free\nP2 (170KB): placed in B4 (was 296KB) -> B4 now has 126KB free\nP3 (281KB): no free block is large enough -> CANNOT be allocated\n\nFinal remaining free block sizes: B0=173KB, B1=53KB, B2=45KB, B3=71KB, B4=126KB"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nPriority scheduling (non-preemptive) allocates the CPU to the ready process with the highest priority, where a SMALLER priority number means HIGHER priority. Once started, a process runs to completion. Ties are broken by earliest arrival time, then process ID. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time | Priority\n----------------------------------------------\nP1      | 3            | 8          | 4\nP2      | 5            | 8          | 8\nP3      | 3            | 5          | 3\n\nUsing Priority (non-preemptive, smaller number = higher priority) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nIdle[0-3] -> P3[3-8] -> P1[8-16] -> P2[16-24]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 16  | 13            | 5\nP2      | 24  | 19            | 11\nP3      | 8  | 5            | 0\n\nAverage Turnaround Time = (13 + 19 + 5) / 3 = 12.33 ms\nAverage Waiting Time = (5 + 11 + 0) / 3 = 5.33 ms"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "hard",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nThe Banker's algorithm avoids deadlock by only granting a resource request if the resulting state is 'safe'. A state is safe if there is some ordering (safe sequence) of all processes such that each process's remaining Need can be satisfied by the currently Available resources plus what is freed by processes earlier in the sequence. Need[i] = Max[i] - Allocation[i]. The safety algorithm repeatedly finds any unfinished process whose Need is <= Work (initially Available), 'runs' it (adding its Allocation back to Work), and marks it finished, until no more processes can be added (safe if all finish) or no more can be found (unsafe if any remain unfinished).\n\nQuestion: A system has 3 processes (P0..P2) and 2 resource types (A, B). The current Allocation and Max matrices, and the Available vector, are:\n\nAllocation:\nProcess | A  B\nP0      | 0  0\nP1      | 2  3\nP2      | 2  3\n\nMax:\nProcess | A  B\nP0      | 8  5\nP1      | 6  6\nP2      | 7  6\n\nAvailable: A=3, B=7\n\nCompute the Need matrix, and using the Banker's algorithm, determine whether the system is currently in a safe state. If it is, give a valid safe sequence."
+      },
+      {
+        "role": "assistant",
+        "content": "Need = Max - Allocation:\nProcess | A  B\nP0      | 8  5\nP1      | 4  3\nP2      | 5  3\n\nNo unfinished process has Need <= Work at any point, so no process beyond the ones above can be scheduled. The system is NOT in a safe state (it may deadlock)."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nPriority scheduling (non-preemptive) allocates the CPU to the ready process with the highest priority, where a SMALLER priority number means HIGHER priority. Once started, a process runs to completion. Ties are broken by earliest arrival time, then process ID. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time | Priority\n----------------------------------------------\nP1      | 1            | 8          | 4\nP2      | 4            | 2          | 7\nP3      | 0            | 10          | 9\nP4      | 10            | 12          | 4\nP5      | 5            | 8          | 2\n\nUsing Priority (non-preemptive, smaller number = higher priority) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nP3[0-10] -> P5[10-18] -> P1[18-26] -> P4[26-38] -> P2[38-40]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 26  | 25            | 17\nP2      | 40  | 36            | 34\nP3      | 10  | 10            | 0\nP4      | 38  | 28            | 16\nP5      | 18  | 13            | 5\n\nAverage Turnaround Time = (25 + 36 + 10 + 28 + 13) / 5 = 22.40 ms\nAverage Waiting Time = (17 + 34 + 0 + 16 + 5) / 5 = 14.40 ms"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nMutual exclusion: The requirement that only one process/thread can execute in a critical section (accessing a shared resource) at any given time.\n\nQuestion: What is Mutual exclusion?"
+      },
+      {
+        "role": "assistant",
+        "content": "The requirement that only one process/thread can execute in a critical section (accessing a shared resource) at any given time."
+      }
+    ]
+  },
+  {
+    "category": "applied_conceptual",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nThe critical-section problem is to design a protocol that processes can use to cooperate safely when accessing shared data. A solution must satisfy mutual exclusion, progress, and bounded waiting.\n\nQuestion: A ticket-booking system runs three server processes that all handle requests against the same 'seats_available' counter: each process reads the counter, decrements it if the value is greater than zero, and writes it back — with no locking. During a flash sale, all three processes read the counter at nearly the same instant. What problem can occur, and why?"
+      },
+      {
+        "role": "assistant",
+        "content": "This is a race condition on the shared 'seats_available' counter, caused by the read-decrement-write sequence not being protected as a critical section. If all three processes read the same value (say, 2 seats available) before any of them writes back, each independently computes '2 - 1 = 1' and writes 1 back — even though three separate bookings were made. Instead of the counter correctly dropping to -1 (oversold, which the check should have prevented for the third booking) or being correctly serialized down to 0 with the third request rejected, it ends at 1: two decrements are silently lost, and the system may believe more seats remain than actually exist, or fail to detect that it oversold. The fix is to make the entire read-decrement-write sequence a critical section, protected so only one process can execute it at a time — e.g. with a mutex."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFIFO page replacement evicts the page that has been resident in memory the longest, regardless of how recently or often it has been used, when a page fault occurs and all frames are full.\n\nQuestion: A system uses 4 page frames and the FIFO page replacement algorithm. Given the page reference string:\n1, 0, 1, 2, 4, 5, 4, 4, 5, 2, 3, 4, 4, 2\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n1   | [1]                   | Fault\n0   | [1, 0]                | Fault\n1   | [1, 0]                | Hit\n2   | [1, 0, 2]             | Fault\n4   | [1, 0, 2, 4]          | Fault\n5   | [0, 2, 4, 5]          | Fault\n4   | [0, 2, 4, 5]          | Hit\n4   | [0, 2, 4, 5]          | Hit\n5   | [0, 2, 4, 5]          | Hit\n2   | [0, 2, 4, 5]          | Hit\n3   | [2, 4, 5, 3]          | Fault\n4   | [2, 4, 5, 3]          | Hit\n4   | [2, 4, 5, 3]          | Hit\n2   | [2, 4, 5, 3]          | Hit\n\nTotal references = 14\nTotal page faults = 6\nTotal page hits = 8\nPage fault rate = 6/14 = 0.43"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nLOOK disk scheduling behaves like SCAN, but instead of travelling all the way to the physical end of the disk, the head reverses direction as soon as it services the last pending request in the current direction, avoiding unnecessary movement.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 117. The pending requests, in the order they arrived, are: 63, 117, 88, 39, 70, 48, 185.\n\nUsing the LOOK (initial direction: increasing cylinder numbers) disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 117 -> 117 -> 185 -> 88 -> 70 -> 63 -> 48 -> 39\n\nHead movement per step: |117-117|=0 + |185-117|=68 + |88-185|=97 + |70-88|=18 + |63-70|=7 + |48-63|=15 + |39-48|=9\n\nTotal head movement = 214 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "comparative",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nThe critical-section problem is to design a protocol that processes can use to cooperate safely when accessing shared data. A solution must satisfy mutual exclusion, progress, and bounded waiting.\n\nA deadlock is a situation where a set of processes are all blocked, each waiting for a resource held by another process in the set, so none can proceed. Four conditions must hold simultaneously for a deadlock to occur.\n\nQuestion: How does a race condition differ from a deadlock in terms of the necessary conditions that produce it?"
+      },
+      {
+        "role": "assistant",
+        "content": "A race condition needs only concurrent, unsynchronized access to shared data where at least one access is a write — no locking or resource-holding is required at all for it to occur; the bug is simply the ABSENCE of mutual exclusion around a critical section, so the final result depends on whatever order the accesses happen to interleave in. A deadlock is the opposite kind of failure: it requires synchronization (resource-holding) to already be in place, and specifically requires four conditions to hold simultaneously — mutual exclusion, hold-and-wait, no preemption, and circular wait — so that a set of processes end up permanently blocked waiting on each other. In short: a race condition is what can go wrong when there is too LITTLE synchronization around shared data, while a deadlock is what can go wrong when there is synchronization (locks/resources being held), but it is acquired and ordered in a way that creates a circular waiting dependency. Fixing a race condition means ADDING mutual exclusion around the critical section; fixing/avoiding a deadlock means removing (or carefully managing) one of the four Coffman conditions that mutual-exclusion -style locking can itself introduce."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nPriority inversion: A scheduling anomaly where a higher-priority process is indirectly delayed by a lower-priority process holding a resource it needs, while an unrelated medium-priority process runs in between.\n\nQuestion: Define Priority inversion."
+      },
+      {
+        "role": "assistant",
+        "content": "A scheduling anomaly where a higher-priority process is indirectly delayed by a lower-priority process holding a resource it needs, while an unrelated medium-priority process runs in between."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nProcesses are created dynamically using system calls such as fork() and exec() on Unix-like systems, and cooperating processes exchange data using inter-process communication (IPC) mechanisms such as shared memory and message passing.\n\nQuestion: What is the difference between a pipe and shared memory for IPC?"
+      },
+      {
+        "role": "assistant",
+        "content": "A pipe is a unidirectional communication channel managed by the kernel, where one process writes bytes in and another reads them out in FIFO order — simple and safe, but every byte transferred goes through a kernel-mediated buffer, adding overhead. Shared memory maps the same physical memory region into both processes' address spaces, letting them read/write directly without kernel involvement per operation — much faster for large or frequent data exchange, but requires explicit application-level synchronization."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nShortest Job First (SJF, non-preemptive) scheduling selects, among all processes that have arrived and are ready, the one with the smallest CPU burst time to run next; once started it runs to completion. Ties are broken by earliest arrival time, then by process ID. Completion Time (CT) is when a process finishes; Turnaround Time (TAT) = CT − Arrival Time; Waiting Time (WT) = TAT − Burst Time.\n\nQuestion: Consider the following processes with their arrival and burst times (all times in milliseconds):\n\nProcess | Arrival Time | Burst Time\n-----------------------------------\nP1      | 5            | 6\nP2      | 3            | 2\nP3      | 6            | 7\nP4      | 1            | 6\n\nUsing Shortest Job First (SJF, non-preemptive) scheduling, draw the Gantt chart and compute the Completion Time, Turnaround Time, and Waiting Time for each process. Also compute the average waiting time and average turnaround time."
+      },
+      {
+        "role": "assistant",
+        "content": "Gantt Chart:\nIdle[0-1] -> P4[1-7] -> P2[7-9] -> P1[9-15] -> P3[15-22]\n\nProcess | CT | TAT (=CT-AT) | WT (=TAT-BT)\nP1      | 15  | 10            | 4\nP2      | 9  | 6            | 4\nP3      | 22  | 16            | 9\nP4      | 7  | 6            | 0\n\nAverage Turnaround Time = (10 + 6 + 16 + 6) / 4 = 9.50 ms\nAverage Waiting Time = (4 + 4 + 9 + 0) / 4 = 4.25 ms"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOperating systems can be classified by how they schedule and share the CPU among users and processes: batch systems, multiprogrammed systems, time-sharing systems, real-time systems, and distributed systems, each suited to different workloads.\n\nQuestion: What is multiprogramming and why is it used?"
+      },
+      {
+        "role": "assistant",
+        "content": "Multiprogramming is the technique of keeping multiple jobs in main memory simultaneously so that the CPU always has a job to execute. When one job needs to wait for I/O, the CPU switches to another job instead of sitting idle, which increases CPU utilization and system throughput."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nCache coherency: The property that all processors/caches in a system see a consistent, up-to-date view of shared memory data despite each holding local cached copies.\n\nQuestion: What is Cache coherency?"
+      },
+      {
+        "role": "assistant",
+        "content": "The property that all processors/caches in a system see a consistent, up-to-date view of shared memory data despite each holding local cached copies."
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "easy",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nInter-Processor Interrupt (IPI): A hardware interrupt one CPU core sends directly to another (via the Local APIC on x86, or an SGI via the GIC on ARM) to force it to run a specific handler immediately, used e.g. to coordinate TLB shootdowns across cores.\n\nQuestion: Define Inter-Processor Interrupt (IPI)."
+      },
+      {
+        "role": "assistant",
+        "content": "A hardware interrupt one CPU core sends directly to another (via the Local APIC on x86, or an SGI via the GIC on ARM) to force it to run a specific handler immediately, used e.g. to coordinate TLB shootdowns across cores."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nIn a paged memory system, a logical address is split into a page number and an offset: page number = logical address // page size; offset = logical address % page size. The page table maps each page number to a physical frame number. The physical address is computed as: physical address = (frame number x page size) + offset.\n\nQuestion: A system uses paging with a page size of 256 bytes. A process has 7 pages, with the following page table: page 0 -> frame 3, page 1 -> frame 8, page 2 -> frame 9, page 3 -> frame 10, page 4 -> frame 4, page 5 -> frame 11, page 6 -> frame 12.\n\nFor the logical address 845, determine: (a) the page number, (b) the offset within the page, (c) the corresponding frame number, and (d) the resulting physical address."
+      },
+      {
+        "role": "assistant",
+        "content": "(a) Page number = logical address // page size = 845 // 256 = 3\n(b) Offset = logical address % page size = 845 % 256 = 77\n(c) From the page table, page 3 -> frame 10\n(d) Physical address = (frame number x page size) + offset = (10 x 256) + 77 = 2637"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFile systems are made available to users through mounting, and their integrity must periodically be checked and repaired using consistency-checking utilities.\n\nQuestion: Why is file system consistency checking (e.g. fsck) necessary, and when is it typically run?"
+      },
+      {
+        "role": "assistant",
+        "content": "Because a system crash or power failure can occur while file system metadata (directory entries, free-space lists, inodes) is only partially updated, leaving it in an inconsistent state (e.g. a block marked both free and allocated). A consistency checker (like fsck on Unix or chkdsk on Windows) compares the actual state of blocks/directories against the metadata and repairs inconsistencies, typically run automatically at boot after an unclean shutdown, or manually on demand."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nC-LOOK disk scheduling behaves like C-SCAN, but instead of jumping to the physical end of the disk, the head jumps directly to the closest pending request on the other side, avoiding unnecessary movement to an empty boundary.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 142. The pending requests, in the order they arrived, are: 51, 137, 69, 143, 178, 35, 27.\n\nUsing the C-LOOK (initial direction: increasing cylinder numbers) disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 142 -> 143 -> 178 -> 27 -> 35 -> 51 -> 69 -> 137\n\nHead movement per step: |143-142|=1 + |178-143|=35 + |27-178|=151 + |35-27|=8 + |51-35|=16 + |69-51|=18 + |137-69|=68\n\nTotal head movement = 297 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nA deadlock is a situation where a set of processes are all blocked, each waiting for a resource held by another process in the set, so none can proceed. Four conditions must hold simultaneously for a deadlock to occur.\n\nQuestion: What is a deadlock?"
+      },
+      {
+        "role": "assistant",
+        "content": "A deadlock is a state in which a set of two or more processes are each waiting for an event (typically resource release) that can only be caused by another process in the same set, so none of them can ever proceed — they are stuck waiting on each other indefinitely."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "hard",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nThe Banker's algorithm avoids deadlock by only granting a resource request if the resulting state is 'safe'. A state is safe if there is some ordering (safe sequence) of all processes such that each process's remaining Need can be satisfied by the currently Available resources plus what is freed by processes earlier in the sequence. Need[i] = Max[i] - Allocation[i]. The safety algorithm repeatedly finds any unfinished process whose Need is <= Work (initially Available), 'runs' it (adding its Allocation back to Work), and marks it finished, until no more processes can be added (safe if all finish) or no more can be found (unsafe if any remain unfinished).\n\nQuestion: A system has 3 processes (P0..P2) and 3 resource types (A, B, C). The current Allocation and Max matrices, and the Available vector, are:\n\nAllocation:\nProcess | A  B  C\nP0      | 0  2  1\nP1      | 3  6  4\nP2      | 0  3  3\n\nMax:\nProcess | A  B  C\nP0      | 8  3  4\nP1      | 7  7  7\nP2      | 8  7  5\n\nAvailable: A=5, B=2, C=3\n\nProcess P2 now requests additional resources: A=1, B=4, C=0. Using the Banker's algorithm, determine whether this request can be granted immediately."
+      },
+      {
+        "role": "assistant",
+        "content": "Need = Max - Allocation:\nProcess | A  B  C\nP0      | 8  1  3\nP1      | 4  1  3\nP2      | 8  4  2\n\nStep 1: Is Request <= Need[P2]? Request=[1, 4, 0], Need[P2]=[8, 4, 2]\n-> Yes.\n\nStep 2: Is Request <= Available? Request=[1, 4, 0], Available=[5, 2, 3]\n-> No. Available cannot satisfy the request, so P2 must wait until enough resources are free."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nFCFS disk scheduling services pending I/O requests strictly in the order they arrived, regardless of cylinder position. Total head movement is the sum of the absolute differences between consecutively serviced cylinders, starting from the initial head position.\n\nQuestion: A disk has 200 cylinders (numbered 0 to 199). The disk head is currently at cylinder 86. The pending requests, in the order they arrived, are: 75, 39, 50, 84, 58, 97, 145, 62, 127.\n\nUsing the FCFS disk scheduling algorithm, determine the order in which the requests are serviced and compute the total head movement (in number of cylinders)."
+      },
+      {
+        "role": "assistant",
+        "content": "Service order: 86 -> 75 -> 39 -> 50 -> 84 -> 58 -> 97 -> 145 -> 62 -> 127\n\nHead movement per step: |75-86|=11 + |39-75|=36 + |50-39|=11 + |84-50|=34 + |58-84|=26 + |97-58|=39 + |145-97|=48 + |62-145|=83 + |127-62|=65\n\nTotal head movement = 353 cylinders"
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nLRU (Least Recently Used) page replacement evicts the page that has not been referenced for the longest time, when a page fault occurs and all frames are full — it uses the recent past as an approximation of the near future.\n\nQuestion: A system uses 4 page frames and the LRU page replacement algorithm. Given the page reference string:\n3, 1, 5, 3, 2, 3, 0, 5, 0, 1, 3, 3\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n3   | [3]                   | Fault\n1   | [3, 1]                | Fault\n5   | [3, 1, 5]             | Fault\n3   | [1, 5, 3]             | Hit\n2   | [1, 5, 3, 2]          | Fault\n3   | [1, 5, 2, 3]          | Hit\n0   | [5, 2, 3, 0]          | Fault\n5   | [2, 3, 0, 5]          | Hit\n0   | [2, 3, 5, 0]          | Hit\n1   | [3, 5, 0, 1]          | Fault\n3   | [5, 0, 1, 3]          | Hit\n3   | [5, 0, 1, 3]          | Hit\n\nTotal references = 12\nTotal page faults = 6\nTotal page hits = 6\nPage fault rate = 6/12 = 0.50"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nA file is a named collection of related information recorded on secondary storage. The operating system provides a uniform logical view of storage by abstracting the physical properties of storage devices into files.\n\nQuestion: What are the common file access methods?"
+      },
+      {
+        "role": "assistant",
+        "content": "Sequential access (records/bytes are read or written in order, one after another, like a tape), direct/random access (records can be read or written in any order using a fixed-length block/record number, like a disk), and indexed access (an index maps keys to record locations, enabling fast lookup of specific records without scanning sequentially)."
+      }
+    ]
+  },
+  {
+    "category": "applied_numerical",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nOptimal (MIN/Belady's) page replacement evicts the page that will not be used again for the longest time in the future (or never used again), when a page fault occurs and all frames are full. It gives the theoretical minimum number of page faults but requires advance knowledge of the full reference string.\n\nQuestion: A system uses 3 page frames and the Optimal page replacement algorithm. Given the page reference string:\n4, 3, 5, 2, 1, 5, 5, 5, 5, 4, 0, 5\n\nDetermine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits."
+      },
+      {
+        "role": "assistant",
+        "content": "Ref | Frame contents after this reference | Hit/Fault\n4   | [4]                   | Fault\n3   | [4, 3]                | Fault\n5   | [4, 3, 5]             | Fault\n2   | [4, 5, 2]             | Fault\n1   | [4, 5, 1]             | Fault\n5   | [4, 5, 1]             | Hit\n5   | [4, 5, 1]             | Hit\n5   | [4, 5, 1]             | Hit\n5   | [4, 5, 1]             | Hit\n4   | [4, 5, 1]             | Hit\n0   | [5, 1, 0]             | Fault\n5   | [5, 1, 0]             | Hit\n\nTotal references = 12\nTotal page faults = 6\nTotal page hits = 6\nPage fault rate = 6/12 = 0.50"
+      }
+    ]
+  },
+  {
+    "category": "recall",
+    "difficulty": "medium",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages provided below. Do NOT add your own examples, do NOT invent information. If the answer is not in the provided text, reply EXACTLY with the word 'OUT_OF_CONTEXT' and nothing else."
+      },
+      {
+        "role": "user",
+        "content": "Textbook passages:\nA thread is the basic unit of CPU utilization, comprising a thread ID, program counter, register set, and stack. Multiple threads within the same process share the process's code section, data section, and other OS resources like open files.\n\nQuestion: Explain the many-to-one, one-to-one, and many-to-many multithreading models."
+      },
+      {
+        "role": "assistant",
+        "content": "Many-to-one maps many user threads to a single kernel thread — efficient, but one blocking call blocks all threads and there is no true parallelism. One-to-one maps each user thread to its own kernel thread — allows parallelism and blocking calls don't block other threads, but thread creation overhead is higher (e.g. Windows, Linux). Many-to-many multiplexes many user threads onto a smaller or equal number of kernel threads, giving developers flexibility while letting the OS create enough kernel threads for parallelism."
+      }
+    ]
+  }
+]
