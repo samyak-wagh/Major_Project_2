@@ -143,18 +143,19 @@ class GroqOSTutorChain:
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
-    def ask(self, question: str) -> Dict[str, Any]:
+    def ask(self, question: str, use_rag: bool = True) -> Dict[str, Any]:
         """
-        Ask a question and get a grounded answer from the OS textbook.
+        Ask a question.
+        use_rag=True  → retrieve textbook chunks then generate (RAG mode)
+        use_rag=False → generate with NO context (baseline LLM-only mode)
         Returns dict with keys: answer, source_documents, question.
-        (Same interface as OSTutorChain.ask())
         """
         try:
-            source_docs = self._retrieve(question)
+            source_docs = self._retrieve(question) if use_rag else []
 
-            # Fast-path fallback: If no relevant textbook passages are found at all,
-            # don't even bother asking the model, immediately trigger fallback.
-            if not source_docs:
+            # Fast-path fallback: If RAG is on but no relevant passages found,
+            # signal out-of-context to trigger fallback.
+            if use_rag and not source_docs:
                 return {
                     "answer": "OUT_OF_CONTEXT",
                     "source_documents": [],
@@ -208,9 +209,7 @@ class GroqOSTutorChain:
 GROQ_MODELS = {
     "llama-3.3-70b-versatile": "Llama 3.3 70B (Best quality)",
     "llama-3.1-8b-instant":    "Llama 3.1 8B (Fastest)",
-    "qwen/qwen3.6-27b":        "Qwen 3.6 27B",
-    "openai/gpt-oss-120b":     "GPT-OSS 120B (OpenAI)",
-    "openai/gpt-oss-20b":      "GPT-OSS 20B (OpenAI)",
-    "groq/compound":           "Groq Compound",
-    "groq/compound-mini":      "Groq Compound Mini",
+    "llama3-70b-8192":         "Llama 3 70B",
+    "mixtral-8x7b-32768":      "Mixtral 8x7B",
+    "gemma2-9b-it":            "Gemma 2 9B",
 }

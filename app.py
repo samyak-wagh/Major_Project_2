@@ -322,7 +322,20 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Upload error: {e}")
 
-# ── Chat history ──────────────────────────────────────────────────────────────
+    st.markdown("---")
+    # ── Evaluation Dashboard link ──────────────────────────────────────────────
+    st.markdown("### 📊 Evaluation")
+    st.info("Run RAGAS evaluation to see how the model scores on faithfulness, relevancy, and context precision.")
+    st.code("streamlit run eval/ragas_dashboard.py", language="bash")
+    st.markdown(
+        "<span style='color:#8b949e;font-size:0.8rem;'>"
+        "Runs separately on a different port. "
+        "After running eval/run_eval.py, the dashboard reads the saved CSV automatically."
+        "</span>",
+        unsafe_allow_html=True,
+    )
+
+
 for message in st.session_state.messages:
     avatar = "🧑‍💻" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):

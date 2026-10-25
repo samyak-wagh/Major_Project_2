@@ -135,6 +135,7 @@ def ask_question(req: QuestionRequest):
     # ── Step 1: Choose which chain to call ───────────────────────────────────────
     # Manual override from UI (e.g. user explicitly picks Groq in sidebar)
     force_backend = req.backend.lower() if req.backend else ""
+    use_rag       = req.use_rag   # False → skip retrieval (LLM-only baseline)
 
     if force_backend == "groq":
         # Caller explicitly wants Groq — honour that
@@ -143,14 +144,14 @@ def ask_question(req: QuestionRequest):
             chain = build_qa_chain(state.cfg, state.qdrant_store, state.embeddings,
                                    backend="groq", groq_model=req.groq_model)
             state.groq_chain = chain
-        response       = chain.ask(req.question)
+        response       = chain.ask(req.question, use_rag=use_rag)
         active_backend = "groq"
 
     elif force_backend in ("qwen", ""):
         # Default path: Qwen2.5 (primary) → Groq (cloud secondary, crash-only)
         if state.qwen_ok and state.qwen_chain:
             try:
-                response       = state.qwen_chain.ask(req.question)
+                response       = state.qwen_chain.ask(req.question, use_rag=use_rag)
                 active_backend = "qwen"
             except Exception as qwen_err:
                 import logging as _log
@@ -158,7 +159,7 @@ def ask_question(req: QuestionRequest):
                     "Qwen chain error — falling back to Groq: %s", qwen_err)
                 state.qwen_ok = False
                 try:
-                    response       = state._get_groq_chain().ask(req.question)
+                    response       = state._get_groq_chain().ask(req.question, use_rag=use_rag)
                     active_backend = "groq (auto-fallback)"
                 except Exception as groq_err:
                     err_str = str(groq_err)
@@ -169,7 +170,7 @@ def ask_question(req: QuestionRequest):
                     active_backend = "error"
         else:
             try:
-                response       = state._get_groq_chain().ask(req.question)
+                response       = state._get_groq_chain().ask(req.question, use_rag=use_rag)
                 active_backend = "groq (local unavailable)"
             except Exception as groq_err:
                 err_str = str(groq_err)
@@ -180,9 +181,9 @@ def ask_question(req: QuestionRequest):
                 active_backend = "error"
 
     else:
-        # force_backend == "local" (legacy TinyLlama request)
-        response       = state._get_groq_chain().ask(req.question)
-        active_backend = "groq (legacy override ignored)"
+        # force_backend == "local"
+        response       = state.qwen_chain.ask(req.question, use_rag=use_rag) if (state.qwen_ok and state.qwen_chain) else state._get_groq_chain().ask(req.question, use_rag=use_rag)
+        active_backend = "local"
 
     # ── Step 2: Pick the right chain for source formatting ────────────────────
     if active_backend == "qwen":
