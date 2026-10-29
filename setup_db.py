@@ -9,11 +9,11 @@ def main():
     print("🗑️  Wiping existing collection (removing sample.pdf)...")
     qdrant_store.delete_collection()
 
-    print("📚 Ingesting the Galvin Textbook (ostxtbook.pdf)...")
+    print("📚 Ingesting the Galvin Textbook (galvin.pdf)...")
     print("⏳ This might take a few minutes. Please wait...")
     
     # Ingest the actual OS textbook
-    success = ingest_pdf("ostxtbook.pdf", cfg, qdrant_store, embeddings, processor)
+    success = ingest_pdf(cfg.get("default_pdf", "galvin.pdf"), cfg, qdrant_store, embeddings, processor)
     
     if success:
         print("✅ Database successfully built with the OS Textbook!")
