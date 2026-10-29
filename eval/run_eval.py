@@ -63,6 +63,12 @@ EVAL_LIMIT = 5         # first 5 questions through all 4 systems (None = all)
 # Smaller batches = more checkpoints = safer for long runs.
 BATCH_SIZE = 1         # 1 question per batch (checkpointed to CSV)
 
+# ── Leak filter ───────────────────────────────────────────────────────────────
+# True  = evaluate only gold questions with NO near-duplicate in the fine-tuning data
+#         (list built by data/decontam_check.py -> data/decontam/leaked_gold.json)
+# False = all 32 questions (some also appear in the training data - results are inflated)
+ONLY_CLEAN_QUESTIONS = True
+
 # ── Systems to run ────────────────────────────────────────────────────────────
 # Set to False to skip a system (useful for quick tests or if Qwen is slow)
 RUN_S1_GROQ_ONLY = True    # S1: Groq LLM, no RAG
@@ -362,7 +368,18 @@ def main():
     print("=" * 70)
 
     # ── Config summary ────────────────────────────────────────────────────────
-    active_q = DATASET[:EVAL_LIMIT] if EVAL_LIMIT else DATASET
+    pool = DATASET
+    if ONLY_CLEAN_QUESTIONS:
+        import json
+        leak_file = os.path.join("data", "decontam", "leaked_gold.json")
+        if not os.path.exists(leak_file):
+            print(f"\n  [ERROR] {leak_file} missing. Run: python data/decontam_check.py")
+            sys.exit(1)
+        leaked = set(json.load(open(leak_file, encoding="utf-8"))["leaked_questions"])
+        pool = [d for d in DATASET if d["question"] not in leaked]
+        print(f"\n  Leak filter ON: {len(pool)} clean of {len(DATASET)} gold questions "
+              f"({len(DATASET) - len(pool)} excluded - near-duplicates of training data)")
+    active_q = pool[:EVAL_LIMIT] if EVAL_LIMIT else pool
     total_q  = len(active_q)
 
     print(f"\n  Questions     : {total_q} of {len(DATASET)} (EVAL_LIMIT={EVAL_LIMIT})")

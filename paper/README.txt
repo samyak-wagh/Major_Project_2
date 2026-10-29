@@ -26,13 +26,14 @@ WHERE EVERY NUMBER COMES FROM  (data/ folder in this zip)
 - Latency / answer length: measured during the same run (eval_run.log); single run.
 - Table I / Section III-D: dataset_v2_train.jsonl (702), dataset_v2_val.jsonl (60).
 - Loss curve (Fig. 2)    : qwen-os-tutor-lora/checkpoint-150/trainer_state.json
-- Train/test overlap     : exact-match + token-overlap scan of the 32 gold questions
+- Train/test overlap     : exact match + embedding retrieval + LLM same-question check (data/decontam_check.py) of the 32 gold questions
                            in eval/run_eval.py against the 762 training/validation questions.
 
 KNOWN WEAKNESSES (stated in the paper, do not hide them)
 - Only 5 of 32 gold questions evaluated (all on deadlocks); no confidence intervals.
-- 3 gold questions appear verbatim in the training data; 2 evaluated questions have
-  paraphrases in training. Fix with a clean split before claiming anything.
+- 15 of 32 gold questions have a near-identical training question (3 exact + 12 LLM-confirmed);
+  3 of the 5 evaluated ones (deadlock definition, four conditions, safe state) are among them.
+  Clean subset = 17 questions (data/decontam/leaked_gold.json).
 - One LLM judge from the same family as the fine-tuned model; no human evaluation.
 - Training prompt differs from inference prompt; adapter trained on 4-bit base,
   run on fp32 base.

@@ -173,7 +173,7 @@ We use RAGAS~\cite{es2024ragas} v0.4.3: \emph{faithfulness} (are the answer's cl
 Each question is sent to all four systems with conversation memory cleared before and after every request, so answers depend only on the question (Section~\ref{sec:pitfalls} explains why). Raw answers are saved before judging. Three judge calls timed out and were re-scored individually from the saved answers with the same judge; no answers were regenerated.
 
 \subsection{Train/Test Overlap Disclosure}
-We compared the 32 gold questions with the 762 training and validation questions. Three gold questions appear verbatim in the training data (preemptive vs.\ non-preemptive scheduling, demand paging, thrashing), and several others have close paraphrases. None of these three is among the five evaluated here. However, two evaluated questions (the four necessary conditions for deadlock, and the definition of a safe state) have paraphrased counterparts in the training data. Any conclusions about the fine-tuned systems should be discounted accordingly; a clean split is required before a full evaluation.
+We compared the 32 gold questions with the 762 training and validation questions in two steps: normalised exact match, then retrieval of the five most similar training questions by BGE embedding similarity (cosine $\geq 0.82$), each confirmed or rejected by an LLM check of whether the two questions would have essentially the same answer. By this (deliberately conservative) check, 15 of the 32 gold questions have a near-identical training question: 3 verbatim copies (preemptive vs.\ non-preemptive scheduling, demand paging, thrashing) and 12 confirmed paraphrases. \emph{Three of the five questions evaluated here are among the 15} (deadlock definition, the four necessary conditions, and safe state); only the Banker's-algorithm and deadlock-recovery questions are clean. Because the fine-tuned systems saw near-duplicates of these three questions, their scores on them are not a fair measure of generalisation, and the pilot results should be read with that in mind. The LLM check can over-flag (for example, topic neighbours), so some of the 15 may be false positives. A clean 17-question subset was identified for subsequent evaluation.
 
 %==============================================================
 \section{Results}
@@ -291,7 +291,7 @@ The earlier three-question run is \emph{not} a controlled ablation of the decodi
 \subsection{Limitations}
 \begin{itemize}
   \item \textbf{Sample size.} Five questions from one chapter; no confidence intervals were computed and none of the differences is statistically established.
-  \item \textbf{Train/test overlap.} Some gold questions are in, or paraphrase, the training data (Section IV-E).
+  \item \textbf{Train/test overlap.} Three of the five evaluated questions have near-duplicates in the training data (Section IV-E); the pilot is therefore partly contaminated.
   \item \textbf{Single, same-family judge.} One LLM judge from the Qwen family, which may favour Qwen-based systems; no human evaluation or second judge.
   \item \textbf{Prompt mismatch.} The training system prompt (answer only from passages, or refuse) differs from the inference system prompt (short tutor answers), and the adapter was trained on a 4-bit base but run on a 32-bit base. Both may affect behaviour.
   \item \textbf{Hardware-dependent latency.} Latency was measured on one CPU-only machine; a GPU would change the local-model figures substantially.
