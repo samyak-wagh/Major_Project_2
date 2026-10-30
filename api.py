@@ -21,6 +21,18 @@ from main import load_config, init_components, build_qa_chain, ingest_pdf
 app = FastAPI(title="OS Tutor API", version="2.0.0")
 
 
+def _list_docs_reliably(store, tries=4):
+    """list_ingested_documents() returns [] on any network error (e.g. a DNS blip to
+    Qdrant Cloud), which is indistinguishable from an empty DB. Retry before believing it."""
+    import time
+    for i in range(tries):
+        docs = store.list_ingested_documents()
+        if docs:
+            return docs
+        time.sleep(3)
+    return []
+
+
 class RAGState:
     def __init__(self):
         print("\n🚀 Initializing OS Tutor backend...")
@@ -37,7 +49,8 @@ class RAGState:
         self.local_ok = False   # Kept for legacy compatibility
 
         # Auto-ingest Galvin textbook if knowledge base is empty
-        docs = self.qdrant_store.list_ingested_documents()
+        docs = _list_docs_reliably(self.qdrant_store)
+        self.kb_ready = bool(docs)
         if not docs:
             default_pdf = self.cfg.get("default_pdf", "ostxtbook.pdf")
             if Path(default_pdf).exists():
@@ -99,6 +112,7 @@ class QuestionRequest(BaseModel):
     use_rag:    bool = True         # kept for eval script compatibility
     backend:    str  = ""           # override: "groq" | "local" | "" (auto = local→groq)
     groq_model: str  = ""           # override Groq model name
+    stateless:  bool = False        # True → wipe chat memory before/after (used by eval)
 
 
 @app.get("/status")
@@ -128,12 +142,19 @@ async def get_status():
 def ask_question(req: QuestionRequest):
     state = get_rag_state()
 
-    if not state.qdrant_store.list_ingested_documents():
+    if not (state.kb_ready or _list_docs_reliably(state.qdrant_store)):
         raise HTTPException(status_code=400,
                             detail="Knowledge base empty. Upload a PDF first.")
 
     # ── Step 1: Choose which chain to call ───────────────────────────────────────
     # Manual override from UI (e.g. user explicitly picks Groq in sidebar)
+    if req.stateless:
+        # Chains keep the last N turns and inject them into every prompt; for evaluation
+        # each answer must depend only on its own question (no leakage between systems).
+        for _c in (state.qwen_chain, state.groq_chain):
+            if _c is not None:
+                _c.clear_memory()
+
     force_backend = req.backend.lower() if req.backend else ""
     use_rag       = req.use_rag   # False → skip retrieval (LLM-only baseline)
 
@@ -203,6 +224,11 @@ def ask_question(req: QuestionRequest):
         src_text = fmt_chain.format_source_references(response["source_documents"])
         sources  = [s.strip() for s in src_text.split("\n") if s.strip()]
         contexts = [doc.page_content for doc in response["source_documents"]]
+
+    if req.stateless:
+        for _c in (state.qwen_chain, state.groq_chain):
+            if _c is not None:
+                _c.clear_memory()
 
     return {"answer": answer, "sources": sources, "contexts": contexts}
 

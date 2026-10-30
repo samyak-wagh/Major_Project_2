@@ -8,7 +8,7 @@ Compares four configurations side-by-side using RAGAS metrics:
   S3 — RAG + Groq      : Groq LLM WITH Qdrant textbook context
   S4 — RAG + Qwen      : Qwen2.5-1.5B + LoRA WITH Qdrant context (primary)
 
-Judge: Gemini 2.5 Flash (via GEMINI_PAID_API_KEY in .env)
+Judge: Groq qwen/qwen3.8-27b (via GROQ_API_KEY in .env)
 Metrics: Faithfulness | Answer Relevancy | Context Precision
 
 USAGE:
@@ -43,7 +43,8 @@ from ragas.metrics._answer_relevance import AnswerRelevancy
 from ragas.metrics._context_precision import LLMContextPrecisionWithReference as ContextPrecision
 from ragas.run_config import RunConfig
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
+from ragas.llms import LangchainLLMWrapper
 from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
@@ -54,13 +55,19 @@ load_dotenv()
 
 # ── Question selection ────────────────────────────────────────────────────────
 # How many questions to run (set to None to run ALL 20 questions in DATASET)
-EVAL_LIMIT = 1         # 1 question only — runs through all 4 systems in 1 batch
+EVAL_LIMIT = 5         # first 5 questions through all 4 systems (None = all)
 
 # ── Batch size ────────────────────────────────────────────────────────────────
-# Questions are processed in batches. Each batch is scored by Gemini after
+# Questions are processed in batches. Each batch is scored by the judge after
 # collection, and results are checkpointed to CSV immediately.
 # Smaller batches = more checkpoints = safer for long runs.
-BATCH_SIZE = 1         # 1 question per batch
+BATCH_SIZE = 1         # 1 question per batch (checkpointed to CSV)
+
+# ── Leak filter ───────────────────────────────────────────────────────────────
+# True  = evaluate only gold questions with NO near-duplicate in the fine-tuning data
+#         (list built by data/decontam_check.py -> data/decontam/leaked_gold.json)
+# False = all 32 questions (some also appear in the training data - results are inflated)
+ONLY_CLEAN_QUESTIONS = True
 
 # ── Systems to run ────────────────────────────────────────────────────────────
 # Set to False to skip a system (useful for quick tests or if Qwen is slow)
@@ -76,6 +83,10 @@ INTER_CALL_DELAY = 0.5
 # ── API endpoint ──────────────────────────────────────────────────────────────
 API_URL  = "http://127.0.0.1:8001"
 
+# ── Judge (RAGAS scorer) ──────────────────────────────────────────────────────
+# Different model family than the Groq generator (GROQ_MODEL) to limit self-grading bias
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen/qwen3.8-27b")
+
 # =============================================================================
 # INTERNAL SETUP  (no need to edit below this line)
 # =============================================================================
@@ -85,6 +96,7 @@ TIMESTAMP   = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 CSV_PATH    = os.path.join(EVAL_DIR, f"results_{TIMESTAMP}.csv")
 REPORT_PATH = os.path.join(EVAL_DIR, "evaluation_report.md")
 LATEST_CSV  = os.path.join(EVAL_DIR, "results_latest.csv")
+ANSWERS_CSV = os.path.join(EVAL_DIR, f"answers_{TIMESTAMP}.csv")   # raw answers, saved BEFORE judging
 
 # Build active systems list from toggle flags
 _ALL_SYSTEMS = [
@@ -287,7 +299,7 @@ def get_rag_response(question: str, backend: str = "local", use_rag: bool = True
                 False = LLM-only baseline (no context)
     """
     try:
-        payload = {"question": question, "backend": backend, "use_rag": use_rag}
+        payload = {"question": question, "backend": backend, "use_rag": use_rag, "stateless": True}
         res = requests.post(f"{API_URL}/ask", json=payload, timeout=600)
         res.raise_for_status()
         data = res.json()
@@ -322,7 +334,7 @@ def check_backend() -> bool:
     print(f"\n[CHECK] Pinging API backend at {API_URL} ...")
     for attempt in range(1, 6):
         try:
-            r    = requests.get(f"{API_URL}/status", timeout=30)
+            r    = requests.get(f"{API_URL}/status", timeout=240)  # /status hits Qdrant Cloud; can take ~100 s on a slow link
             data = r.json()
             if not data.get("chain_ready"):
                 print("  [WARN] Backend up but chain NOT ready. Upload the PDF first.")
@@ -356,7 +368,18 @@ def main():
     print("=" * 70)
 
     # ── Config summary ────────────────────────────────────────────────────────
-    active_q = DATASET[:EVAL_LIMIT] if EVAL_LIMIT else DATASET
+    pool = DATASET
+    if ONLY_CLEAN_QUESTIONS:
+        import json
+        leak_file = os.path.join("data", "decontam", "leaked_gold.json")
+        if not os.path.exists(leak_file):
+            print(f"\n  [ERROR] {leak_file} missing. Run: python data/decontam_check.py")
+            sys.exit(1)
+        leaked = set(json.load(open(leak_file, encoding="utf-8"))["leaked_questions"])
+        pool = [d for d in DATASET if d["question"] not in leaked]
+        print(f"\n  Leak filter ON: {len(pool)} clean of {len(DATASET)} gold questions "
+              f"({len(DATASET) - len(pool)} excluded - near-duplicates of training data)")
+    active_q = pool[:EVAL_LIMIT] if EVAL_LIMIT else pool
     total_q  = len(active_q)
 
     print(f"\n  Questions     : {total_q} of {len(DATASET)} (EVAL_LIMIT={EVAL_LIMIT})")
@@ -374,19 +397,24 @@ def main():
         print("\n  [ERROR] No systems enabled. Set at least one RUN_Sx flag to True.")
         sys.exit(1)
 
-    # ── Gemini judge LLM ──────────────────────────────────────────────────────
-    paid_key = os.environ.get("GEMINI_PAID_API_KEY", "")
-    if not paid_key:
-        print("\n  [ERROR] GEMINI_PAID_API_KEY not set in .env")
-        print("     Add:  GEMINI_PAID_API_KEY=your-key  to .env and retry.")
+    # ── Groq judge LLM ────────────────────────────────────────────────────────
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if not groq_key:
+        print("\n  [ERROR] GROQ_API_KEY not set in .env")
         sys.exit(1)
 
-    print("\n  Loading Gemini 2.5 Flash (judge LLM) ...")
-    eval_llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=paid_key,
-        temperature=0,
-        max_retries=10,
+    print(f"\n  Loading Groq judge LLM ({JUDGE_MODEL}) ...")
+    # max_tokens: gpt-oss spends tokens on reasoning, so a low cap truncates the judge.
+    # bypass_n: Groq rejects n>1, so RAGAS must issue n separate calls instead.
+    eval_llm = LangchainLLMWrapper(
+        ChatGroq(
+            model=JUDGE_MODEL,
+            api_key=groq_key,
+            temperature=0,
+            max_retries=10,
+            max_tokens=4096,   # Groq TPM cap is 8000 for this model
+        ),
+        bypass_n=True,
     )
     print("  Loading BAAI/bge-small-en-v1.5 embeddings ...")
     eval_embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
@@ -396,7 +424,7 @@ def main():
         AnswerRelevancy(),
         ContextPrecision(),
     ]
-    safe_config = RunConfig(max_retries=10, max_workers=2, timeout=300)
+    safe_config = RunConfig(max_retries=10, max_workers=1, timeout=300)
 
     # ── Backend health ────────────────────────────────────────────────────────
     if not check_backend():
@@ -444,8 +472,11 @@ def main():
                 })
                 time.sleep(INTER_CALL_DELAY)
 
-        # ── Score this batch with Gemini ──────────────────────────────────────
-        print(f"\n  [SCORING] Batch {batch_num} — Gemini judging {len(SYSTEMS)} systems ...")
+        raw_rows = [dict(system=t, **smp) for t, smps in system_samples.items() for smp in smps]
+        pd.DataFrame(raw_rows).to_csv(ANSWERS_CSV, mode="a", header=not os.path.exists(ANSWERS_CSV), index=False)
+
+        # ── Score this batch with the judge ──────────────────────────────────────
+        print(f"\n  [SCORING] Batch {batch_num} — judge scoring {len(SYSTEMS)} systems ...")
         batch_dfs = []
 
         for sys_cfg in SYSTEMS:
@@ -455,9 +486,12 @@ def main():
                 continue
             print(f"    Scoring {tag} ...", end="", flush=True)
             try:
+                # No-RAG systems have no retrieved context, so Faithfulness / Context Precision
+                # are undefined for them -> score Answer Relevancy only (leaves NaN, not a fake 0).
+                sys_metrics = metrics if sys_cfg["use_rag"] else [m for m in metrics if isinstance(m, AnswerRelevancy)]
                 result = evaluate(
                     dataset=make_eval_dataset(samples),
-                    metrics=metrics,
+                    metrics=sys_metrics,
                     llm=eval_llm,
                     embeddings=eval_embeddings,
                     run_config=safe_config,
@@ -535,7 +569,7 @@ def main():
 
 **Run timestamp**: {TIMESTAMP}
 **Questions evaluated**: {total_q} of {len(DATASET)} (EVAL_LIMIT={EVAL_LIMIT}, BATCH_SIZE={BATCH_SIZE})
-**Evaluation library**: ragas  |  **Judge LLM**: Gemini 2.5 Flash
+**Evaluation library**: ragas  |  **Judge LLM**: {JUDGE_MODEL}
 
 ## System Definitions
 

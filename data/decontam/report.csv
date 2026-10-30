@@ -1,0 +1,42 @@
+gold_idx,chapter,gold_question,status,max_cosine,closest_train_question,closest_split,n_train_rows_to_remove
+1,Deadlocks,What is a deadlock in an operating system?,LEAK,0.893,What are the four general strategies for handling deadlocks in an OS?,train,1
+2,Deadlocks,What are the four necessary conditions for a deadlock to occur?,LEAK,0.871,List and briefly explain the four necessary conditions for deadlock (Coffman conditions).,train,2
+3,Deadlocks,What is the main idea behind the Banker's algorithm?,clean,0.82,How does the Banker's algorithm specifically implement the 'deadlock avoidance' strategy described among the four general strategies for handling deadlocks?,train,0
+4,Deadlocks,What defines a safe state in deadlock avoidance?,LEAK,0.989,"What is a ""safe state"" in the context of deadlock avoidance?",train,1
+5,Deadlocks,What are the common methods for recovering from a deadlock?,clean,0.865,What are the two main approaches to deadlock recovery once a deadlock is detected?,train,0
+6,CPU Scheduling,What is Round Robin CPU scheduling?,clean,0.902,How does Round Robin scheduling work?,train,0
+7,CPU Scheduling,What is Shortest Job First (SJF) scheduling?,LEAK,0.937,"How does SJF (Shortest Job First) scheduling work, and why is it considered optimal?",train,2
+8,CPU Scheduling,What is the difference between preemptive and non-preemptive scheduling?,EXACT,1.0,What is the difference between preemptive and non-preemptive scheduling?,train,2
+9,CPU Scheduling,What is the CPU-I/O burst cycle?,clean,0.789,What is the difference between polling and interrupt-driven I/O?,train,0
+10,CPU Scheduling,What is the multilevel queue scheduling algorithm?,LEAK,0.965,What is multilevel queue scheduling?,train,2
+11,Memory Management,What is demand paging?,EXACT,1.0,What is demand paging?,val,1
+12,Memory Management,What is thrashing?,EXACT,1.0,What is Thrashing?,train,4
+13,Memory Management,What is the working-set model?,LEAK,0.894,"What is the working set model, and how does it help prevent thrashing?",train,2
+14,Memory Management,What is page replacement?,clean,0.842,What is the difference between local and global page replacement?,val,0
+15,Memory Management,How does LRU page replacement work?,clean,0.826,What is the difference between local and global page replacement?,val,0
+16,Memory Management,What is paging?,LEAK,0.877,"What is paging, and how does it eliminate external fragmentation?",train,1
+17,Memory Management,What is a TLB?,LEAK,0.836,What is TLB shootdown?,train,1
+18,Memory Management,What is the difference between logical and physical address?,LEAK,0.951,What is the difference between logical (virtual) address and physical address?,train,2
+19,Memory Management,What is internal vs external fragmentation?,LEAK,0.975,What is the difference between internal fragmentation and external fragmentation?,train,2
+20,Memory Management,How does FIFO page replacement work?,clean,0.784,What is the difference between local and global page replacement?,val,0
+21,Memory Management,How does OPT page replacement work?,clean,0.82,What is the difference between local and global page replacement?,val,0
+22,Disk Scheduling,What is disk scheduling?,clean,0.848,Why do disk-scheduling algorithms mainly try to minimize total seek time (head movement)?,train,0
+23,Disk Scheduling,How does SCAN disk scheduling work?,LEAK,0.916,Explain how the SCAN (elevator) disk scheduling algorithm works.,val,1
+24,Disk Scheduling,What is SSTF disk scheduling?,LEAK,0.922,"How is SSTF disk scheduling analogous to SJF CPU scheduling, and how are their respective drawbacks similar?",val,3
+25,Disk Scheduling,How does C-LOOK differ from SCAN?,clean,0.962,What is the difference between SCAN and LOOK (and C-SCAN vs C-LOOK)?,train,0
+26,Disk Scheduling,How does NVM differ from HDD for scheduling?,clean,0.781,How does NUMA affect scheduling and memory-allocation decisions in a NUMA-aware OS?,train,0
+27,Memory Management Numerical,"Frames=3, FIFO, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",clean,0.851,"A system uses 3 page frames and the FIFO page replacement algorithm. Given the page reference string:
+2, 5, 5, 5, 5, 1, 5, 0, 5, 5, 0, 2, 3, 0
+
+Determine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits.",train,0
+28,Memory Management Numerical,"Frames=3, LRU, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",clean,0.855,"A system uses 3 page frames and the LRU page replacement algorithm. Given the page reference string:
+3, 1, 5, 5, 0, 4, 2, 0, 4, 4, 4, 4, 4, 0
+
+Determine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits.",train,0
+29,Memory Management Numerical,"Frames=3, OPT, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",clean,0.838,"A system uses 3 page frames and the Optimal page replacement algorithm. Given the page reference string:
+3, 5, 4, 2, 1, 4, 5, 4, 1, 1, 3, 4, 0
+
+Determine, for each reference, whether it is a page hit or a page fault, show the resulting frame contents, and compute the total number of page faults and page hits.",train,0
+30,Memory Management Numerical,"Logical address=32 bits, page size=4 KB. How many page table entries?",clean,0.844,"A process has a page table where page 5 maps to frame 12, and the system uses a page size of 4096 bytes. What is the physical address corresponding to logical address 20500, and what are the intermediate page number and offset?",train,0
+31,Memory Management Numerical,"TLB hit ratio=90%, TLB=20ns, memory=100ns. Find effective access time.",clean,0.706,Explain the term TLB shootdown in the context of operating systems.,train,0
+32,Memory Management Numerical,"8-bit logical address, page size=16 bytes. Bits for page number and offset?",clean,0.861,"A process has a page table where page 5 maps to frame 12, and the system uses a page size of 4096 bytes. What is the physical address corresponding to logical address 20500, and what are the intermediate page number and offset?",train,0

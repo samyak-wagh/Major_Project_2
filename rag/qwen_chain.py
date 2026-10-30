@@ -149,8 +149,10 @@ class QwenOSTutorChain:
             temperature=temperature if temperature > 0 else None,
             do_sample=temperature > 0,
             top_p=0.85,
-            repetition_penalty=1.4,
-            no_repeat_ngram_size=5,
+            # Mild penalty only: HF applies repetition_penalty / no_repeat_ngram_size to the
+            # PROMPT too, so strong values forbid quoting the retrieved textbook passages
+            # (word-salad answers, near-zero faithfulness in RAG mode).
+            repetition_penalty=1.1,
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=tokenizer.eos_token_id,
             return_full_text=False,
