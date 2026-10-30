@@ -113,6 +113,7 @@ class QuestionRequest(BaseModel):
     backend:    str  = ""           # override: "groq" | "local" | "" (auto = local→groq)
     groq_model: str  = ""           # override Groq model name
     stateless:  bool = False        # True → wipe chat memory before/after (used by eval)
+    qwen_opts:  dict = {}           # per-request Qwen generation options (prompt/greedy/rep_penalty)
 
 
 @app.get("/status")
@@ -172,7 +173,7 @@ def ask_question(req: QuestionRequest):
         # Default path: Qwen2.5 (primary) → Groq (cloud secondary, crash-only)
         if state.qwen_ok and state.qwen_chain:
             try:
-                response       = state.qwen_chain.ask(req.question, use_rag=use_rag)
+                response       = state.qwen_chain.ask(req.question, use_rag=use_rag, opts=req.qwen_opts)
                 active_backend = "qwen"
             except Exception as qwen_err:
                 import logging as _log
@@ -203,11 +204,13 @@ def ask_question(req: QuestionRequest):
 
     else:
         # force_backend == "local"
-        response       = state.qwen_chain.ask(req.question, use_rag=use_rag) if (state.qwen_ok and state.qwen_chain) else state._get_groq_chain().ask(req.question, use_rag=use_rag)
+        response       = state.qwen_chain.ask(req.question, use_rag=use_rag, opts=req.qwen_opts) if (state.qwen_ok and state.qwen_chain) else state._get_groq_chain().ask(req.question, use_rag=use_rag)
         active_backend = "local"
 
     # ── Step 2: Pick the right chain for source formatting ────────────────────
-    if active_backend == "qwen":
+    # backend="local" is served by the Qwen chain too; formatting through groq_chain left
+    # contexts empty whenever Groq had not been initialised earlier in the session.
+    if active_backend in ("qwen", "local") and state.qwen_ok and state.qwen_chain:
         fmt_chain = state.qwen_chain
     else:
         fmt_chain = state.groq_chain

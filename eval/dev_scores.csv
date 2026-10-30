@@ -1,0 +1,25 @@
+variant,question,faithfulness,answer_relevancy,chars
+base,What is Earliest Deadline First (EDF)?,1.0,0.7550507194647912,633
+trainp,What is Earliest Deadline First (EDF)?,0.6,0.7827639575177594,573
+greedy,What is Earliest Deadline First (EDF)?,0.375,0.8134714308329762,578
+trainp+gr,What is Earliest Deadline First (EDF)?,0.8888888888888888,0.7825873913765818,678
+base,Does choosing a microkernel architecture over a monolithic kernel always make every individual operation slower?,0.23076923076923078,0.9011770201935024,1258
+trainp,Does choosing a microkernel architecture over a monolithic kernel always make every individual operation slower?,0.0,0.9322242477696516,840
+greedy,Does choosing a microkernel architecture over a monolithic kernel always make every individual operation slower?,0.07692307692307693,0.8613127167749756,911
+trainp+gr,Does choosing a microkernel architecture over a monolithic kernel always make every individual operation slower?,0.06666666666666667,0.9459434114590987,1079
+base,What is the difference between local and global page replacement?,0.5714285714285714,0.9938002386369257,517
+trainp,What is the difference between local and global page replacement?,0.375,0.9825992177501144,603
+greedy,What is the difference between local and global page replacement?,0.2857142857142857,0.9814007159109192,518
+trainp+gr,What is the difference between local and global page replacement?,0.25,0.9938002386369257,567
+base,Explain the term Race condition in the context of operating systems.,1.0,0.8505274794033068,414
+trainp,Explain the term Race condition in the context of operating systems.,0.4444444444444444,0.8505274794033068,747
+greedy,Explain the term Race condition in the context of operating systems.,0.5,0.8505274794033068,353
+trainp+gr,Explain the term Race condition in the context of operating systems.,0.5,0.8505274794033068,542
+base,Why does the long-term scheduler run far less frequently than the short-term (CPU) scheduler?,0.125,0.8537022316992928,453
+trainp,Why does the long-term scheduler run far less frequently than the short-term (CPU) scheduler?,0.0,0.9201215426971999,767
+greedy,Why does the long-term scheduler run far less frequently than the short-term (CPU) scheduler?,0.0,0.8635056325121915,454
+trainp+gr,Why does the long-term scheduler run far less frequently than the short-term (CPU) scheduler?,0.5,0.9546878771070902,443
+base,What is a microkernel and what is its main advantage?,0.5714285714285714,0.9999999999999994,591
+trainp,What is a microkernel and what is its main advantage?,0.5454545454545454,0.9874949464980324,1007
+greedy,What is a microkernel and what is its main advantage?,0.3076923076923077,0.9874949464980324,718
+trainp+gr,What is a microkernel and what is its main advantage?,1.0,0.9874949464980324,680

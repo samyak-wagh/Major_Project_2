@@ -55,7 +55,7 @@ load_dotenv()
 
 # ── Question selection ────────────────────────────────────────────────────────
 # How many questions to run (set to None to run ALL 20 questions in DATASET)
-EVAL_LIMIT = 5         # first 5 questions through all 4 systems (None = all)
+EVAL_LIMIT = None      # None = every question that passes the leak filter below
 
 # ── Batch size ────────────────────────────────────────────────────────────────
 # Questions are processed in batches. Each batch is scored by the judge after
@@ -85,7 +85,9 @@ API_URL  = "http://127.0.0.1:8001"
 
 # ── Judge (RAGAS scorer) ──────────────────────────────────────────────────────
 # Different model family than the Groq generator (GROQ_MODEL) to limit self-grading bias
-JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen/qwen3.8-27b")
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "openai/gpt-oss-120b")   # qwen3.8-27b has a 1000 output-token/min cap
+# GEN_ONLY=1 -> generate + save answers only; score later with eval/score_answers.py (resumable)
+GEN_ONLY = os.environ.get("GEN_ONLY") == "1"
 
 # =============================================================================
 # INTERNAL SETUP  (no need to edit below this line)
@@ -96,7 +98,9 @@ TIMESTAMP   = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 CSV_PATH    = os.path.join(EVAL_DIR, f"results_{TIMESTAMP}.csv")
 REPORT_PATH = os.path.join(EVAL_DIR, "evaluation_report.md")
 LATEST_CSV  = os.path.join(EVAL_DIR, "results_latest.csv")
-ANSWERS_CSV = os.path.join(EVAL_DIR, f"answers_{TIMESTAMP}.csv")   # raw answers, saved BEFORE judging
+# raw answers, saved BEFORE judging. Set ANSWERS_CSV=<existing file> to resume: questions already
+# answered by every system in that file are skipped and new answers are appended to it.
+ANSWERS_CSV = os.environ.get("ANSWERS_CSV") or os.path.join(EVAL_DIR, f"answers_{TIMESTAMP}.csv")
 
 # Build active systems list from toggle flags
 _ALL_SYSTEMS = [
@@ -413,6 +417,7 @@ def main():
             temperature=0,
             max_retries=10,
             max_tokens=4096,   # Groq TPM cap is 8000 for this model
+            **({"reasoning_effort": "low"} if "gpt-oss" in JUDGE_MODEL else {}),
         ),
         bypass_n=True,
     )
@@ -436,6 +441,13 @@ def main():
     # ── Batch loop ────────────────────────────────────────────────────────────
     for i in range(0, total_q, BATCH_SIZE):
         batch     = active_q[i : i + BATCH_SIZE]
+        if os.path.exists(ANSWERS_CSV):
+            _prev = pd.read_csv(ANSWERS_CSV)
+            _done = {q for q, g in _prev.groupby("user_input") if g["system"].nunique() >= len(SYSTEMS)}
+            batch = [b for b in batch if b["question"] not in _done]
+            if not batch:
+                print(f"  [SKIP] question {i + 1} already answered by all systems")
+                continue
         batch_num = i // BATCH_SIZE + 1
         batch_end = min(i + BATCH_SIZE, total_q)
 
@@ -474,6 +486,9 @@ def main():
 
         raw_rows = [dict(system=t, **smp) for t, smps in system_samples.items() for smp in smps]
         pd.DataFrame(raw_rows).to_csv(ANSWERS_CSV, mode="a", header=not os.path.exists(ANSWERS_CSV), index=False)
+        if GEN_ONLY:
+            print(f"  [SAVED] answers for batch {batch_num} -> {ANSWERS_CSV}  (GEN_ONLY: not scoring)")
+            continue
 
         # ── Score this batch with the judge ──────────────────────────────────────
         print(f"\n  [SCORING] Batch {batch_num} — judge scoring {len(SYSTEMS)} systems ...")
@@ -515,6 +530,10 @@ def main():
             print(f"  [SAVED] Batch {batch_num} -> {CSV_PATH}")
 
     # ── Final summary ─────────────────────────────────────────────────────────
+    if GEN_ONLY:
+        print(f"\n  GEN_ONLY done. Answers: {ANSWERS_CSV}")
+        print(f"  Score them with:  python eval/score_answers.py {ANSWERS_CSV}")
+        return
     if not os.path.exists(CSV_PATH):
         print("\n  [ERROR] No results were written — all batches failed.")
         sys.exit(1)

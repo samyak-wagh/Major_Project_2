@@ -38,6 +38,16 @@ _SYSTEM_INSTRUCTION = (
     "NEVER ask follow-up questions back to the student."
 )
 
+# The exact system prompt the adapter was fine-tuned with (see dataset_v2*.jsonl).
+# Selectable per request with opts={"prompt": "train"} so the train/inference
+# prompt mismatch can be tested without reloading the model.
+_TRAIN_SYSTEM_INSTRUCTION = (
+    "You are an Operating Systems tutor. Answer ONLY using the exact textbook passages "
+    "provided below. Do NOT add your own examples, do NOT invent information. "
+    "If the answer is not in the provided text, reply EXACTLY with the word "
+    "'OUT_OF_CONTEXT' and nothing else."
+)
+
 # Qwen2.5-1.5B has a 32K context window — we can afford more than TinyLlama
 _MAX_CHUNK_WORDS = 300
 _TOP_K_CHUNKS    = 4
@@ -173,7 +183,8 @@ class QwenOSTutorChain:
 
     # ── Prompt building ────────────────────────────────────────────────────────
 
-    def _build_messages(self, question: str, context_docs: List[Document]) -> list:
+    def _build_messages(self, question: str, context_docs: List[Document],
+                        prompt_mode: str = "concise") -> list:
         """Build Qwen ChatML messages list."""
         if context_docs:
             truncated = []
@@ -198,15 +209,26 @@ class QwenOSTutorChain:
 
         # Qwen ChatML format — the pipeline applies the chat template automatically
         return [
-            {"role": "system", "content": _SYSTEM_INSTRUCTION},
+            {"role": "system",
+             "content": _TRAIN_SYSTEM_INSTRUCTION if prompt_mode == "train" else _SYSTEM_INSTRUCTION},
             {"role": "user",   "content": user_content},
         ]
 
     # ── Generation ─────────────────────────────────────────────────────────────
 
-    def _generate(self, messages: list) -> str:
-        """Run inference and return the assistant reply."""
-        outputs = self.hf_pipeline(messages)
+    def _generate(self, messages: list, greedy: bool = False,
+                  rep_penalty: float = None) -> str:
+        """Run inference and return the assistant reply.
+
+        greedy=True      -> deterministic decoding (no sampling)
+        rep_penalty=<x>  -> override the pipeline's repetition penalty for this call
+        """
+        gen_kwargs = {}
+        if greedy:
+            gen_kwargs.update(do_sample=False, temperature=None, top_p=None)
+        if rep_penalty is not None:
+            gen_kwargs["repetition_penalty"] = rep_penalty
+        outputs = self.hf_pipeline(messages, **gen_kwargs)
         answer: str = outputs[0]["generated_text"].strip()
 
         # Strip any leaked special tokens
@@ -269,7 +291,7 @@ class QwenOSTutorChain:
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
-    def ask(self, question: str, use_rag: bool = True) -> Dict[str, Any]:
+    def ask(self, question: str, use_rag: bool = True, opts: dict = None) -> Dict[str, Any]:
         """
         Ask a question.
         use_rag=True  → retrieve textbook chunks then generate (normal RAG mode)
@@ -278,8 +300,10 @@ class QwenOSTutorChain:
         """
         try:
             source_docs = self._retrieve(question) if use_rag else []
-            messages = self._build_messages(question, source_docs)
-            answer   = self._generate(messages)
+            opts     = opts or {}
+            messages = self._build_messages(question, source_docs, opts.get("prompt", "concise"))
+            answer   = self._generate(messages, greedy=bool(opts.get("greedy")),
+                                      rep_penalty=opts.get("rep_penalty"))
 
             if answer and "OUT_OF_CONTEXT" not in answer:
                 self.history.append((question, answer))

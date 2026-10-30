@@ -1,0 +1,20 @@
+system,question,reason
+S3 - RAG + Groq,What are the common methods for recovering from a deadlock?,empty completion
+S3 - RAG + Groq,What is Round Robin CPU scheduling?,Groq 429 daily token limit
+S1 - Groq Only,What is the CPU-I/O burst cycle?,Groq 429 daily token limit
+S1 - Groq Only,What is page replacement?,Groq 429 daily token limit
+S3 - RAG + Groq,What is page replacement?,Groq 429 daily token limit
+S1 - Groq Only,How does LRU page replacement work?,Groq 429 daily token limit
+S3 - RAG + Groq,How does LRU page replacement work?,Groq 429 daily token limit
+S3 - RAG + Groq,How does FIFO page replacement work?,Groq 429 daily token limit
+S1 - Groq Only,How does OPT page replacement work?,Groq 429 daily token limit
+S3 - RAG + Groq,How does OPT page replacement work?,Groq 429 daily token limit
+S1 - Groq Only,What is disk scheduling?,Groq 429 daily token limit
+S3 - RAG + Groq,What is disk scheduling?,Groq 429 daily token limit
+S3 - RAG + Groq,How does C-LOOK differ from SCAN?,Groq 429 daily token limit
+S1 - Groq Only,How does NVM differ from HDD for scheduling?,Groq 429 daily token limit
+S3 - RAG + Groq,How does NVM differ from HDD for scheduling?,Groq 429 daily token limit
+S1 - Groq Only,"Frames=3, LRU, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",Groq 429 daily token limit
+S3 - RAG + Groq,"Frames=3, LRU, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",Groq 429 daily token limit
+S3 - RAG + Groq,"Frames=3, OPT, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",Groq 429 daily token limit
+S1 - Groq Only,"Logical address=32 bits, page size=4 KB. How many page table entries?",Groq 429 daily token limit
