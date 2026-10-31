@@ -217,7 +217,7 @@ class QwenOSTutorChain:
     # ── Generation ─────────────────────────────────────────────────────────────
 
     def _generate(self, messages: list, greedy: bool = False,
-                  rep_penalty: float = None) -> str:
+                  rep_penalty: float = None, adapter_off: bool = False) -> str:
         """Run inference and return the assistant reply.
 
         greedy=True      -> deterministic decoding (no sampling)
@@ -228,7 +228,12 @@ class QwenOSTutorChain:
             gen_kwargs.update(do_sample=False, temperature=None, top_p=None)
         if rep_penalty is not None:
             gen_kwargs["repetition_penalty"] = rep_penalty
-        outputs = self.hf_pipeline(messages, **gen_kwargs)
+        # adapter_off=True runs the BASE Qwen2.5-1.5B-Instruct (LoRA weights bypassed) so the
+        # effect of fine-tuning can be isolated; same prompt, same decoding, same machine.
+        import contextlib
+        ctx = self.hf_pipeline.model.disable_adapter() if adapter_off else contextlib.nullcontext()
+        with ctx:
+            outputs = self.hf_pipeline(messages, **gen_kwargs)
         answer: str = outputs[0]["generated_text"].strip()
 
         # Strip any leaked special tokens
@@ -303,7 +308,8 @@ class QwenOSTutorChain:
             opts     = opts or {}
             messages = self._build_messages(question, source_docs, opts.get("prompt", "concise"))
             answer   = self._generate(messages, greedy=bool(opts.get("greedy")),
-                                      rep_penalty=opts.get("rep_penalty"))
+                                      rep_penalty=opts.get("rep_penalty"),
+                                      adapter_off=(opts.get("adapter") == "off"))
 
             if answer and "OUT_OF_CONTEXT" not in answer:
                 self.history.append((question, answer))

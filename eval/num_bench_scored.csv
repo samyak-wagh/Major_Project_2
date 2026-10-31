@@ -1,0 +1,82 @@
+system,id,cat,strict,lenient,api_error
+S1 - Groq Only,1,page_replacement,False,False,False
+S2 - Qwen Only,1,page_replacement,False,False,False
+S5 - Base Qwen Only,1,page_replacement,False,False,False
+S1 - Groq Only,2,page_replacement,True,True,False
+S2 - Qwen Only,2,page_replacement,False,False,False
+S5 - Base Qwen Only,2,page_replacement,False,True,False
+S1 - Groq Only,3,page_replacement,False,False,False
+S2 - Qwen Only,3,page_replacement,False,True,False
+S5 - Base Qwen Only,3,page_replacement,False,True,False
+S1 - Groq Only,6,page_replacement,False,True,False
+S2 - Qwen Only,6,page_replacement,True,True,False
+S5 - Base Qwen Only,6,page_replacement,False,True,False
+S1 - Groq Only,7,page_replacement,True,True,False
+S2 - Qwen Only,7,page_replacement,False,True,False
+S5 - Base Qwen Only,7,page_replacement,False,False,False
+S1 - Groq Only,8,page_replacement,True,True,False
+S2 - Qwen Only,8,page_replacement,False,True,False
+S5 - Base Qwen Only,8,page_replacement,False,False,False
+S1 - Groq Only,11,page_replacement,True,True,False
+S2 - Qwen Only,11,page_replacement,False,True,False
+S5 - Base Qwen Only,11,page_replacement,False,False,False
+S1 - Groq Only,12,page_replacement,True,True,False
+S2 - Qwen Only,12,page_replacement,False,False,False
+S5 - Base Qwen Only,12,page_replacement,False,False,False
+S1 - Groq Only,13,page_replacement,True,True,False
+S2 - Qwen Only,13,page_replacement,False,False,False
+S5 - Base Qwen Only,13,page_replacement,False,False,False
+S1 - Groq Only,16,disk_scheduling,True,True,False
+S2 - Qwen Only,16,disk_scheduling,False,False,False
+S5 - Base Qwen Only,16,disk_scheduling,False,False,False
+S1 - Groq Only,17,disk_scheduling,True,True,False
+S2 - Qwen Only,17,disk_scheduling,False,False,False
+S5 - Base Qwen Only,17,disk_scheduling,False,False,False
+S1 - Groq Only,18,disk_scheduling,True,True,False
+S2 - Qwen Only,18,disk_scheduling,False,False,False
+S5 - Base Qwen Only,18,disk_scheduling,False,False,False
+S1 - Groq Only,21,disk_scheduling,True,True,False
+S2 - Qwen Only,21,disk_scheduling,False,False,False
+S5 - Base Qwen Only,21,disk_scheduling,False,False,False
+S1 - Groq Only,22,disk_scheduling,True,True,False
+S2 - Qwen Only,22,disk_scheduling,False,False,False
+S5 - Base Qwen Only,22,disk_scheduling,False,False,False
+S1 - Groq Only,23,disk_scheduling,True,True,False
+S2 - Qwen Only,23,disk_scheduling,False,True,False
+S5 - Base Qwen Only,23,disk_scheduling,False,False,False
+S1 - Groq Only,26,disk_scheduling,True,True,False
+S2 - Qwen Only,26,disk_scheduling,False,False,False
+S5 - Base Qwen Only,26,disk_scheduling,False,False,False
+S1 - Groq Only,27,disk_scheduling,True,True,False
+S2 - Qwen Only,27,disk_scheduling,False,False,False
+S5 - Base Qwen Only,27,disk_scheduling,False,False,False
+S1 - Groq Only,28,disk_scheduling,True,True,False
+S2 - Qwen Only,28,disk_scheduling,False,False,False
+S5 - Base Qwen Only,28,disk_scheduling,False,False,False
+S1 - Groq Only,31,cpu_scheduling,True,True,False
+S2 - Qwen Only,31,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,31,cpu_scheduling,False,False,False
+S1 - Groq Only,32,cpu_scheduling,True,True,False
+S2 - Qwen Only,32,cpu_scheduling,False,True,False
+S5 - Base Qwen Only,32,cpu_scheduling,False,True,False
+S1 - Groq Only,33,cpu_scheduling,True,True,False
+S2 - Qwen Only,33,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,33,cpu_scheduling,False,False,False
+S1 - Groq Only,36,cpu_scheduling,True,True,False
+S2 - Qwen Only,36,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,36,cpu_scheduling,False,False,False
+S1 - Groq Only,37,cpu_scheduling,True,True,False
+S2 - Qwen Only,37,cpu_scheduling,False,True,False
+S5 - Base Qwen Only,37,cpu_scheduling,False,False,False
+S1 - Groq Only,38,cpu_scheduling,True,True,False
+S2 - Qwen Only,38,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,38,cpu_scheduling,False,False,False
+S1 - Groq Only,41,cpu_scheduling,False,False,False
+S2 - Qwen Only,41,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,41,cpu_scheduling,False,False,False
+S1 - Groq Only,42,cpu_scheduling,True,True,False
+S2 - Qwen Only,42,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,42,cpu_scheduling,False,False,False
+S1 - Groq Only,43,cpu_scheduling,False,False,False
+S2 - Qwen Only,43,cpu_scheduling,False,False,False
+S5 - Base Qwen Only,43,cpu_scheduling,False,False,False

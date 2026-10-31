@@ -1,0 +1,1085 @@
+system,id,cat,algo,response
+S1 - Groq Only,1,page_replacement,FIFO,"**Answer: 8 page faults**
+
+**Explanation (FIFO with 3 frames)**  
+
+| Step | Reference | Frames after step | Fault? | Cumulative faults |
+|------|-----------|-------------------|--------|-------------------|
+| 1 | 1 | [1] | Yes | 1 |
+| 2 | 3 | [1, 3] | Yes | 2 |
+| 3 | 6 | [1, 3, 6] | Yes | 3 |
+| 4 | 7 | [7, 3, 6] (replace 1) | Yes | 4 |
+| 5 | 7 | [7, 3, 6] | No | 4 |
+| 6 | 3 | [7, 3, 6] | No | 4 |
+| 7 | 0 | [7, 6, 0] (replace 3) | Yes | 5 |
+| 8 | 1 | [7, 0, 1] (replace 6) | Yes | 6 |
+| 9 | 1 | [7, 0, 1] | No | 6 |
+|10 | 4 | [7, 1, 4] (replace 0) | Yes | 7 |
+|11 | 1 | [7, 1, 4] | No | 7 |
+|12 | 7 | [7, 1, 4] | No | 7 |
+|13 | 0 | [7, 4, 0] (replace 1) | Yes | 8 |
+|14 | 7 | [7, 4, 0] | No | 8 |
+
+Thus, the total number of page faults incurred by the FIFO algorithm on this reference string is **8**."
+S2 - Qwen Only,1,page_replacement,FIFO,"A page fault occurs whenever a reference refers to a page that isn't in memory. Tracking each reference and memory state:
+Ref | Page | Memory State
+1    | 1     | Frame 0 -> Fault
+3    | 3     | Frame 0 -> Fault
+6    | 6     | Frame 0 -> Fault
+7    | 7     | Frame 0 -> Fault
+7    | 7     | No fault (already in)
+3    | 3     | No fault (already in)
+0    | 0     | Frame 1 -> Fault
+1    | 1     | Frame 1 -> Fault
+1    | 1     | No fault (already in)
+4    | 4     | Frame 1 -> Fault
+1    | 1     | No fault (already in)
+7    | 7     | No fault (already in)
+0    | 0     | No fault (already in)
+7    | 7     | No fault (already in)
+
+Total references = 13
+Total pages referenced = 13
+Number of page faults = Total references - Total pages referenced = 13 - 13 = 0"
+S5 - Base Qwen Only,1,page_replacement,FIFO,"To determine the total number of page faults using the FIFO (First-In-First-Out) page replacement policy with 3 frames for the given reference string, we need to simulate the memory access and track which pages are replaced. Here's how it works:
+
+1. Initialize the three frames as follows:
+   Frame 1: [ ]
+   Frame 2: [ ]
+   Frame 3: [ ]
+
+2. Process each page reference one by one:
+   - Page 1: Accesses frame 1.
+     Frames: [1], [ ], []
+   - Page 2: Accesses frame 1.
+     Frames: [1], [1], []
+   - Page 3: Accesses frame 1.
+     Frames: [1], [], [1]
+   - Page 4: Accesses frame 1.
+     Frames: [1], [], [1]
+   - Page 5: Accesses frame 1.
+     Frames: [1], [], [1]
+   - Page 6: Accesses frame 1.
+     Frames: [1], [], [1]
+   - Page 7: Accesses frame 1.
+     Frames: [1], [], [1]
+   - Page 8: Accesses frame 1."
+S1 - Groq Only,2,page_replacement,FIFO,"Using FIFO with 4 frames, the page‑fault count for the reference string  
+
+**6 4 5 5 6 1 5 1 4 4 7 2 4** is **7** page faults."
+S2 - Qwen Only,2,page_replacement,FIFO,"A page fault occurs whenever a page is referenced and no free frame holds it. Tracking frames and references:
+
+Frames | Contents
+-----------------------------------
+0      | 6
+1      | 4
+2      | 5
+3      | 5
+4      | 6
+5      | 1
+6      | 5
+7      | 1
+8      | 4
+9      | 4
+10     | 7
+11     | 2
+12     | 4
+
+The reference string has 12 entries, and we started with 4 frames. We had to evict pages 0 (ref 0), 1 (ref 1), 3 (ref 2), and 5 (ref 3) because those were the first four pages that didn't already occupy a free frame. Total page faults = 4."
+S5 - Base Qwen Only,2,page_replacement,FIFO,"To determine the total number of page faults using the FIFO (First-In-First-Out) page replacement policy with 4 frames for the given reference string, we need to simulate the memory access process:
+
+1. Initially, all 4 frames are empty.
+2. Process accesses pages in order: 6, 4, 5, 5, 6, 1, 5, 1, 4, 4, 7, 2, 4.
+3. Frame allocation sequence would be as follows:
+   - Page 6 goes into frame 1.
+   - Page 4 goes into frame 2.
+   - Page 5 goes into frame 3.
+   - Page 5 stays in frame 3.
+   - Page 6 stays in frame 1.
+   - Page 1 goes into frame 4.
+   - Page 5 stays in frame 3.
+   - Page 1 stays in frame 4.
+   - Page 4 goes into frame 1.
+   - Page 4 stays in frame 1.
+   - Page 7 goes into frame 2.
+   - Page 2 goes into frame 3.
+   - Page 4 goes into frame 2.
+   - Page 4"
+S1 - Groq Only,3,page_replacement,FIFO,"Using FIFO with 3 frames, the page‑fault count is **6**."
+S2 - Qwen Only,3,page_replacement,FIFO,"A page fault occurs whenever a reference refers to a page that isn't in memory. Refs: 5, 7, 6, 1, 6, 7, 1, 6, 7, 6, 4, 6, 7, 0
+
+Pages referenced exactly once per ref: 5 -> fault (first reference) → no fault thereafter; 7 -> fault (second reference) → no fault thereafter; 6 -> fault (third reference) → no fault thereafter; 1 -> fault (fourth reference) → no fault thereafter; 6 -> fault (fifth reference) → no fault thereafter; 7 -> fault (sixth reference) → no fault thereafter; 1 -> fault (seventh reference) → no fault thereafter; 6 -> fault (eighth reference) → no fault thereafter; 7 -> fault (ninth reference) → no fault thereafter; 6 -> fault (tenth reference) → no fault thereafter; 4 -> fault (eleventh reference) → no fault thereafter; 6 -> fault (twelfth reference) → no fault thereafter; 7 -> fault (thirteenth reference) → no fault thereafter; 0 -> fault (fourteenth"
+S5 - Base Qwen Only,3,page_replacement,FIFO,"To determine the total number of page faults using the FIFO (First-In-First-Out) page replacement policy with 3 frames for the given reference string, we need to simulate the memory access process:
+
+1. Initially, all frames are empty.
+2. Process accesses pages in order: 5, 7, 6, 1, 6, 7, 1, 6, 7, 6, 4, 6, 7, 0.
+3. Frame contents after each access:
+   - After accessing 5: [5]
+   - After accessing 7: [5, 7]
+   - After accessing 6: [5, 7, 6]
+   - After accessing 1: [5, 7, 6, 1]
+   - After accessing 6: [5, 7, 6, 1, 6]
+   - After accessing 7: [5, 7, 6, 1, 6, 7]
+   - After accessing 1: [5, 7, 6, 1, 6, 7, 1]
+   - After accessing 6: [5, 7, 6,"
+S1 - Groq Only,4,page_replacement,FIFO,"Using FIFO with 3 frames, the page‑fault count for the reference string  
+
+**0 1 6 7 2 7 3 1 7 7 4 6 4** is **10** page faults."
+S1 - Groq Only,6,page_replacement,LRU,"Using LRU with 4 frames, the reference string
+
+```
+4 5 7 1 7 4 7 2 6 7 1 4
+```
+
+produces **8 page faults** in total. The faults occur on the first four references (4, 5, 7, 1), then on 2, 6, 1, and finally 4. All other references hit an existing page in the frames."
+S2 - Qwen Only,6,page_replacement,LRU,"First few references: Page 0 -> Frame 0 (fault) → Frame 3 (fault) → Frame 1 → Frame 2 → Frame 0
+Next few references: Page 1 -> Frame 0 (fault) → Frame 1 → Frame 2 → Frame 0
+Last reference: Page 6 -> Frame 0 (fault)
+
+Total page faults = 8"
+S5 - Base Qwen Only,6,page_replacement,LRU,"To determine the number of page faults using the LRU (Least Recently Used) page replacement policy with 4 frames for the given reference string, we need to simulate the memory access and frame eviction process:
+
+1. Initialize the frames as follows:
+   Frame 0: [ ]
+   Frame 1: [ ]
+   Frame 2: [ ]
+   Frame 3: [ ]
+
+2. Process each reference:
+   - Page 4: Accesses Frame 0.
+     Faults: 1
+   - Page 5: Accesses Frame 0.
+     Faults: 2
+   - Page 7: Accesses Frame 0.
+     Faults: 3
+   - Page 1: Accesses Frame 1.
+     Faults: 4
+   - Page 7: Accesses Frame 0.
+     Faults: 5
+   - Page 4: Accesses Frame 0.
+     Faults: 6
+   - Page 2: Accesses Frame 2.
+     Faults: 7
+   - Page 6: Accesses Frame 2.
+     Faults: 8
+   - Page 7: Accesses Frame 0.
+     Faults: 9
+   -"
+S1 - Groq Only,7,page_replacement,LRU,"Using LRU with 4 frames, the page‑fault count for the reference string  
+
+**1 3 6 2 7 0 1 0 7 1 3 3 1 0** is **8**.  
+
+(Each time a page not currently in one of the 4 frames is referenced, the least‑recently‑used page is evicted, resulting in a fault. The simulation above shows 8 such faults.)"
+S2 - Qwen Only,7,page_replacement,LRU,"Ref bits: 1 3 6 2 7 0 1 0 7 1 3 3 1 0
+First four pages don't need to be evicted since they match the frame contents exactly. After that:
+Page 5 (was 0) -> fault → page table now has 5
+Page 8 (was 7) -> fault → page table now has 8
+
+Final page table: 1 -> 1, 3 -> 3, 6 -> 6, 2 -> 2, 7 -> 8, 0 -> 5, 1 -> 1, 3 -> 3, 3 -> 3, 1 -> 1, 0 -> 5
+
+Total number of page faults = 9"
+S5 - Base Qwen Only,7,page_replacement,LRU,"To determine the number of page faults using the LRU (Least Recently Used) page replacement policy with 4 frames for the given reference string, we need to simulate the memory access and track which pages get replaced. Here's the process:
+
+1. Initialize the frame table as follows:
+   Frame 0: [1]
+   Frame 1: [3]
+   Frame 2: [6]
+   Frame 3: [2]
+
+2. Access order: 1 3 6 2 7 0 1 0 7 1 3 3 1 0
+
+3. Page accesses:
+   - First access: 1 -> Frame 0 (Page fault)
+   - Second access: 3 -> Frame 1 (No page fault)
+   - Third access: 6 -> Frame 2 (No page fault)
+   - Fourth access: 2 -> Frame 0 (No page fault)
+   - Fifth access: 7 -> Frame 3 (No page fault)
+   - Sixth access: 0 -> Frame 0 (No page fault)
+   - Seventh access: 1 -> Frame 0 (No page fault)
+   - Eighth access: 0 -> Frame 0 (No page fault)"
+S1 - Groq Only,8,page_replacement,LRU,"**Answer: 8 page faults**
+
+**Explanation (LRU with 4 frames)**  
+
+| Step | Reference | Frames after step (LRU order: oldest → newest) | Fault? |
+|------|-----------|-----------------------------------------------|--------|
+| 1 | 2 | [2] | Yes |
+| 2 | 0 | [2, 0] | Yes |
+| 3 | 5 | [2, 0, 5] | Yes |
+| 4 | 7 | [2, 0, 5, 7] | Yes |
+| 5 | 2 | [0, 5, 7, 2] | No |
+| 6 | 3 | [5, 7, 2, 3] | Yes (evict 0) |
+| 7 | 7 | [5, 2, 3, 7] | No |
+| 8 | 2 | [5, 3, 7, 2] | No |
+| 9 | 4 | [3, 7, 2, 4] | Yes (evict 5) |
+|10 | 1 | [7, 2, 4, 1] | Yes (evict 3) |
+|11 | 6 | [2, 4, 1, 6] | Yes (evict 7) |
+|12 | 2 | [4, 1, 6, 2] | No |
+|13 | 2 | [4, 1, 6, 2] | No |
+|14 | 4 | [1, 6, 2, 4] | No |
+
+Total page faults = **8**."
+S2 - Qwen Only,8,page_replacement,LRU,"Ref. strings are scanned in order until a page fault occurs (a page isn't in any frame). Faults when new pages are first needed: 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11. Total page faults = 11."
+S5 - Base Qwen Only,8,page_replacement,LRU,"To determine the number of page faults using the LRU (Least Recently Used) page replacement policy with 4 frames for the given reference string, we need to simulate the process:
+
+1. Initialize the frame table as follows:
+   Frame 0: [2]
+   Frame 1: [0]
+   Frame 2: [5]
+   Frame 3: [7]
+
+2. Process each page reference:
+   - Page 2: Replace Frame 0 (LRU), fault occurs.
+   - Page 0: No fault since it's already in Frame 1.
+   - Page 5: Replace Frame 1 (LRU), fault occurs.
+   - Page 7: Replace Frame 2 (LRU), fault occurs.
+   - Page 2: Replace Frame 3 (LRU), no fault.
+   - Page 3: Replace Frame 0 (LRU), fault occurs.
+   - Page 7: Replace Frame 2 (LRU), no fault.
+   - Page 2: Replace Frame 3 (LRU), no fault.
+   - Page 4: Replace Frame 0 (LRU), fault occurs.
+   - Page 1: No fault since it's already in Frame 1.
+   -"
+S1 - Groq Only,11,page_replacement,OPT,"**Answer: 6 page faults**
+
+**Explanation (Optimal – OPT algorithm)**  
+
+| Step | Reference | Frames before | Hit/Fault | Frames after | Faults so far |
+|------|-----------|---------------|-----------|--------------|---------------|
+| 1 | 0 | – – – | Fault | 0 – – | 1 |
+| 2 | 7 | 0 – – | Fault | 0 7 – | 2 |
+| 3 | 3 | 0 7 – | Fault | 0 7 3 | 3 |
+| 4 | 7 | 0 7 3 | Hit | 0 7 3 | 3 |
+| 5 | 0 | 0 7 3 | Hit | 0 7 3 | 3 |
+| 6 | 2 | 0 7 3 | Fault | 7 3 2 *(evict 0 – never used again)* | 4 |
+| 7 | 3 | 7 3 2 | Hit | 7 3 2 | 4 |
+| 8 | 2 | 7 3 2 | Hit | 7 3 2 | 4 |
+| 9 | 2 | 7 3 2 | Hit | 7 3 2 | 4 |
+|10 | 2 | 7 3 2 | Hit | 7 3 2 | 4 |
+|11 | 6 | 7 3 2 | Fault | 3 2 6 *(evict 7 – never used again)* | 5 |
+|12 | 4 | 3 2 6 | Fault | 2 6 4 *(evict any – none used again)* | 6 |
+
+- **Why evict the chosen page?**  
+  OPT replaces the page whose next use is farthest in the future (or never used again).  
+  - At step 6, page 0 is never referenced again, so it is the optimal choice to evict.  
+  - At step 11, pages 7, 3, and 2 are all never referenced again; any can be evicted, so we choose 7.  
+  - At step 12, all remaining pages are never referenced again; any can be evicted.
+
+Thus the total number of page faults incurred by the OPT algorithm on this reference string with 3 frames is **6**."
+S2 - Qwen Only,11,page_replacement,OPT,"OPT selects pages using the recent reference bit first (first free frame). Refs: 0, 7, 3, 7, 0, 2, 3, 2, 2, 2, 6, 4 -> Faults taken: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 Total page faults = 11"
+S5 - Base Qwen Only,11,page_replacement,OPT,"The OPT page replacement policy involves replacing the least recently used frame when a new page request arrives. Given the reference string 0 7 3 7 0 2 3 2 2 2 6 4:
+
+1. Initially, all frames are empty.
+2. When the first page (0) is requested, no fault occurs since there's an empty slot.
+3. Next, the second page (7) is requested; it replaces the first page (0).
+4. Then, the third page (3) is requested; it replaces the second page (7), causing one more fault.
+5. This process continues until all pages from the reference string have been served without any additional faults.
+
+Thus, the total number of page faults is **1**."
+S1 - Groq Only,12,page_replacement,OPT,"**Answer: 7 page faults**
+
+**Explanation (optimal‑replacement simulation)**  
+
+| Step | Reference | Frames before | Action | Frames after | Fault? |
+|------|-----------|---------------|--------|--------------|--------|
+| 1 | 1 | [] | Load 1 | [1] | Yes |
+| 2 | 6 | [1] | Load 6 | [1,6] | Yes |
+| 3 | 4 | [1,6] | Load 4 | [1,6,4] | Yes |
+| 4 | 2 | [1,6,4] | Load 2 | [1,6,4,2] | Yes |
+| 5 | 5 | [1,6,4,2] | Replace **1** (never used again) | [5,6,4,2] | Yes |
+| 6 | 2 | [5,6,4,2] | Hit | – | No |
+| 7 | 4 | [5,6,4,2] | Hit | – | No |
+| 8 | 7 | [5,6,4,2] | Replace **5** (next use at 14) | [7,6,4,2] | Yes |
+| 9 | 7 | [7,6,4,2] | Hit | – | No |
+|10 | 6 | [7,6,4,2] | Hit | – | No |
+|11 | 4 | [7,6,4,2] | Hit | – | No |
+|12 | 7 | [7,6,4,2] | Hit | – | No |
+|13 | 2 | [7,6,4,2] | Hit | – | No |
+|14 | 5 | [7,6,4,2] | Replace **6** (never used again) | [7,5,4,2] | Yes |
+|15 | 7 | [7,5,4,2] | Hit | – | No |
+
+- **Total faults** = 7 (steps 1, 2, 3, 4, 5, 8, 14).
+
+Thus, with 4 frames and the optimal replacement policy, the reference string causes **7 page faults**."
+S2 - Qwen Only,12,page_replacement,OPT,"Ref string: 1 6 4 2 5 2 4 7 7 6 4 7 2 5 7
+Frames: [1] -> fault=0 → [1, 6] -> fault=0 → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault → [1, 6] -> no fault
+
+Final frame contents: [1, 6, 4, 2]
+Total page faults = 9"
+S5 - Base Qwen Only,12,page_replacement,OPT,"To determine the number of page faults using the OPT page replacement policy with 4 frames for the given reference string, we need to simulate the process:
+
+1. Initialize the frame set as {0, 1, 2, 3}.
+2. Process each page request one by one.
+   - Page 1: Frame 0 is used; no fault.
+   - Page 2: Frame 1 is used; no fault.
+   - Page 3: Frame 2 is used; no fault.
+   - Page 4: Frame 3 is used; no fault.
+   - Page 5: Frame 0 is used again; no fault.
+   - Page 6: Frame 1 is used; no fault.
+   - Page 7: Frame 2 is used; no fault.
+   - Page 8: Frame 3 is used; no fault.
+   - Page 9: Frame 0 is used again; no fault.
+   - Page 10: Frame 1 is used; no fault.
+   - Page 11: Frame 2 is used; no fault.
+   - Page 12: Frame 3 is used; no fault.
+   - Page 13: Frame 0 is used"
+S1 - Groq Only,13,page_replacement,OPT,"**Page‑fault count with OPT (4 frames)**  
+
+| Reference | Page in frames before reference | Hit/Fault | Frames after | Fault count |
+|-----------|---------------------------------|-----------|--------------|-------------|
+| 4 | – | Fault | [4] | 1 |
+| 1 | [4] | Fault | [4, 1] | 2 |
+| 3 | [4, 1] | Fault | [4, 1, 3] | 3 |
+| 3 | [4, 1, 3] | Hit | – | 3 |
+| 0 | [4, 1, 3] | Fault | [4, 1, 3, 0] | 4 |
+| 1 | [4, 1, 3, 0] | Hit | – | 4 |
+| 7 | [4, 1, 3, 0] | Fault | replace **4** (never used again) → [7, 1, 3, 0] | 5 |
+| 5 | [7, 1, 3, 0] | Fault | replace **7** (never used again) → [5, 1, 3, 0] | 6 |
+| 6 | [5, 1, 3, 0] | Fault | replace **1** (never used again) → [5, 6, 3, 0] | 7 |
+| 2 | [5, 6, 3, 0] | Fault | replace **6** (never used again) → [5, 2, 3, 0] | 8 |
+| 0 | [5, 2, 3, 0] | Hit | – | 8 |
+| 5 | [5, 2, 3, 0] | Hit | – | 8 |
+
+**Total page faults:** **8**
+
+The optimal (OPT) algorithm always replaces the page whose next use is farthest in the future (or never used again). Following this rule for the given reference string with 4 frames results in 8 faults."
+S2 - Qwen Only,13,page_replacement,OPT,"Ref. strings are scanned in order until a page request matches one of the already-replaced frames; if none match, a new frame is chosen and replaced. Ties broken favoring older frames first.
+
+Tentative initial frames: None
+Request | Frame | Replacement | New/Old
+4       | 0      | X           | Younger
+1       | 0      | X           | Older
+3       | 0      | X           | Older
+3       | 0      | X           | Older
+0       | 0      | X           | Older
+1       | 0      | X           | Older
+7       | 0      | X           | Older
+5       | 0      | X           | Older
+6       | 0      | X           | Older
+2       | 0      | X           | Older
+0       | 0      | X           | Older
+
+All pages are eventually referenced at least once — this is OPT's guarantee for any reference string. Total references = 13. Since every reference hit an existing frame, there were no page faults."
+S5 - Base Qwen Only,13,page_replacement,OPT,"The OPT page replacement policy means that pages will be replaced when they are requested if no other page can fit into any of the available frames. Given the reference string and 4 frames:
+
+1. Frame 1 contains 4.
+2. Frame 2 contains 1.
+3. Frame 3 contains 3.
+4. Frame 4 contains 0.
+
+When the first request for frame 3 comes, it replaces frame 1 because there's nowhere else to put it. No page fault occurs here.
+
+Next, the second request for frame 3 again causes another page fault since frame 1 is still occupied.
+
+Then, the third request for frame 3 results in another page fault as well.
+
+After this, the fourth request for frame 3 does not cause a page fault because frame 1 is now free after the previous three requests.
+
+Finally, the fifth request for frame 3 leads to a page fault because frame 1 is already occupied by the previously used frame 3.
+
+Thus, there are 4 page faults in total."
+S1 - Groq Only,16,disk_scheduling,FCFS,"**Total head movement**
+
+The head starts at cylinder 126 and services the requests in the order they arrive:
+
+| Move | From → To | Distance |
+|------|-----------|----------|
+| 1 | 126 → 14 | 112 |
+| 2 | 14 → 24 | 10 |
+| 3 | 24 → 60 | 36 |
+| 4 | 60 → 5 | 55 |
+| 5 | 5 → 79 | 74 |
+| 6 | 79 → 31 | 48 |
+
+Adding the distances:
+
+112 + 10 + 36 + 55 + 74 + 48 = **335 cylinders**
+
+So the total head movement required to service all requests in arrival order is **335 cylinders**."
+S2 - Qwen Only,16,disk_scheduling,FCFS,"Cylinder | Request | Movement = Next-cylinder - current | Total movement so far
+126 -> 14 | 14 | 12 | 12
+126 -> 24 | 24 - 126 = 102 | 102 + 12 = 114
+126 -> 60 | 60 - 126 = 66 | 114 + 66 = 180
+126 -> 5 | 5 - 126 = 121 | 180 + 121 = 301
+126 -> 79 | 79 - 126 = 47 | 301 + 47 = 348
+126 -> 31 | 31 - 126 = 95 | 348 + 95 = 443
+
+Total head movement = 443 cylinders"
+S5 - Base Qwen Only,16,disk_scheduling,FCFS,"To calculate the total head movement for the given requests, we need to track each request's position relative to the current head location and sum up all movements:
+
+1. Request 14 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+2. Request 24 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+3. Request 60 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+4. Request 5 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+5. Request 79 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+6. Request 31 arrives at cylinder 126.
+   - Head moves from 126 to 126 (no movement).
+
+Now, let's consider the requests that require moving the head between cylinders:
+
+1. Request 14 arrives at cylinder 126.
+   - Head moves from"
+S1 - Groq Only,17,disk_scheduling,FCFS,"**Total head movement:** **351 cylinders**
+
+**How it’s calculated (FCFS – First‑Come, First‑Served)**  
+
+| Step | Current cylinder | Next request | Distance moved |
+|------|------------------|--------------|----------------|
+| 0 | 163 | 89 | |163 – 89| = **74** |
+| 1 | 89 | 80 | |89 – 80| = **9** |
+| 2 | 80 | 199 | |80 – 199| = **119** |
+| 3 | 199 | 116 | |199 – 116| = **83** |
+| 4 | 116 | 155 | |116 – 155| = **39** |
+| 5 | 155 | 160 | |155 – 160| = **5** |
+| 6 | 160 | 167 | |160 – 167| = **7** |
+| 7 | 167 | 182 | |167 – 182| = **15** |
+
+Adding all the distances:
+
+74 + 9 + 119 + 83 + 39 + 5 + 7 + 15 = **351** cylinders.
+
+Thus, when the requests are served strictly in the order they arrive, the disk head travels a total of **351 cylinders**."
+S2 - Qwen Only,17,disk_scheduling,FCFS,"Movement per request: |163->89|=74 + |89->80|=9 + |80->199|=119 + |199->116|=83 + |116->155|=39 + |155->160|=5 + |160->167|=7 + |167->182|=15
+Total head movement = 393 cylinders"
+S5 - Base Qwen Only,17,disk_scheduling,FCFS,"To calculate the total head movement for these pending requests, we need to track each request's position relative to the current head location of 163. The head will move forward if it needs to reach a higher cylinder number than its current position, and backward if it needs to reach a lower cylinder number. Here’s how:
+
+1. **Request 89**: Head moves from 163 to 89 (forward).
+2. **Request 80**: Head moves from 89 to 80 (backward).
+3. **Request 199**: Head moves from 80 to 199 (forward).
+4. **Request 116**: Head moves from 199 to 116 (backward).
+5. **Request 155**: Head moves from 116 to 155 (forward).
+6. **Request 160**: Head moves from 155 to 160 (no change).
+7. **Request 167**: Head moves from 160 to 167 (forward).
+8. **Request 182**: Head moves from 167 to 182 (forward).
+
+Summing up"
+S1 - Groq Only,18,disk_scheduling,FCFS,"**Total head movement = 479 cylinders**
+
+**How it’s calculated (FCFS – first‑come, first‑served)**  
+
+| Step | Current cylinder | Next request | Movement (|Δ|) | Cumulative movement |
+|------|------------------|--------------|-------------|---------------------|
+| 0 | 123 | – | – | 0 |
+| 1 | 123 | 155 | |155‑123| = **32** | 32 |
+| 2 | 155 | 55 | |55‑155| = **100** | 132 |
+| 3 | 55 | 152 | |152‑55| = **97** | 229 |
+| 4 | 152 | 118 | |118‑152| = **34** | 263 |
+| 5 | 118 | 109 | |109‑118| = **9** | 272 |
+| 6 | 109 | 173 | |173‑109| = **64** | 336 |
+| 7 | 173 | 30 | |30‑173| = **143** | **479** |
+
+Adding all the movements gives a total of **479 cylinders**."
+S2 - Qwen Only,18,disk_scheduling,FCFS,"Movement per request: |155-123|=32 + |55-155|=100 + |152-55|=97 + |118-152|=34 + |109-118|=9 + |173-109|=64 + |30-173|=143
+Total head movement = 404 cylinders"
+S5 - Base Qwen Only,18,disk_scheduling,FCFS,"To calculate the total head movement for these pending requests, we need to track where each request lands after being serviced:
+
+1. **Request 155**: Starts at cylinder 123.
+   - Head moves from 123 to 155 (32 cylinders).
+
+2. **Request 55**: Starts at cylinder 123.
+   - Head moves from 123 to 55 (68 cylinders).
+
+3. **Request 152**: Starts at cylinder 123.
+   - Head moves from 123 to 152 (29 cylinders).
+
+4. **Request 118**: Starts at cylinder 123.
+   - Head moves from 123 to 118 (9 cylinders).
+
+5. **Request 109**: Starts at cylinder 123.
+   - Head moves from 123 to 109 (14 cylinders).
+
+6. **Request 173**: Starts at cylinder 123.
+   - Head moves from 123 to 173 (50 cylinders).
+
+7. **Request 30**: Starts at cylinder 123.
+   - Head moves"
+S1 - Groq Only,21,disk_scheduling,SSTF,"**Total head movement (SSTF): 226 cylinders**
+
+**How it was calculated**
+
+1. **Start at cylinder 158**  
+   - Distances to pending requests:  
+     50 (108), 143 (15), 14 (144), 184 (26), 28 (130), 41 (117), 158 (0)  
+   - The closest request is **158** (distance 0).  
+   - Move to 158 → movement 0.
+
+2. **Head now at 158** (remaining requests: 50, 143, 14, 184, 28, 41)  
+   - Distances: 50 (108), 143 (15), 14 (144), 184 (26), 28 (130), 41 (117)  
+   - Next closest: **143** (15).  
+   - Move to 143 → movement 15.
+
+3. **Head at 143** (remaining: 50, 14, 184, 28, 41)  
+   - Distances: 50 (93), 14 (129), 184 (41), 28 (115), 41 (102)  
+   - Next closest: **184** (41).  
+   - Move to 184 → movement 41.
+
+4. **Head at 184** (remaining: 50, 14, 28, 41)  
+   - Distances: 50 (134), 14 (170), 28 (156), 41 (143)  
+   - Next closest: **50** (134).  
+   - Move to 50 → movement 134.
+
+5. **Head at 50** (remaining: 14, 28, 41)  
+   - Distances: 14 (36), 28 (22), 41 (9)  
+   - Next closest: **41** (9).  
+   - Move to 41 → movement 9.
+
+6. **Head at 41** (remaining: 14, 28)  
+   - Distances: 14 (27), 28 (13)  
+   - Next closest: **28** (13).  
+   - Move to 28 → movement 13.
+
+7. **Head at 28** (remaining: 14)  
+   - Distance: 14 (14)  
+   - Move to 14 → movement 14.
+
+**Sum of movements**  
+0 + 15 + 41 + 134 + 9 + 13 + 14 = **226 cylinders**."
+S2 - Qwen Only,21,disk_scheduling,SSTF,"Cylinder | Request | Movement = Next-cylinder - Current | New position
+158    | 158      | 0                  | 158
+143    | 158      | 15     | 173
+14      | 143      | 119        | 133
+184    | 14      | 119        | 133
+28      | 184      | 156        | 181
+41      | 28      | 19        | 19
+158    | 41      | 117        | 19
+
+Total head movement = 0 + 119 + 119 + 119 + 156 + 19 + 117 = 602 cylinders"
+S5 - Base Qwen Only,21,disk_scheduling,SSTF,"To calculate the total head movement using the shortest-seek-time-first algorithm, we need to determine the sequence of cylinder movements for each request:
+
+1. Request 50: Head moves from 158 to 50.
+   - Movement: 158 - 50 = 108
+
+2. Request 143: Head moves from 50 to 143.
+   - Movement: 143 - 50 = 93
+
+3. Request 14: Head moves from 143 to 14.
+   - Movement: 14 - 143 = -129 (negative because it's moving backwards)
+
+4. Request 184: Head moves from 14 to 184.
+   - Movement: 184 - 14 = 170
+
+5. Request 28: Head moves from 184 to 28.
+   - Movement: 28 - 184 = -156 (negative)
+
+6. Request 41: Head moves from 28 to 41.
+   - Movement: 41 - 28 = 13"
+S1 - Groq Only,22,disk_scheduling,SSTF,"**Total head movement (SSTF): 153 cylinders**
+
+**Step‑by‑step calculation**
+
+| Current position | Pending requests | Distances | Next request | Movement |
+|------------------|------------------|-----------|--------------|----------|
+| 50 | 32, 133, 90, 152, 165, 167 | 18, 83, 40, 102, 115, 117 | 32 | 18 |
+| 32 | 133, 90, 152, 165, 167 | 101, 58, 120, 133, 135 | 90 | 58 |
+| 90 | 133, 152, 165, 167 | 43, 62, 75, 77 | 133 | 43 |
+| 133 | 152, 165, 167 | 19, 32, 34 | 152 | 19 |
+| 152 | 165, 167 | 13, 15 | 165 | 13 |
+| 165 | 167 | 2 | 167 | 2 |
+
+Adding the movements:  
+18 + 58 + 43 + 19 + 13 + 2 = **153 cylinders**."
+S2 - Qwen Only,22,disk_scheduling,SSTF,"Cylinder movements per request: |50→32|=18, |32→133|=101, |133→90|=43, |90→152|=62, |152→165|=13, |165→167|=2
+
+Total head movement = 247 cylinders"
+S5 - Base Qwen Only,22,disk_scheduling,SSTF,"To calculate the total head movement using the shortest-seek-time-first algorithm, we need to determine the sequence of cylinder movements for each request:
+
+1. Request 32: Head moves from 50 to 32.
+   - Movement: 50 - 32 = 18
+
+2. Request 133: Head moves from 32 to 133.
+   - Movement: 133 - 32 = 101
+
+3. Request 90: Head moves from 133 to 90.
+   - Movement: 133 - 90 = 43
+
+4. Request 152: Head moves from 90 to 152.
+   - Movement: 152 - 90 = 62
+
+5. Request 165: Head moves from 152 to 165.
+   - Movement: 165 - 152 = 13
+
+6. Request 167: Head moves from 165 to 167.
+   - Movement: 167 - 165 = 2
+
+Summing these movements gives the"
+S1 - Groq Only,23,disk_scheduling,SSTF,"**Total head movement (SSTF)**: **121 cylinders**
+
+**Step‑by‑step calculation**
+
+| Current head | Remaining requests | Distance to each | Next request | Movement |
+|--------------|--------------------|------------------|--------------|----------|
+| 27 | 148, 32, 91, 106, 98, 96, 61 | 121, 5, 64, 79, 71, 69, 34 | 32 | 5 |
+| 32 | 148, 91, 106, 98, 96, 61 | 116, 59, 74, 66, 64, 29 | 61 | 29 |
+| 61 | 148, 91, 106, 98, 96 | 87, 30, 45, 37, 35 | 91 | 30 |
+| 91 | 148, 106, 98, 96 | 57, 15, 7, 5 | 96 | 5 |
+| 96 | 148, 106, 98 | 52, 10, 2 | 98 | 2 |
+| 98 | 148, 106 | 50, 8 | 106 | 8 |
+| 106 | 148 | 42 | 148 | 42 |
+
+Adding the movements:  
+5 + 29 + 30 + 5 + 2 + 8 + 42 = **121** cylinders."
+S2 - Qwen Only,23,disk_scheduling,SSTF,"Cylinder | Request | Movement = Next-Cylinder - Current-Cylinder
+27      | 148      | 121
+27      | 32      | 5
+27      | 91      | 64
+27      | 106      | 79
+27      | 98      | 11
+27      | 96      | 1
+27      | 61      | 24
+
+Total head movement = 244 cylinders"
+S5 - Base Qwen Only,23,disk_scheduling,SSTF,"To calculate the total head movement using the shortest-seek-time-first algorithm, we need to determine the sequence of cylinder movements for each pending request. The head starts at cylinder 27. Here's the step-by-step process:
+
+1. **Initial Position**: Head at cylinder 27.
+2. **First Request**: 148
+   - Move from 27 to 148 (121 cylinders)
+3. **Second Request**: 32
+   - Move from 148 to 32 (116 cylinders)
+4. **Third Request**: 91
+   - Move from 32 to 91 (59 cylinders)
+5. **Fourth Request**: 106
+   - Move from 91 to 106 (15 cylinders)
+6. **Fifth Request**: 98
+   - Move from 106 to 98 (18 cylinders)
+7. **Sixth Request**: 96
+   - Move from 98 to 96 (2 cylinders)
+8. **Seventh Request**: 61
+   - Move from 96 to 61 (35 cylinders)
+
+Now, sum up all"
+S1 - Groq Only,26,disk_scheduling,LOOK,"**LOOK algorithm (head starts at cylinder 87, moving toward lower numbers)**  
+
+| Step | Current head | Next request | Move (cylinders) |
+|------|--------------|--------------|------------------|
+| 0 | 87 | – | – |
+| 1 | 87 → 45 | 45 | 42 |
+| 2 | 45 → 35 | 35 | 10 |
+| 3 | 35 → 22 | 22 | 13 |
+| 4 | 22 → 9  | 9  | 13 |
+| 5 | 9  → 141 | 141 | 132 |
+| 6 | 141 → 151 | 151 | 10 |
+| 7 | 151 → 160 | 160 | 9 |
+
+**Total head movement**
+
+\[
+42 + 10 + 13 + 13 + 132 + 10 + 9 = \boxed{229\text{ cylinders}}
+\]
+
+*Explanation:*  
+- LOOK services all pending requests in the current direction until the last request in that direction is reached, then reverses.  
+- Starting at 87 and moving downward, the head first services 45, 35, 22, and 9 (the only requests below 87).  
+- It then reverses direction and services the remaining requests 141, 151, and 160.  
+- The sum of all movements gives the total head movement of 229 cylinders."
+S2 - Qwen Only,26,disk_scheduling,LOOK,"LOOK scans toward lower cylinder numbers first. Starting at 87, it moves to 35 -> movement=52, then to 160 -> movement=113, then to 151 -> movement=10, then to 22 -> movement=10, then to 45 -> movement=48, then to 141 -> movement=94, then to 9 -> movement=85. Total head movement = 357 cylinders."
+S5 - Base Qwen Only,26,disk_scheduling,LOOK,"To calculate the total head movement using LOOK, we need to track the position of the head as it processes each request. The initial head position is at cylinder 87. We'll move the head towards lower cylinder numbers for each request:
+
+1. Request 35: Head moves from 87 to 35.
+   - Movement = 87 - 35 = 52
+
+2. Request 160: Head moves from 35 to 160.
+   - Movement = 35 - 160 = -125
+
+3. Request 151: Head moves from 160 to 151.
+   - Movement = 160 - 151 = +9
+
+4. Request 22: Head moves from 151 to 22.
+   - Movement = 151 - 22 = +129
+
+5. Request 45: Head moves from 22 to 45.
+   - Movement = 22 - 45 = -23
+
+6. Request 141: Head moves from 45 to 141.
+   - Movement = 45"
+S1 - Groq Only,27,disk_scheduling,LOOK,"Using the LOOK algorithm (which moves only as far as the last request in each direction), the head services the requests in this order:
+
+1. **107 → 133**  26  
+2. **133 → 160**  27  
+3. **160 → 168**  8  
+4. **168 → 190**  22  
+5. **190 → 193**  3  
+6. **193 → 81**  112  
+7. **81 → 14**  67  
+8. **14 → 2**  12  
+
+Adding all movements:
+
+26 + 27 + 8 + 22 + 3 + 112 + 67 + 12 = **277 cylinders**.
+
+So the total head movement is **277**."
+S2 - Qwen Only,27,disk_scheduling,LOOK,"LOOK scans toward increasing cylinder numbers, so starting at 107 moves first to 133 -> 193 -> 190 -> 168 -> 160 -> 14 -> 81 -> 2 -> 107. Head movement per step: |133-107|=26 + |193-133|=60 + |190-193|=3 + |168-190|=22 + |160-168|=8 + |14-160|=146 + |81-14|=77 + |2-81|=79. Total head movement = 406 cylinders."
+S5 - Base Qwen Only,27,disk_scheduling,LOOK,"To calculate the total head movement using LOOK, we need to determine how many times the head moves from one cylinder to another as it processes each request. The head starts at cylinder 107 and moves towards higher cylinder numbers.
+
+Requests: 133, 193, 190, 81, 14, 168, 2, 160
+
+Processing these requests:
+
+1. Head starts at 107.
+   - Request 133: Moves to 133 (133 - 107 = 26)
+   - Request 193: Moves to 193 (193 - 107 = 86)
+   - Request 190: Moves to 190 (190 - 107 = 83)
+   - Request 81: Moves to 81 (81 - 107 = -26) (head returns to lower cylinder)
+   - Request 14: Moves to 14 (14 - 107 = -93) (head returns to lower cylinder)
+   - Request 168: Moves to"
+S1 - Groq Only,28,disk_scheduling,LOOK,**Total head movement:** 254 cylinders.
+S2 - Qwen Only,28,disk_scheduling,LOOK,"LOOK scans toward lower cylinder numbers first. Starting at 140, it moves to 130 (movement=10), then to 38 (movement=12), then to 56 (movement=18), then to 102 (movement=32), then to 130 again (no movement this pass since it's already there), and finally to 190 (movement=50). Total movement = 10 + 12 + 18 + 32 + 50 = 112 cylinders."
+S5 - Base Qwen Only,28,disk_scheduling,LOOK,"To calculate the total head movement using LOOK, we need to determine how many times the head moves from one cylinder to another as it processes each request. The initial position of the head is at cylinder 140. Here's the process:
+
+1. Request 56: Head moves from 140 to 56.
+2. Request 173: Head moves from 56 to 173.
+3. Request 130: Head moves from 173 to 130.
+4. Request 38: Head moves from 130 to 38.
+5. Request 190: Head moves from 38 to 190.
+6. Request 102: Head moves from 190 to 102.
+
+The head movements are: +56 - 140 = -84, +173 - 56 = +117, +130 - 173 = -43, +38 - 130 = -92, +190 - 38 = +152, +102 - 190 = -88."
+S1 - Groq Only,31,cpu_scheduling,FCFS,"**Average waiting time (FCFS)**  
+
+| Process | Arrival | Burst | Start | Finish | Waiting time |
+|---------|---------|-------|-------|--------|--------------|
+| P5 | 1 | 10 | 1 | 11 | 0 |
+| P1 | 2 | 8 | 11 | 19 | 9 |
+| P4 | 2 | 3 | 19 | 22 | 17 |
+| P2 | 4 | 2 | 22 | 24 | 18 |
+| P3 | 5 | 4 | 24 | 28 | 19 |
+
+Sum of waiting times = 0 + 9 + 17 + 18 + 19 = 63  
+Average waiting time = 63 / 5 = 12.6
+
+**Answer:** **12.60** (rounded to two decimal places)."
+S2 - Qwen Only,31,cpu_scheduling,FCFS,"P1 arrives at T=2; no process precedes it so it starts running immediately. It finishes at T=10. Waiting time = 10 - 2 = 8. P2 arrives at T=4; P1 is still running so it waits until P1 finishes. P1 finishes at T=10, so P2 waits for 6 more units of time. P2 finishes at T=10 + 6 = 16. Waiting time = 16 - 4 = 12. P3 arrives at T=5; P2 is still running so it waits until P2 finishes. P2 finishes at T=16, so P3 waits for 11 more units of time. P3 finishes at T=16 + 11 = 27. Waiting time = 27 - 5 = 22. P4 arrives at T=2; P3 is still running so it waits until P3 finishes. P3 finishes at T=27, so P4 waits for 25 more units of time. P4 finishes at T=27 + 25 = 52. Waiting time = 52 - 2 ="
+S5 - Base Qwen Only,31,cpu_scheduling,FCFS,"To calculate the average waiting time for processes under First-Come, First-Served (FCFS) scheduling with tie-breaking by process number:
+
+1. Sort processes by their arrival times.
+2. Calculate each process's waiting time as its position minus its arrival time.
+3. Sum these waiting times.
+4. Divide by the total number of processes.
+
+Arrival times: P1(2), P2(4), P3(5), P4(2), P5(1)
+Waiting times: P1(2-2=0), P2(2-4=-2), P3(3-5=-2), P4(4-2=2), P5(5-1=4)
+
+Sum of waiting times = 0 + (-2) + (-2) + 2 + 4 = 2
+
+Average waiting time = 2 / 5 = 0.40
+
+The average waiting time is 0.40."
+S1 - Groq Only,32,cpu_scheduling,FCFS,"**Average waiting time**
+
+| Process | Arrival | Burst | Start | Waiting time |
+|---------|---------|-------|-------|--------------|
+| P2 | 0 | 5 | 0 | 0 |
+| P3 | 3 | 6 | 5 | 5 – 3 = 2 |
+| P1 | 4 | 10 | 11 | 11 – 4 = 7 |
+
+Total waiting time = 0 + 2 + 7 = 9  
+Average waiting time = 9 / 3 = 3.00
+
+**Answer:** **3.00** (rounded to two decimal places)."
+S2 - Qwen Only,32,cpu_scheduling,FCFS,"P1 arrives at T=4; no process precedes it so it starts running. It finishes at T=14 with a burst of 10. Waiting time = 14 - 4 = 10. P2 arrives at T=0; P1 is running but hasn't finished yet, so P2 takes over. P2 finishes at T=5 with a burst of 5. Waiting time = 5 - 0 = 5. P3 arrives at T=3; neither P1 nor P2 are running, so P3 takes over. P3 finishes at T=9 with a burst of 6. Waiting time = 9 - 3 = 6. Total waiting time = 10 + 5 + 6 = 21. Average waiting time = 21 / 3 = 7.00."
+S5 - Base Qwen Only,32,cpu_scheduling,FCFS,"To calculate the average waiting time for processes under First-Come, First-Served (FCFS) scheduling with tie-breaking by process number:
+
+1. Sort processes by their arrival times.
+   - P1 arrives at t=4
+   - P2 arrives at t=0
+   - P3 arrives at t=3
+
+2. Calculate the waiting time for each process:
+   - P1's waiting time = 4 - 4 = 0
+   - P2's waiting time = 0 - 0 = 0
+   - P3's waiting time = 3 - 3 = 0
+
+3. Sum up all waiting times:
+   Total waiting time = 0 + 0 + 0 = 0
+
+4. Divide by the number of processes:
+   Average waiting time = Total waiting time / Number of processes = 0 / 3 = 0
+
+Therefore, the average waiting time is 0.00."
+S1 - Groq Only,33,cpu_scheduling,FCFS,"**Average waiting time**
+
+| Process | Arrival | Burst | Start | Finish | Waiting time |
+|---------|---------|-------|-------|--------|--------------|
+| P1 | 1 | 10 | 1 | 11 | 0 |
+| P4 | 2 | 3 | 11 | 14 | 9 |
+| P3 | 3 | 12 | 14 | 26 | 11 |
+| P5 | 4 | 2 | 26 | 28 | 22 |
+| P2 | 5 | 4 | 28 | 32 | 23 |
+
+Sum of waiting times = 0 + 9 + 11 + 22 + 23 = 65  
+Average waiting time = 65 / 5 = 13.00
+
+**Answer:** **13.00** (rounded to two decimal places)."
+S2 - Qwen Only,33,cpu_scheduling,FCFS,P1 arrives at T=1 and starts running; it finishes at T=11. Its waiting time = 11 - 1 = 10. P2 arrives at T=5 and finishes at T=9. Its waiting time = 9 - 5 = 4. P3 arrives at T=3 and finishes at T=15. Its waiting time = 15 - 3 = 12. P4 arrives at T=2 and finishes at T=5. Its waiting time = 5 - 2 = 3. P5 arrives at T=4 and finishes at T=6. Its waiting time = 6 - 4 = 2. Average waiting time = (10 + 4 + 12 + 3 + 2) / 5 = 7.80
+S5 - Base Qwen Only,33,cpu_scheduling,FCFS,"To calculate the average waiting time for processes under First-Come, First-Served (FCFS) scheduling with tie-breaking by process number:
+
+1. Sort processes by their arrival times.
+2. Calculate each process's waiting time as its position minus its arrival time.
+3. Sum these waiting times.
+4. Divide by the total number of processes.
+
+Arrival times: P1(1), P2(5), P3(3), P4(2), P5(4)
+Waiting times: P1(0), P2(4), P3(2), P4(2), P5(2)
+
+Sum of waiting times = 0 + 4 + 2 + 2 + 2 = 10
+
+Average waiting time = 10 / 5 = 2.00
+
+The average waiting time is 2.00."
+S1 - Groq Only,36,cpu_scheduling,SJF,"**Average waiting time = 5.00**
+
+**Step‑by‑step schedule**
+
+| Time | Event | Ready queue (burst) | Process chosen | Start | Finish | Waiting time |
+|------|-------|---------------------|----------------|-------|--------|--------------|
+| 1    | P1 & P4 arrive | P1(7), P4(2) | **P4** (shortest) | 1 | 3 | 0 |
+| 3    | P4 finished | P1(7), P2(10) | **P1** | 3 | 10 | 2 |
+| 10   | P1 finished | P2(10), P3(4) | **P3** | 10 | 14 | 6 |
+| 14   | P3 finished | P2(10) | **P2** | 14 | 24 | 12 |
+
+- **P4**: waiting time = 1 – 1 = **0**
+- **P1**: waiting time = 3 – 1 = **2**
+- **P3**: waiting time = 10 – 4 = **6**
+- **P2**: waiting time = 14 – 2 = **12**
+
+Sum of waiting times = 0 + 2 + 6 + 12 = **20**  
+Average waiting time = 20 / 4 = **5.00** (rounded to two decimal places)."
+S2 - Qwen Only,36,cpu_scheduling,SJF,"P1 arrives first, starts running immediately. It finishes at t=8, spending 1 unit of time waiting. Total wait = 1. Average wait = 1/1 = 1.00"
+S5 - Base Qwen Only,36,cpu_scheduling,SJF,"To calculate the average waiting time for processes under non-preemptive shortest-job-first scheduling with arrival ties broken by process number:
+
+1. Sort processes by their burst times.
+2. Assign each process its initial waiting time as zero since they arrive immediately.
+3. Calculate the waiting time for each subsequent process by summing up the total burst time of all previous processes and subtracting this from the current process's burst time.
+4. Sum these waiting times to get the total waiting time.
+5. Divide the total waiting time by the number of processes to find the average waiting time.
+
+For the given data:
+P1 (burst 7), P2 (burst 10), P3 (burst 4), P4 (burst 2)
+
+Sorted bursts: 2, 4, 7, 10
+
+Waiting times:
+P1: 0
+P2: 2 + 4 = 6
+P3: 2 + 4 + 7 = 13
+P4: 2 + 4 + 7 + 10 = 23
+
+Total waiting time: 0 + 6 + 13 + 23 = 42
+
+Average waiting time: 42 / 4 ="
+S1 - Groq Only,37,cpu_scheduling,SJF,"**Average waiting time**
+
+| Process | Arrival | Burst | Start | Finish | Waiting time |
+|---------|---------|-------|-------|--------|--------------|
+| P3 | 0 | 2 | 0 | 2 | 0 |
+| P2 | 2 | 10 | 2 | 12 | 0 |
+| P1 | 6 | 3 | 12 | 15 | 6 |
+
+- **P3** starts immediately at time 0 → waiting time = 0 – 0 = 0.  
+- **P2** arrives at time 2 and is the only ready process → waiting time = 2 – 2 = 0.  
+- **P1** arrives at time 6 but must wait until P2 finishes at time 12 → waiting time = 12 – 6 = 6.
+
+Average waiting time  
+\[
+\frac{0 + 0 + 6}{3} = 2.00
+\]
+
+**Answer:** **2.00** (rounded to two decimal places)."
+S2 - Qwen Only,37,cpu_scheduling,SJF,P1 arrives at time 6 and starts running immediately; it finishes at time 9. No other process blocks P1 before it finishes. P2 arrives at time 2 and blocks P1 for 7 units; P2 then runs from time 9 to time 19. P3 arrives at time 0 and runs directly from there until completion at time 2. Total waiting time = 0 + 18 = 18 ms. Average waiting time = 18 / 3 = 6.00 ms
+S5 - Base Qwen Only,37,cpu_scheduling,SJF,"To calculate the average waiting time for processes under non-preemptive shortest-job-first scheduling with arrival ties broken by process number:
+
+1. Sort processes by their burst times.
+2. Assign each process its initial waiting time as zero since they arrive immediately.
+3. Calculate the waiting time for each subsequent process by summing up the total burst time of all previous processes minus the current process's burst time until it arrives.
+4. Sum these waiting times to get the total waiting time.
+5. Divide the total waiting time by the number of processes to find the average waiting time.
+
+For this example:
+P1 (burst 3) arrives at t=6, so its waiting time is 0.
+P2 (burst 10) arrives at t=8, so its waiting time is 3 (since P1 has already arrived).
+P3 (burst 2) arrives at t=10, so its waiting time is 5 (since P1 and P2 have already arrived).
+
+Total waiting time = 0 + 3 + 5 = 8
+
+Average waiting time = Total waiting time / Number of processes = 8 / 3 ≈ 2.67
+
+The average waiting time is approximately 2.67 units."
+S1 - Groq Only,38,cpu_scheduling,SJF,"**Average waiting time = 9.25 units**
+
+**Step‑by‑step calculation**
+
+| Process | Arrival | Burst | Start | Finish | Waiting time (Start – Arrival) |
+|---------|---------|-------|-------|--------|--------------------------------|
+| P2 | 0 | 10 | 0 | 10 | 0 |
+| P3 | 2 | 4 | 10 | 14 | 8 |
+| P1 | 1 | 5 | 14 | 19 | 13 |
+| P4 | 3 | 12 | 19 | 31 | 16 |
+
+*Total waiting time* = 0 + 8 + 13 + 16 = 37  
+*Average waiting time* = 37 / 4 = 9.25
+
+Thus, under non‑preemptive shortest‑job‑first scheduling with the given arrival times, the average waiting time is **9.25** (rounded to two decimal places)."
+S2 - Qwen Only,38,cpu_scheduling,SJF,"P1 arrives first: no other process is ready before it, so it starts running at t=1. It finishes at t=6. Waiting time = 6-1 = 5. P2 arrives next: it waits until P1 finishes (t=6) then starts running. It finishes at t=7. Waiting time = 7-0 = 7. P3 arrives next: it waits until P2 finishes (t=7) then starts running. It finishes at t=11. Waiting time = 11-2 = 9. P4 arrives last: it waits until P3 finishes (t=11) then starts running. It finishes at t=13. Waiting time = 13-3 = 10. Average waiting time = (5 + 7 + 9 + 10) / 4 = 8.75"
+S5 - Base Qwen Only,38,cpu_scheduling,SJF,"To calculate the average waiting time for processes under non-preemptive shortest-job-first scheduling with arrival times tied by process number, we need to consider each process's waiting time as it waits for its turn to run. Here’s how:
+
+1. **P1** arrives first at time 1.
+   - Waiting time = 0
+
+2. **P2** arrives next at time 0.
+   - Since P1 has already arrived, P2 starts running immediately.
+   - Waiting time = 0
+
+3. **P3** arrives at time 2.
+   - P1 finishes at time 5, so P3 can start now.
+   - Waiting time = 2
+
+4. **P4** arrives at time 3.
+   - P1 finishes at time 8, so P4 can start now.
+   - Waiting time = 3
+
+Now, let's sum up all the waiting times:
+\[ \text{Total waiting time} = 0 + 0 + 2 + 3 = 5 \]
+
+The total execution time of all processes is \(5 + 10 + 4 + 12 = 31\).
+
+The average waiting time is calculated as:
+\[ \text{Average waiting time"
+S1 - Groq Only,41,cpu_scheduling,RR,"**Average waiting time = 13.25 ms**
+
+**Step‑by‑step simulation**
+
+| Time | Event | Queue (front → back) | Running | Remaining burst |
+|------|-------|----------------------|---------|-----------------|
+| 0‑3  | P1 runs | P2, P3, P4, P1 | P1 | 3 |
+| 3‑6  | P2 runs | P3, P4, P1, P2 | P2 | 2 |
+| 6‑9  | P3 runs | P4, P1, P2, P3 | P3 | 1 |
+| 9‑12 | P4 runs | P1, P2, P3, P4 | P4 | 4 |
+| 12‑15| P1 runs | P2, P3, P4 | P1 | 0 (finishes) |
+| 15‑18| P2 runs | P3, P4 | P2 | 0 (finishes) |
+| 18‑19| P3 runs | P4 | P3 | 0 (finishes) |
+| 19‑22| P4 runs | P4 | P4 | 1 |
+| 22‑23| P4 runs | – | P4 | 0 (finishes) |
+
+- **Completion times**  
+  - P1: 15  
+  - P2: 18  
+  - P3: 19  
+  - P4: 23  
+
+- **Waiting time** (completion time – burst time, since all arrive at 0)  
+  - P1: 15 – 6 = 9  
+  - P2: 18 – 5 = 13  
+  - P3: 19 – 4 = 15  
+  - P4: 23 – 7 = 16  
+
+- **Average waiting time**  
+  \[
+  \frac{9+13+15+16}{4} = \frac{53}{4} = 13.25
+  \]
+
+Rounded to two decimal places, the average waiting time is **13.25**."
+S2 - Qwen Only,41,cpu_scheduling,RR,"P1 arrives first: no other process is ready before T=3, so it runs for its full burst = 3ms. It spends 3ms waiting. Total wait = 3ms. No other process has arrived by T=3, so P2-P4 each spend 0ms waiting. Average waiting time = (3+0+0+0)/4 = 0.75ms"
+S5 - Base Qwen Only,41,cpu_scheduling,RR,"To calculate the average waiting time for these processes under round-robin scheduling with a time quantum of 3:
+
+1. **Round Robin Schedule**: Each process gets a turn every 3 units of time.
+2. **Arrival Times**: P1 arrives first at t=0, followed by P2 at t=3, P3 at t=6, and P4 at t=9.
+3. **Burst Times**: P1 has a burst of 6 units, P2 has 5 units, P3 has 4 units, and P4 has 7 units.
+4. **Waiting Time Calculation**:
+   - P1 waits 0 units before starting.
+   - P2 starts after P1 finishes (t=3), so it waits 3 units.
+   - P3 starts after P2 finishes (t=6), so it waits 3 units.
+   - P4 starts after P3 finishes (t=9), so it waits 3 units.
+5. **Average Waiting Time**:
+   \[
+   \text{Average Waiting Time} = \frac{(0 + 3 + 3 + 3)}{4} = \frac{9}{4} = 2.25
+   \"
+S1 - Groq Only,42,cpu_scheduling,RR,"**Average waiting time**
+
+| Process | Burst time | Completion time | Waiting time (C – B) |
+|---------|------------|-----------------|----------------------|
+| P1 | 10 | 40 | 30 |
+| P2 | 7  | 33 | 26 |
+| P3 | 11 | 42 | 31 |
+| P4 | 9  | 39 | 30 |
+| P5 | 5  | 29 | 24 |
+
+Sum of waiting times = 30 + 26 + 31 + 30 + 24 = **141**  
+Average waiting time = 141 / 5 = **28.20** (rounded to two decimal places).
+
+So, the average waiting time for the given round‑robin schedule is **28.20**."
+S2 - Qwen Only,42,cpu_scheduling,RR,"P1 arrives first: no other process is ready before T=3, so it runs for its full burst length = 10 -> waits=0
+T=6 -> P2 becomes ready; P2 runs for its burst length = 7 -> waits=0
+T=8 -> P3 becomes ready; P3 runs for its burst length = 11 -> waits=0
+T=10 -> P4 becomes ready; P4 runs for its burst length = 9 -> waits=0
+T=12 -> P5 becomes ready; P5 runs for its burst length = 5 -> waits=0
+
+Average waiting time = total wait time / number of processes = (0 + 0 + 0 + 0 + 5) / 5 = 1.00"
+S5 - Base Qwen Only,42,cpu_scheduling,RR,"To calculate the average waiting time for these processes under round-robin scheduling with a time quantum of 3, we need to simulate the execution of each process:
+
+1. **P1** arrives first and executes for its entire burst time of 10 units.
+   - Waiting time = 0
+
+2. **P2** arrives next but cannot start immediately because P1's time quantum has not been used up yet.
+   - Wait until P1 finishes (time 10)
+   - Executes for 3 units (since it's the first time quantum)
+   - Remaining burst time = 7 - 3 = 4 units
+   - Next time quantum starts after P1 finishes (time 13)
+
+3. **P3** arrives now and can execute immediately since P1's time quantum is over.
+   - Executes for 3 units
+   - Remaining burst time = 11 - 3 = 8 units
+   - Next time quantum starts after P3 finishes (time 16)
+
+4. **P4** arrives now and can execute immediately since P3's time quantum is over.
+   - Executes for 3 units
+   - Remaining burst time = 9 - 3 = 6 units
+   -"
+S1 - Groq Only,43,cpu_scheduling,RR,"**Average waiting time for the round‑robin schedule**
+
+| Process | Burst | Quantum | Completion time | Waiting time (C – B) |
+|---------|-------|---------|-----------------|----------------------|
+| P1 | 5 | 3 | 11 | 11 – 5 = **6** |
+| P2 | 9 | 3 | 20 | 20 – 9 = **11** |
+| P3 |12 | 3 | 26 | 26 – 12 = **14** |
+
+*Simulation steps*
+
+1. **0–3 s** – P1 runs (remaining 2).  
+2. **3–6 s** – P2 runs (remaining 6).  
+3. **6–9 s** – P3 runs (remaining 9).  
+4. **9–11 s** – P1 finishes."
+S2 - Qwen Only,43,cpu_scheduling,RR,"P1 arrives first: no other process is ready before T=3, so it runs for its full burst = 5ms. It spends 5ms waiting. Total wait = 5ms. P2 arrives next: T=6 -> P1 is still running, so P2 waits = 0ms. P3 arrives last: T=8 -> P1 & P2 are both free, so P3 runs for its entire burst = 12ms. It spends 12ms waiting. Average waiting time = (5 + 0 + 12) / 3 = 7.33ms"
+S5 - Base Qwen Only,43,cpu_scheduling,RR,"To calculate the average waiting time for these processes under round-robin scheduling with a time quantum of 3:
+
+1. **P1** arrives first at time 0.
+   - Burst time = 5 units.
+   - Time spent in system = 5 units (since it's the first process).
+   - Waiting time = 0 units (no previous process).
+
+2. **P2** arrives next at time 0.
+   - Burst time = 9 units.
+   - Time spent in system = 3 units (first round-robin cycle).
+   - Waiting time = 3 units (time spent in system before arrival of P1).
+
+3. **P3** arrives last at time 0.
+   - Burst time = 12 units.
+   - Time spent in system = 6 units (second round-robin cycle).
+   - Waiting time = 6 units (time spent in system before arrival of P2).
+
+The total waiting times are:
+- P1: 0 units
+- P2: 3 units
+- P3: 6 units
+
+Total waiting time = 0 + 3 + 6 = 9 units
+
+Average waiting time = Total waiting time / Number of processes = 9 / 3"

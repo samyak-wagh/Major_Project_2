@@ -149,15 +149,28 @@ def summary(out_path: str):
                 else:
                     cells.append("n/a")
             print(f"{sysname:<20}" + "".join(f"{c:>26}" for c in cells))
-        s3 = [x for x in sub.system.unique() if x.startswith("S3")]
-        s4 = [x for x in sub.system.unique() if x.startswith("S4")]
-        if s3 and s4:
+        # paired differences over questions scored for both systems: (A, B, meaning)
+        pairs = [("S4", "S3", "fine-tuned vs cloud, with RAG"),
+                 ("S4", "S6", "effect of fine-tuning, with RAG"),
+                 ("S2", "S5", "effect of fine-tuning, no RAG"),
+                 ("S6", "S5", "effect of RAG on the base model"),
+                 ("S4", "S2", "effect of RAG on the fine-tuned model"),
+                 ("S3", "S1", "effect of RAG on the cloud model"),
+                 ("S2", "S1", "fine-tuned vs cloud, no RAG")]
+        pv = {m: sub.pivot_table(index="user_input", columns="system", values=m) for m in M_FULL}
+        full = lambda pre: next((x for x in sub.system.unique() if x.startswith(pre)), None)
+        for a_, b_, meaning in pairs:
+            A_, B_ = full(a_), full(b_)
+            if not A_ or not B_:
+                continue
             for m in M_FULL:
-                p = sub.pivot_table(index="user_input", columns="system", values=m).dropna(subset=[s3[0], s4[0]])
-                if len(p):
-                    mu, lo, hi, n = boot_ci(p[s4[0]] - p[s3[0]])
-                    verdict = "includes 0 -> not distinguishable" if lo <= 0 <= hi else "excludes 0"
-                    print(f"  paired S4-S3 {m[:22]:<22}: {mu:+.3f} [{lo:+.3f},{hi:+.3f}] n={n}  ({verdict})")
+                if A_ not in pv[m] or B_ not in pv[m]:
+                    continue
+                d = (pv[m][A_] - pv[m][B_]).dropna()
+                if len(d):
+                    mu, lo, hi, n = boot_ci(d)
+                    verdict = "CI includes 0" if lo <= 0 <= hi else "CI excludes 0"
+                    print(f"  paired {a_}-{b_} {m[:20]:<20}: {mu:+.3f} [{lo:+.3f},{hi:+.3f}] n={n}  ({verdict})  [{meaning}]")
 
 
 if __name__ == "__main__":

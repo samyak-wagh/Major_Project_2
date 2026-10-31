@@ -108,8 +108,16 @@ _ALL_SYSTEMS = [
     {"name": "S2 - Qwen Only",   "backend": "local", "use_rag": False, "enabled": RUN_S2_QWEN_ONLY},
     {"name": "S3 - RAG + Groq",  "backend": "groq",  "use_rag": True,  "enabled": RUN_S3_RAG_GROQ},
     {"name": "S4 - RAG + Qwen",  "backend": "local", "use_rag": True,  "enabled": RUN_S4_RAG_QWEN},
+    # Base Qwen2.5-1.5B-Instruct with the LoRA adapter bypassed: same prompt/decoding/machine as S2/S4,
+    # so S2-S5 and S4-S6 isolate what fine-tuning adds.
+    {"name": "S5 - Base Qwen Only",  "backend": "local", "use_rag": False, "enabled": True, "qwen_opts": {"adapter": "off"}},
+    {"name": "S6 - RAG + Base Qwen", "backend": "local", "use_rag": True,  "enabled": True, "qwen_opts": {"adapter": "off"}},
 ]
 SYSTEMS = [s for s in _ALL_SYSTEMS if s["enabled"]]
+# ONLY_SYSTEMS="S5,S6" -> run just those systems (answers are appended to ANSWERS_CSV)
+_only = [x.strip() for x in os.environ.get("ONLY_SYSTEMS", "").split(",") if x.strip()]
+if _only:
+    SYSTEMS = [s for s in SYSTEMS if any(s["name"].startswith(p) for p in _only)]
 
 # =============================================================================
 # GOLD STANDARD QUESTION BANK — 20 Questions, 4 OS Chapters (Galvin textbook)
@@ -259,17 +267,20 @@ DATASET = [
     # ── Numerical — Memory Management ─────────────────────────────────────────
     {
         "question": "Frames=3, FIFO, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",
-        "ground_truth": "FIFO with 3 frames: faults at 7,0,1,2,3,0,4,2,3,0 = 9 page faults.",
+        # CORRECTED 2026-10-30: the original text said "= 9"; the ten listed faults (and a simulation) give 10.
+        "ground_truth": "FIFO with 3 frames: faults at 7,0,1,2,3,0,4,2,3,0 = 10 page faults.",
         "chapter": "Memory Management Numerical",
     },
     {
         "question": "Frames=3, LRU, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",
-        "ground_truth": "LRU with 3 frames: faults at 7,0,1,2,3,4,2,3,0 = 8 page faults. LRU outperforms FIFO here.",
+        # CORRECTED 2026-10-30: the original text said "= 8"; the nine listed faults (and a simulation) give 9.
+        "ground_truth": "LRU with 3 frames: faults at 7,0,1,2,3,4,2,3,0 = 9 page faults. LRU outperforms FIFO here.",
         "chapter": "Memory Management Numerical",
     },
     {
         "question": "Frames=3, OPT, ref string: 7 0 1 2 0 3 0 4 2 3 0 3 2. Total page faults?",
-        "ground_truth": "OPT with 3 frames: faults at 7,0,1,2,3,4 = 6 page faults. OPT gives the minimum possible.",
+        # CORRECTED 2026-10-30: the original text said "= 6" and omitted the final fault on page 0; simulation gives 7.
+        "ground_truth": "OPT with 3 frames: faults at 7,0,1,2,3,4,0 = 7 page faults. OPT gives the minimum possible.",
         "chapter": "Memory Management Numerical",
     },
     {
@@ -294,7 +305,7 @@ DATASET = [
 # HELPERS
 # =============================================================================
 
-def get_rag_response(question: str, backend: str = "local", use_rag: bool = True):
+def get_rag_response(question: str, backend: str = "local", use_rag: bool = True, qwen_opts: dict = None):
     """
     Call the FastAPI /ask endpoint.
     Returns (answer_str, [context_strings]).
@@ -303,7 +314,8 @@ def get_rag_response(question: str, backend: str = "local", use_rag: bool = True
                 False = LLM-only baseline (no context)
     """
     try:
-        payload = {"question": question, "backend": backend, "use_rag": use_rag, "stateless": True}
+        payload = {"question": question, "backend": backend, "use_rag": use_rag, "stateless": True,
+                   "qwen_opts": qwen_opts or {}}
         res = requests.post(f"{API_URL}/ask", json=payload, timeout=600)
         res.raise_for_status()
         data = res.json()
@@ -443,7 +455,8 @@ def main():
         batch     = active_q[i : i + BATCH_SIZE]
         if os.path.exists(ANSWERS_CSV):
             _prev = pd.read_csv(ANSWERS_CSV)
-            _done = {q for q, g in _prev.groupby("user_input") if g["system"].nunique() >= len(SYSTEMS)}
+            _want = {s["name"] for s in SYSTEMS}
+            _done = {q for q, g in _prev.groupby("user_input") if _want <= set(g["system"])}
             batch = [b for b in batch if b["question"] not in _done]
             if not batch:
                 print(f"  [SKIP] question {i + 1} already answered by all systems")
@@ -471,6 +484,7 @@ def main():
                     q,
                     backend=sys_cfg["backend"],
                     use_rag=sys_cfg["use_rag"],
+                    qwen_opts=sys_cfg.get("qwen_opts"),
                 )
                 elapsed = time.time() - t0
                 print(f"  {len(ans):>5} chars  {elapsed:.1f}s")
