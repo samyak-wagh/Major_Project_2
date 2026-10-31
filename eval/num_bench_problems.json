@@ -1,0 +1,362 @@
+[
+ {
+  "cat": "page_replacement",
+  "algo": "FIFO",
+  "question": "Reference string: 1 3 6 7 7 3 0 1 1 4 1 7 0 7. The system has 3 frames, all initially empty, and uses the FIFO page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 9.0,
+  "tol": 0,
+  "id": 1
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "FIFO",
+  "question": "Reference string: 6 4 5 5 6 1 5 1 4 4 7 2 4. The system has 4 frames, all initially empty, and uses the FIFO page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 7.0,
+  "tol": 0,
+  "id": 2
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "FIFO",
+  "question": "Reference string: 5 7 6 1 6 7 1 6 7 6 4 6 7 0. The system has 3 frames, all initially empty, and uses the FIFO page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 7.0,
+  "tol": 0,
+  "id": 3
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "FIFO",
+  "question": "Reference string: 0 1 6 7 2 7 3 1 7 7 4 6 4. The system has 3 frames, all initially empty, and uses the FIFO page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 10.0,
+  "tol": 0,
+  "id": 4
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "FIFO",
+  "question": "Reference string: 6 3 4 4 0 0 2 7 7 5 3 4 7 7 7. The system has 4 frames, all initially empty, and uses the FIFO page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 9.0,
+  "tol": 0,
+  "id": 5
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "LRU",
+  "question": "Reference string: 4 5 7 1 7 4 7 2 6 7 1 4. The system has 4 frames, all initially empty, and uses the LRU page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 8.0,
+  "tol": 0,
+  "id": 6
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "LRU",
+  "question": "Reference string: 1 3 6 2 7 0 1 0 7 1 3 3 1 0. The system has 4 frames, all initially empty, and uses the LRU page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 8.0,
+  "tol": 0,
+  "id": 7
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "LRU",
+  "question": "Reference string: 2 0 5 7 2 3 7 2 4 1 6 2 2 4. The system has 4 frames, all initially empty, and uses the LRU page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 8.0,
+  "tol": 0,
+  "id": 8
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "LRU",
+  "question": "Reference string: 2 3 6 0 1 6 1 0 5 5 0 0 7 5 4. The system has 4 frames, all initially empty, and uses the LRU page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 8.0,
+  "tol": 0,
+  "id": 9
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "LRU",
+  "question": "Reference string: 1 7 7 2 2 3 6 5 7 3 1 6 0 3. The system has 4 frames, all initially empty, and uses the LRU page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 10.0,
+  "tol": 0,
+  "id": 10
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "OPT",
+  "question": "Reference string: 0 7 3 7 0 2 3 2 2 2 6 4. The system has 3 frames, all initially empty, and uses the optimal (OPT) page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 6.0,
+  "tol": 0,
+  "id": 11
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "OPT",
+  "question": "Reference string: 1 6 4 2 5 2 4 7 7 6 4 7 2 5 7. The system has 4 frames, all initially empty, and uses the optimal (OPT) page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 7.0,
+  "tol": 0,
+  "id": 12
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "OPT",
+  "question": "Reference string: 4 1 3 3 0 1 7 5 6 2 0 5. The system has 4 frames, all initially empty, and uses the optimal (OPT) page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 8.0,
+  "tol": 0,
+  "id": 13
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "OPT",
+  "question": "Reference string: 3 1 4 3 4 4 2 1 4 1 6 2 1 0. The system has 3 frames, all initially empty, and uses the optimal (OPT) page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 6.0,
+  "tol": 0,
+  "id": 14
+ },
+ {
+  "cat": "page_replacement",
+  "algo": "OPT",
+  "question": "Reference string: 1 5 4 1 4 5 2 4 4 1 0 6 4. The system has 4 frames, all initially empty, and uses the optimal (OPT) page replacement policy. How many page faults occur in total? Give the number.",
+  "truth": 6.0,
+  "tol": 0,
+  "id": 15
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "FCFS",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 126. Pending requests (in arrival order): 14, 24, 60, 5, 79, 31. Requests are served in arrival order. What is the total head movement in cylinders? Give the number.",
+  "truth": 335.0,
+  "tol": 0,
+  "id": 16
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "FCFS",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 163. Pending requests (in arrival order): 89, 80, 199, 116, 155, 160, 167, 182. Requests are served in arrival order. What is the total head movement in cylinders? Give the number.",
+  "truth": 351.0,
+  "tol": 0,
+  "id": 17
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "FCFS",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 123. Pending requests (in arrival order): 155, 55, 152, 118, 109, 173, 30. Requests are served in arrival order. What is the total head movement in cylinders? Give the number.",
+  "truth": 479.0,
+  "tol": 0,
+  "id": 18
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "FCFS",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 148. Pending requests (in arrival order): 64, 99, 74, 91, 14, 188, 183, 111. Requests are served in arrival order. What is the total head movement in cylinders? Give the number.",
+  "truth": 489.0,
+  "tol": 0,
+  "id": 19
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "FCFS",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 92. Pending requests (in arrival order): 84, 74, 186, 196, 31, 76, 106, 81. Requests are served in arrival order. What is the total head movement in cylinders? Give the number.",
+  "truth": 405.0,
+  "tol": 0,
+  "id": 20
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "SSTF",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 158. Pending requests (in arrival order): 50, 143, 14, 184, 28, 41, 158. Use shortest-seek-time-first. What is the total head movement in cylinders? Give the number.",
+  "truth": 226.0,
+  "tol": 0,
+  "id": 21
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "SSTF",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 50. Pending requests (in arrival order): 32, 133, 90, 152, 165, 167. Use shortest-seek-time-first. What is the total head movement in cylinders? Give the number.",
+  "truth": 153.0,
+  "tol": 0,
+  "id": 22
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "SSTF",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 27. Pending requests (in arrival order): 148, 32, 91, 106, 98, 96, 61. Use shortest-seek-time-first. What is the total head movement in cylinders? Give the number.",
+  "truth": 121.0,
+  "tol": 0,
+  "id": 23
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "SSTF",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 76. Pending requests (in arrival order): 46, 138, 7, 169, 183, 175. Use shortest-seek-time-first. What is the total head movement in cylinders? Give the number.",
+  "truth": 245.0,
+  "tol": 0,
+  "id": 24
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "SSTF",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 85. Pending requests (in arrival order): 58, 5, 4, 70, 138, 122. Use shortest-seek-time-first. What is the total head movement in cylinders? Give the number.",
+  "truth": 215.0,
+  "tol": 0,
+  "id": 25
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "LOOK",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 87. Pending requests (in arrival order): 35, 160, 151, 22, 45, 141, 9. Use LOOK, with the head initially moving toward lower cylinder numbers. What is the total head movement in cylinders? Give the number.",
+  "truth": 229.0,
+  "tol": 0,
+  "id": 26
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "LOOK",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 107. Pending requests (in arrival order): 133, 193, 190, 81, 14, 168, 2, 160. Use LOOK, with the head initially moving toward higher cylinder numbers. What is the total head movement in cylinders? Give the number.",
+  "truth": 277.0,
+  "tol": 0,
+  "id": 27
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "LOOK",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 140. Pending requests (in arrival order): 56, 173, 130, 38, 190, 102. Use LOOK, with the head initially moving toward lower cylinder numbers. What is the total head movement in cylinders? Give the number.",
+  "truth": 254.0,
+  "tol": 0,
+  "id": 28
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "LOOK",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 79. Pending requests (in arrival order): 70, 87, 51, 95, 91, 117, 163, 140. Use LOOK, with the head initially moving toward lower cylinder numbers. What is the total head movement in cylinders? Give the number.",
+  "truth": 140.0,
+  "tol": 0,
+  "id": 29
+ },
+ {
+  "cat": "disk_scheduling",
+  "algo": "LOOK",
+  "question": "Disk cylinders are numbered 0 to 199 and the head starts at cylinder 168. Pending requests (in arrival order): 48, 40, 160, 105, 39, 124, 1. Use LOOK, with the head initially moving toward lower cylinder numbers. What is the total head movement in cylinders? Give the number.",
+  "truth": 167.0,
+  "tol": 0,
+  "id": 30
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "FCFS",
+  "question": "Processes: P1 (arrival 2, burst 8); P2 (arrival 4, burst 2); P3 (arrival 5, burst 4); P4 (arrival 2, burst 3); P5 (arrival 1, burst 10). Scheduling is FCFS (first-come, first-served); arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 12.6,
+  "tol": 0.011,
+  "id": 31
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "FCFS",
+  "question": "Processes: P1 (arrival 4, burst 10); P2 (arrival 0, burst 5); P3 (arrival 3, burst 6). Scheduling is FCFS (first-come, first-served); arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 3.0,
+  "tol": 0.011,
+  "id": 32
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "FCFS",
+  "question": "Processes: P1 (arrival 1, burst 10); P2 (arrival 5, burst 4); P3 (arrival 3, burst 12); P4 (arrival 2, burst 3); P5 (arrival 4, burst 2). Scheduling is FCFS (first-come, first-served); arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 13.0,
+  "tol": 0.011,
+  "id": 33
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "FCFS",
+  "question": "Processes: P1 (arrival 2, burst 2); P2 (arrival 2, burst 11); P3 (arrival 4, burst 5); P4 (arrival 2, burst 4). Scheduling is FCFS (first-come, first-served); arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 7.5,
+  "tol": 0.011,
+  "id": 34
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "FCFS",
+  "question": "Processes: P1 (arrival 6, burst 8); P2 (arrival 4, burst 5); P3 (arrival 5, burst 2). Scheduling is FCFS (first-come, first-served); arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 3.0,
+  "tol": 0.011,
+  "id": 35
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "SJF",
+  "question": "Processes: P1 (arrival 1, burst 7); P2 (arrival 2, burst 10); P3 (arrival 4, burst 4); P4 (arrival 1, burst 2). Scheduling is non-preemptive shortest-job-first; arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 5.0,
+  "tol": 0.011,
+  "id": 36
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "SJF",
+  "question": "Processes: P1 (arrival 6, burst 3); P2 (arrival 2, burst 10); P3 (arrival 0, burst 2). Scheduling is non-preemptive shortest-job-first; arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 2.0,
+  "tol": 0.011,
+  "id": 37
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "SJF",
+  "question": "Processes: P1 (arrival 1, burst 5); P2 (arrival 0, burst 10); P3 (arrival 2, burst 4); P4 (arrival 3, burst 12). Scheduling is non-preemptive shortest-job-first; arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 9.25,
+  "tol": 0.011,
+  "id": 38
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "SJF",
+  "question": "Processes: P1 (arrival 0, burst 3); P2 (arrival 2, burst 8); P3 (arrival 3, burst 6); P4 (arrival 3, burst 10); P5 (arrival 0, burst 7). Scheduling is non-preemptive shortest-job-first; arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 8.8,
+  "tol": 0.011,
+  "id": 39
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "SJF",
+  "question": "Processes: P1 (arrival 0, burst 12); P2 (arrival 6, burst 9); P3 (arrival 0, burst 7); P4 (arrival 6, burst 3). Scheduling is non-preemptive shortest-job-first; arrival ties are broken by process number. What is the average waiting time? Round to two decimal places.",
+  "truth": 6.0,
+  "tol": 0.011,
+  "id": 40
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "RR",
+  "question": "Processes: P1 (arrival 0, burst 6); P2 (arrival 0, burst 5); P3 (arrival 0, burst 4); P4 (arrival 0, burst 7). Scheduling is round robin with time quantum 3; all processes arrive at time 0 and queue in process-number order. What is the average waiting time? Round to two decimal places.",
+  "truth": 12.5,
+  "tol": 0.011,
+  "id": 41
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "RR",
+  "question": "Processes: P1 (arrival 0, burst 10); P2 (arrival 0, burst 7); P3 (arrival 0, burst 11); P4 (arrival 0, burst 9); P5 (arrival 0, burst 5). Scheduling is round robin with time quantum 3; all processes arrive at time 0 and queue in process-number order. What is the average waiting time? Round to two decimal places.",
+  "truth": 28.2,
+  "tol": 0.011,
+  "id": 42
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "RR",
+  "question": "Processes: P1 (arrival 0, burst 5); P2 (arrival 0, burst 9); P3 (arrival 0, burst 12). Scheduling is round robin with time quantum 3; all processes arrive at time 0 and queue in process-number order. What is the average waiting time? Round to two decimal places.",
+  "truth": 10.33,
+  "tol": 0.011,
+  "id": 43
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "RR",
+  "question": "Processes: P1 (arrival 0, burst 8); P2 (arrival 0, burst 11); P3 (arrival 0, burst 12); P4 (arrival 0, burst 5). Scheduling is round robin with time quantum 2; all processes arrive at time 0 and queue in process-number order. What is the average waiting time? Round to two decimal places.",
+  "truth": 20.5,
+  "tol": 0.011,
+  "id": 44
+ },
+ {
+  "cat": "cpu_scheduling",
+  "algo": "RR",
+  "question": "Processes: P1 (arrival 0, burst 11); P2 (arrival 0, burst 4); P3 (arrival 0, burst 8); P4 (arrival 0, burst 6). Scheduling is round robin with time quantum 3; all processes arrive at time 0 and queue in process-number order. What is the average waiting time? Round to two decimal places.",
+  "truth": 16.25,
+  "tol": 0.011,
+  "id": 45
+ }
+]
