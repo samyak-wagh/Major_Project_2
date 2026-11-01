@@ -17,6 +17,57 @@ The project contains the tutor itself (RAG pipeline, API, UI), a LoRA-fine-tuned
 
 ---
 
+## 📦 Dataset & data links
+
+Everything is in this repository (branch `paper-eval-pipeline`; the same paths apply on `main` once merged). Repository: <https://github.com/samyak-wagh/Major_Project_2>.
+
+### Fine-tuning dataset (OS Tutor v2 — 762 examples)
+**Use the `_train` and `_val` files for training; do not train on the unsplit file.** All three formats hold identical content — pick one (`.jsonl` is the default for most loaders; `.csv` is what the Colab notebooks read).
+
+| Purpose | Format | View on GitHub | Direct download (raw) |
+|---|---|---|---|
+| **Training** (702 ex.) | JSONL | [dataset_v2_train.jsonl](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_train.jsonl) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_train.jsonl) |
+| | CSV | [dataset_v2_train.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_train.csv) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_train.csv) |
+| | JSON | [dataset_v2_train.json](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_train.json) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_train.json) |
+| **Validation** (60 ex.) | JSONL | [dataset_v2_val.jsonl](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_val.jsonl) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_val.jsonl) |
+| | CSV | [dataset_v2_val.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_val.csv) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_val.csv) |
+| | JSON | [dataset_v2_val.json](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2_val.json) | [raw](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2_val.json) |
+| Full, unsplit (762 ex.) — *for re-splitting only* | JSONL / JSON / CSV | [dataset_v2.jsonl](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2.jsonl) · [json](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2.json) · [csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/dataset_v2.csv) | [raw jsonl](https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/dataset_v2.jsonl) |
+
+- **Schema, categories and usage notes:** [DATASET_USAGE.md](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/DATASET_USAGE.md) and [data/README.md](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/README.md). Columns (CSV): `category, difficulty, system, prompt, completion`.
+- **Load directly in Colab / Python:**
+  ```python
+  import pandas as pd
+  base = "https://raw.githubusercontent.com/samyak-wagh/Major_Project_2/paper-eval-pipeline/"
+  train = pd.read_csv(base + "dataset_v2_train.csv")
+  val   = pd.read_csv(base + "dataset_v2_val.csv")
+  ```
+- **Which split does the paper use?** Two splits exist and the paper reports both, so do not mix them up:
+  - *Split A (original):* the files above, 702 train / 60 val. Used to train the **deployed adapter** (`qwen-os-tutor-lora/`) and in the six-system evaluation. In this split 58 of 60 validation examples share a passage with training.
+  - *Split B (passage-grouped):* 540 / 125 / 97 (train / val / test), created **inside `fine_tune2.ipynb`** from the same files by grouping examples by passage. It is regenerated deterministically (seed 42) when the notebook runs; it is not committed as a separate file.
+
+### Decontaminated data and the gold question bank
+| Item | Link |
+|---|---|
+| Training data with the rows that overlap the leaked gold questions removed (681 of 702 kept) | [data/decontam/dataset_v2_train_decontam.jsonl](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/decontam/dataset_v2_train_decontam.jsonl) |
+| Validation data, decontaminated (54 of 60 kept) | [data/decontam/dataset_v2_val_decontam.jsonl](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/decontam/dataset_v2_val_decontam.jsonl) |
+| Gold questions found in the training data (15 excluded) | [data/decontam/leaked_gold.json](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/decontam/leaked_gold.json) · [report.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/decontam/report.csv) |
+| Gold question bank (32 questions, 17 clean) | defined in [eval/run_eval.py](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/run_eval.py) |
+| Overlap-check script | [data/decontam_check.py](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/data/decontam_check.py) |
+
+### Evaluation data (answers, scores, benchmark)
+| Item | Link |
+|---|---|
+| 102 generated answers (S1–S6) with retrieved contexts and references | [eval/answers_20261029_233832.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/answers_20261029_233832.csv) |
+| 102 RAGAS scores | [eval/scores_20261029_233832.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/scores_20261029_233832.csv) |
+| Judge-free calculation benchmark: problems / answers / scores | [num_bench_problems.json](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/num_bench_problems.json) · [num_bench_answers.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/num_bench_answers.csv) · [num_bench_scored.csv](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/num_bench_scored.csv) |
+| Full write-up of this evaluation | [eval/eval2.md](https://github.com/samyak-wagh/Major_Project_2/blob/paper-eval-pipeline/eval/eval2.md) |
+
+### Knowledge base (not included)
+The retrieval corpus is the textbook *Operating System Concepts* (Silberschatz, Galvin & Gagne). The PDF is copyrighted and is **not** in the repository; obtain your own copy and ingest it with `python setup_db.py`.
+
+---
+
 ## 🚀 Quick start
 
 ### 1. Install
