@@ -19,7 +19,7 @@
 
 \begin{document}
 
-\title{Does Fine-Tuning Help? A Comparative Study of Cloud, Base and LoRA-Fine-Tuned Language Models with Retrieval for Operating Systems Question Answering}
+\title{Retrieval-Augmented Operating Systems Tutoring with a LoRA-Fine-Tuned 1.5B Model: System Design and Leakage-Controlled Evaluation}
 
 \author{\IEEEauthorblockN{First Author}
 \IEEEauthorblockA{\textit{Department of Computer Science} \\
@@ -32,50 +32,51 @@ email@example.com}
 \textit{Your Institution}\\
 City, Country \\
 email@example.com}
+\and
+\IEEEauthorblockN{Third Author}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{Your Institution}\\
+City, Country \\
+email@example.com}
 }
 
 \maketitle
 
 \begin{abstract}
-We study whether adapting a small language model to a course textbook, and adding retrieval, can match a much larger cloud model for operating-systems (OS) question answering. We built an OS tutoring pipeline over a standard textbook, a 762-example instruction dataset, and a LoRA adapter for Qwen2.5-1.5B-Instruct, and compared six systems: cloud model, base Qwen and fine-tuned Qwen, each with and without retrieval. After removing 15 of 32 gold questions that closely match training examples, we scored the remaining 17 with RAGAS (LLM judge), and measured calculation accuracy on 27 newly generated problems whose answers are computed by simulation. The cloud model with retrieval was the most faithful system (0.61 versus 0.32 for fine-tuned Qwen with retrieval). Fine-tuning did not improve the text metrics: compared with its own base model, the fine-tuned model had lower answer relevancy (by 0.13 without and 0.07 with retrieval) and no detectable gain in faithfulness. On calculations the cloud model answered 22 of 27 correctly, while fine-tuned and base Qwen answered 1 and 0 under a strict criterion (8 and 4 under a lenient one; difference not significant). We report these negative and inconclusive results together with the data-quality problems we found and corrected, the train/test overlap check, and the limitations of a small, single-judge study.
+General-purpose chatbots answer operating-systems (OS) questions fluently but not necessarily from the course textbook. We present OS~Tutor, a retrieval-augmented generation (RAG) tutor over a standard OS textbook that runs with either a locally hosted, LoRA-fine-tuned Qwen2.5-1.5B-Instruct model or a cloud-hosted open-weight model. We contribute a leakage-controlled evaluation at two levels. At the system level, six configurations (with and without retrieval, with the cloud model, the fine-tuned model and the un-tuned base model) are compared on 17 questions screened for overlap with the fine-tuning data, with bootstrap intervals and a judge-free numerical benchmark of 27 problems. At the generator level, the adapter is compared with its base on 97 held-out items over three seeds. RAG with the cloud model is the most faithful system (0.61 versus 0.32 for RAG with the fine-tuned model). Fine-tuning improves token-F1 on held-out passages from 0.321 to 0.393 (95\% CI of the difference 0.039 to 0.104) but not RAGAS answer relevancy, and its effect depends on the system prompt. A data audit shows why: 762 examples rest on 126 passages, refusal is taught by 14 distinct questions, and about half of the recall answers lie outside their passages. The study indicates that, at this data scale, fine-tuning a small model mainly changes answer style, and that data grounding and prompt consistency matter more than model size.
 \end{abstract}
 
 \begin{IEEEkeywords}
-retrieval-augmented generation, LoRA, small language models, fine-tuning, educational question answering, operating systems, RAGAS, evaluation
+retrieval-augmented generation, LoRA, small language models, educational question answering, operating systems, RAGAS, data leakage
 \end{IEEEkeywords}
 
 %==============================================================
-\section{Introduction}
-Students of operating systems increasingly ask general chatbots about course material. Answers are fluent but not tied to the course textbook, and small errors are hard for novices to spot. Retrieval-augmented generation (RAG)~\cite{lewis2020rag} grounds answers in retrieved passages, and parameter-efficient fine-tuning such as LoRA~\cite{hu2022lora} and QLoRA~\cite{dettmers2023qlora} makes it feasible to adapt a small model on modest hardware, which would allow a tutor to run locally and offline.
+\section{Introduction}\label{sec:intro}
+Students increasingly study from general-purpose chatbots, whose fluent answers are not tied to their course material and may contain errors a novice cannot detect~\cite{kasneci2023edu,ji2023hallucination}. We therefore developed a specialised chatbot for specific coursework, grounded in the standard textbook of the course. We chose Operating Systems (OS) as the first course; our aim is to extend the same approach to further courses, each built on its own standard textbooks. Retrieval-augmented generation (RAG)~\cite{lewis2020rag} supplies retrieved textbook passages to the model, and parameter-efficient fine-tuning such as LoRA~\cite{hu2022lora} and QLoRA~\cite{dettmers2023qlora} makes it possible to adapt a small model on modest hardware, so that a tutor can run locally and offline.
 
-We ask a plain empirical question: \emph{given a textbook, does LoRA fine-tuning of a 1.5B-parameter model add measurable value over the same model without fine-tuning, and how far is the result from a larger cloud model?} We built the pipeline, fixed the evaluation problems we met along the way, and report the outcome, including where it disappointed.
+We ask two questions. \textbf{RQ1:} how does a small, local, fine-tuned model with RAG compare with the same pipeline using a larger cloud model? \textbf{RQ2:} what does fine-tuning add beyond the un-tuned base model, in grounded answering, refusal and calculation? RQ2 can only be answered with an evaluation free of train/test overlap, and our own data audit showed how easily overlap arises.
 
 Our contributions are:
 \begin{enumerate}
-  \item A \textbf{comparative study} of six configurations (cloud, base Qwen, fine-tuned Qwen; each with and without retrieval) on questions with no near-duplicate in the fine-tuning data, with paired confidence intervals.
-  \item A 762-example OS \textbf{instruction dataset} (seven categories, 40 refusal examples, simulator-computed numerical answers) and the \textbf{LoRA adapter} trained on it, documented honestly including its weaknesses.
-  \item A judge-free \textbf{calculation benchmark} with simulator-computed ground truth.
-  \item An \textbf{evaluation protocol} with a train/test overlap check, and a record of pitfalls (decoding penalties, memory leakage, empty or error answers stored as answers, wrong reference answers, judge quotas) that can silently change results.
+  \item \textbf{System.} OS~Tutor, an end-to-end RAG tutor with interchangeable local and cloud generators sharing one retriever (Section~\ref{sec:system}).
+  \item \textbf{Data audit.} A 762-example instruction dataset in seven categories, and an audit that quantifies passage reuse, refusal diversity and answer groundedness (Section~\ref{sec:data}).
+  \item \textbf{System-level study.} Six systems on 17 overlap-screened questions with a base-model control and paired bootstrap intervals, plus a judge-free numerical benchmark (Sections~\ref{sec:eval} and~\ref{sec:resA}).
+  \item \textbf{Generator-level study.} A passage-grouped, three-seed comparison of adapter and base on 97 held-out items under two system prompts (Section~\ref{sec:resB}).
 \end{enumerate}
 
 %==============================================================
-\section{Related Work}
-\textbf{RAG.} Lewis et al.~\cite{lewis2020rag} combine a generator with a retrieval index; surveys~\cite{gao2023ragsurvey} catalogue later retrieval, chunking and reranking variants. We use a plain dense-retrieval baseline shared by all RAG systems.
+\section{Related Work}\label{sec:related}
+\textbf{RAG and fine-tuning.} Lewis et al.~\cite{lewis2020rag} pair a generator with a retrieval index, and dense retrievers~\cite{karpukhin2020dpr} made passage retrieval practical; we use a simple dense baseline. LoRA~\cite{hu2022lora} and QLoRA~\cite{dettmers2023qlora} train low-rank updates on a frozen, optionally 4-bit base; we apply them to a 1.5B model of the Qwen2.5 family~\cite{qwen25}. Zhou et al.~\cite{zhou2023lima} argue that a small curated instruction set mainly teaches style and format, consistent with our findings.
 
-\textbf{Parameter-efficient fine-tuning.} LoRA~\cite{hu2022lora} trains low-rank updates to frozen weights; QLoRA~\cite{dettmers2023qlora} does so on a 4-bit base. Our base model comes from the Qwen2.5 family~\cite{qwen25}.
+\textbf{Abstention.} Models must learn to recognise unanswerable questions~\cite{rajpurkar2018squad2}, which matters in education, where confident errors are costly~\cite{kasneci2023edu}. Our \texttt{OUT\_OF\_CONTEXT} examples are a simple form of abstention training.
 
-\textbf{Evaluation.} RAGAS~\cite{es2024ragas} defines reference-light metrics for faithfulness, answer relevancy and context quality using an LLM judge; LLM judges are convenient but biased~\cite{zheng2023judge}, and hallucination is well documented~\cite{ji2023hallucination}. We therefore add a judge-free calculation benchmark and treat judge scores as indicative.
+\textbf{Evaluation.} RAGAS~\cite{es2024ragas} defines LLM-judged faithfulness, answer relevancy and context-precision metrics; LLM judges have known biases~\cite{zheng2023judge}, so we add reference-based metrics such as ROUGE-L~\cite{lin2004rouge} and a judge-free benchmark. Contamination between training and evaluation data inflates results~\cite{magar2022contamination}; we screen for it and test differences with the paired bootstrap~\cite{efron1993bootstrap}.
 
 %==============================================================
-\section{System and Artifacts}
+\section{System Description}\label{sec:system}
+\textbf{Retrieval.} The knowledge base is one OS textbook~\cite{galvin}, parsed with PyMuPDF and split into 1000-character chunks with 200-character overlap (4{,}330 chunks). Chunks are embedded with BAAI/bge-small-en-v1.5~\cite{xiao2023cpack} and stored in Qdrant; at query time the top three chunks above a similarity threshold of 0.55 are retrieved. All RAG systems share this retriever.
 
-\subsection{Retrieval}
-The knowledge base is one OS textbook PDF~\cite{galvin}, parsed with PyMuPDF and split into 1000-character chunks with 200 characters of overlap (4{,}330 chunks), embedded with BAAI/bge-small-en-v1.5~\cite{xiao2023cpack} and stored in Qdrant. At query time the top three chunks with similarity at least 0.55 are retrieved. All RAG systems share this retriever.
-
-\subsection{Generators}
-\textbf{Local.} Qwen2.5-1.5B-Instruct~\cite{qwen25} in 32-bit precision on CPU, with or without our LoRA adapter. Decoding: sampling with temperature 0.1, top-$p$ 0.85, repetition penalty 1.1, at most 256 new tokens, with a concise tutor system prompt. The base-model variants bypass the adapter at inference, so prompt, decoding, retriever and machine are identical.
-
-\textbf{Cloud.} An open-weight 20B model (\texttt{openai/gpt-oss-20b}~\cite{gptoss}) through the Groq API, using the repository's RAG prompt.
+\textbf{Generators.} The local generator is Qwen2.5-1.5B-Instruct with our LoRA adapter on CPU in 32-bit precision, decoded with sampling (temperature 0.1, top-$p$ 0.85, repetition penalty 1.1, at most 256 new tokens), with passages truncated to 300 words. The cloud generator is \texttt{openai/gpt-oss-20b}~\cite{gptoss} served through Groq. The un-tuned base model is obtained from the same weights by bypassing the adapter. Fig.~\ref{fig:arch} shows the pipeline; in no-RAG mode the retrieval branch is skipped.
 
 \begin{figure}[t]
 \centering
@@ -88,7 +89,7 @@ The knowledge base is one OS textbook PDF~\cite{galvin}, parsed with PyMuPDF and
 \node[box, right=of q] (emb) {BGE\\embedding};
 \node[box, right=of emb] (qd) {Qdrant\\top-3};
 \node[box, below=7mm of emb] (pr) {Prompt\\builder};
-\node[box, left=of pr] (gl) {Local Qwen2.5-1.5B\\(adapter on / off)};
+\node[box, left=of pr] (gl) {Local: Qwen2.5-1.5B\\+ LoRA (CPU)};
 \node[box, right=of pr] (gc) {Cloud: gpt-oss-20b\\(Groq)};
 \node[box, below=7mm of pr] (ans) {Answer};
 \draw[arr] (q) -- (emb);
@@ -100,180 +101,84 @@ The knowledge base is one OS textbook PDF~\cite{galvin}, parsed with PyMuPDF and
 \draw[arr] (gl) |- (ans);
 \draw[arr] (gc) |- (ans);
 \end{tikzpicture}
-\caption{Pipeline. The retriever is shared; the generator is chosen per request. Without retrieval, the retrieval branch is skipped.}
+\caption{OS Tutor pipeline. The retriever is shared; the generator is selected per request.}
 \label{fig:arch}
 \end{figure}
 
-\subsection{Instruction Dataset}
-The dataset has 762 chat-format examples (702 training, 60 validation); each has a system message, a user message with textbook passages followed by a question, and an assistant answer, mirroring the inference-time RAG prompt. Table~\ref{tab:dataset} gives the categories. Forty \texttt{out\_of\_context} examples teach a fixed refusal when the passages lack the answer. Repository documentation states that numerical answers are produced by simulating the algorithms. A scan against the textbook (8-word sequences) found that only 0.3\% of answer text is copied from it. Weaknesses we found: the numerical examples (50\%) come from only nine question templates, passages repeat (120 distinct passages), the conceptual categories are small (7\% of the data), the validation set contains no refusal example, and the passages are shorter than the retrieved chunks used at inference.
-
-\begin{table}[t]
-\caption{Dataset composition by category.}
-\label{tab:dataset}
-\centering
-\begin{tabular}{lrr}
-\toprule
-Category & Train & Validation \\
-\midrule
-recall & 260 & 27 \\
-applied\_numerical & 354 & 26 \\
-out\_of\_context & 40 & 0 \\
-applied\_conceptual & 17 & 1 \\
-negative\_edge\_case & 11 & 3 \\
-analytical & 10 & 1 \\
-comparative & 10 & 2 \\
-\midrule
-Total & 702 & 60 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{LoRA Fine-Tuning}
-We fine-tuned Qwen2.5-1.5B-Instruct with Unsloth and TRL's SFT trainer on one GPU, with a 4-bit base. LoRA used rank 16, $\alpha=32$, dropout 0.05 on all attention and MLP projections; minority categories were oversampled $3\times$. Training used effective batch size 16, learning rate $2\times10^{-4}$ with cosine decay and 5\% warm-up, 8-bit AdamW, maximum length 1024, 3 epochs (150 steps). Training loss fell from 1.87 to 0.23 while validation loss was 0.577, 0.496 and 0.515 at steps 50, 100 and 150 (Fig.~\ref{fig:loss}); we used the final adapter although validation loss was lowest at step 100.
-
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.95\columnwidth, height=4.6cm,
-  xlabel={Training step}, ylabel={Loss},
-  xmin=0, xmax=160, ymin=0, ymax=2,
-  legend style={font=\scriptsize, at={(0.98,0.98)}, anchor=north east},
-  tick label style={font=\scriptsize}, label style={font=\footnotesize},
-  grid=both, grid style={line width=.1pt, draw=gray!30}
-]
-\addplot[blue, mark=*, mark size=1pt] coordinates {
-(10,1.872) (20,1.029) (30,0.813) (40,0.529) (50,0.501) (60,0.473) (70,0.396)
-(80,0.337) (90,0.334) (100,0.375) (110,0.311) (120,0.264) (130,0.265) (140,0.282) (150,0.232)};
-\addlegendentry{Train}
-\addplot[red, mark=square*, mark size=1.5pt] coordinates {(50,0.577) (100,0.496) (150,0.515)};
-\addlegendentry{Validation}
-\end{axis}
-\end{tikzpicture}
-\caption{Fine-tuning loss; validation loss every 50 steps.}
-\label{fig:loss}
-\end{figure}
+\textbf{Two system prompts.} The \emph{training prompt}, used for every fine-tuning example, enforces strict grounding: answer only from the passages, otherwise reply \texttt{OUT\_OF\_CONTEXT}. The \emph{deployed prompt} used by the serving code asks for a concise tutor answer of two to five sentences, based on the passages if provided, with no refusal instruction. The system-level study runs under the deployed prompt; the generator-level study tests both.
 
 %==============================================================
-\section{Evaluation Methodology}
+\section{Fine-Tuning Data and Method}\label{sec:data}
 
-\subsection{Systems}
-Table~\ref{tab:systems} lists the six systems. S2/S5 and S4/S6 differ only in the adapter.
+\subsection{Dataset and Audit}\label{sec:audit}
+The dataset has 762 chat-format examples, each a system message, a user message of the form \texttt{Textbook passages: <passage> Question: <question>}, and an answer. \emph{Recall} examples ask for one fact from a curated knowledge-base entry; \emph{applied\_numerical} problems have worked answers produced by simulating the algorithm; four reasoning categories were authored individually and are scarce; and \emph{out\_of\_context} examples pair a real OS passage with an unrelated question, the answer being \texttt{OUT\_OF\_CONTEXT}.
 
-\begin{table}[t]
-\caption{Systems compared.}
-\label{tab:systems}
-\centering
-\begin{tabular}{lll}
-\toprule
-ID & Generator & Retrieval \\
-\midrule
-S1 & Cloud (gpt-oss-20b) & no \\
-S2 & Fine-tuned Qwen2.5-1.5B & no \\
-S5 & Base Qwen2.5-1.5B & no \\
-S3 & Cloud (gpt-oss-20b) & yes \\
-S4 & Fine-tuned Qwen2.5-1.5B & yes \\
-S6 & Base Qwen2.5-1.5B & yes \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Questions and Overlap Check}
-The gold bank has 32 textbook questions with reference answers. We compared each with all 762 training and validation questions by normalised exact match, then by BGE similarity ($\ge 0.82$) to select candidates, each confirmed or rejected by an LLM check of whether the two questions would receive essentially the same answer. This conservative check flagged \textbf{15 of 32} questions (3 verbatim copies, 12 paraphrases), which we excluded. We evaluate the remaining \textbf{17} (11 conceptual, 6 numerical). The check can over-flag topic neighbours, so the clean set is, if anything, harder for the fine-tuned systems.
-
-\subsection{Metrics and Judge}
-We use RAGAS~\cite{es2024ragas} 0.4.3: \emph{faithfulness} (claims supported by the retrieved context), \emph{answer relevancy} and \emph{context precision} with reference. Faithfulness and context precision need retrieved context and are undefined for S1, S2 and S5. The judge is \texttt{gpt-oss-120b} through the Groq API; because daily quotas ran out, calls were spread over three API keys from at least two organisations, always with the same judge model. We report means with 95\% bootstrap confidence intervals over questions, and paired differences over questions scored for both systems. Context precision depends on the reference answers; we found three of them wrong (see Section~\ref{sec:integrity}) and re-scored those rows.
-
-\subsection{Calculation Benchmark}
-To measure correctness without a judge, we generated page-replacement (FIFO, LRU, optimal), disk-scheduling (FCFS, SSTF, LOOK) and CPU-scheduling (FCFS, SJF, round robin) problems with a fixed seed. Ground truth comes from deterministic simulators, which reproduce the textbook's 15/12/9 page-fault example. Wording differs from the training templates. Forty-five problems were generated and the first three per algorithm were used (27 problems) because local generation was slow; selection is deterministic. S1, S2 and S5 answered without retrieval. An answer is \emph{strictly} correct if its last number equals the truth, and \emph{leniently} correct if the truth appears among the numbers in its last 250 characters.
-
-\subsection{Data Integrity}
-\label{sec:integrity}
-Nineteen of the 68 answers of S1--S4 had to be regenerated (none of S5/S6): eighteen cloud answers stored the provider's rate-limit error text because a daily token quota was exhausted during generation, and one cloud answer was empty. Scores computed from error text were discarded before final scoring; one further empty cloud answer in the benchmark was also regenerated. Three gold reference answers were incorrect: for the string \texttt{7 0 1 2 0 3 0 4 2 3 0 3 2} with three frames the correct page-fault counts are 10 (FIFO), 9 (LRU) and 7 (OPT), not 9, 8 and 6. We corrected them; re-scoring changed none of the six affected context-precision values. One system (S3) replied with a refusal to a numerical question; the judge cannot score a refusal, so we recorded answer relevancy 0.0, faithfulness as not applicable, and context precision from the identical retrieval of S4. Section~\ref{sec:results} shows how much this single rule matters.
-
-%==============================================================
-\section{Results}
-\label{sec:results}
-
-\subsection{Text Quality on the 17 Clean Questions}
-Table~\ref{tab:main} and Fig.~\ref{fig:bars} give the main results; Table~\ref{tab:paired} gives paired differences.
+Table~\ref{tab:audit} audits the data. \emph{Ungrounded} means that fewer than 30\% of the answer's content words occur in its passage, a cheap lexical proxy. Four findings shape the interpretation of every result below. (i)~The 762 examples use only \textbf{126 distinct passages}. (ii)~In the original split, \textbf{58 of 60 validation examples shared a passage with training}, so validation loss partly measures memorisation. (iii)~The 40 refusal examples use \textbf{14 distinct questions}. (iv)~\textbf{46\% of recall answers} (133 of 287) and almost all reasoning-category answers are not contained in their passages, which conflicts with the instruction to answer only from them.
 
 \begin{table*}[t]
-\caption{RAGAS scores on the 17 clean questions: mean [95\% bootstrap CI]. n/a: undefined without retrieval. S3 faithfulness has n=16 (one refusal).}
-\label{tab:main}
+\caption{Dataset composition under the two splits and groundedness of reference answers. Split A (original) is the fine-tuning split; split B groups examples by passage and is used for the generator-level study. For numerical items the answer is computed from the question, and refusal answers are not passage text, so the proxy does not apply.}
+\label{tab:audit}
 \centering
-\begin{tabular}{llccc}
+\begin{tabular}{lrccc}
 \toprule
- & System & Faithfulness & Answer relevancy & Context precision \\
+Category & Total & Split A: train / val & Split B: train / val / test & Ungrounded answers \\
 \midrule
-S1 & Cloud only & n/a & 0.93 [0.91, 0.95] & n/a \\
-S2 & Fine-tuned only & n/a & 0.81 [0.76, 0.86] & n/a \\
-S5 & Base Qwen only & n/a & 0.94 [0.93, 0.96] & n/a \\
-S3 & RAG + cloud & 0.61 [0.42, 0.79] & 0.87 [0.75, 0.94] & 0.57 [0.36, 0.78] \\
-S4 & RAG + fine-tuned & 0.32 [0.16, 0.49] & 0.88 [0.84, 0.91] & 0.60 [0.38, 0.80] \\
-S6 & RAG + base Qwen & 0.43 [0.26, 0.61] & 0.95 [0.92, 0.97] & 0.60 [0.39, 0.80] \\
+recall               & 287 & 260 / 27 & 217 / 35 / 35 & 133 (46\%) \\
+applied\_numerical   & 380 & 354 / 26 & 255 / 76 / 49 & n/a (computed) \\
+out\_of\_context     & 40  & 40 / 0   & 29 / 6 / 5    & n/a (refusal) \\
+applied\_conceptual  & 18  & 17 / 1   & 14 / 2 / 2    & 18 (100\%) \\
+negative\_edge\_case & 14  & 11 / 3   & 10 / 2 / 2    & 14 (100\%) \\
+comparative          & 12  & 10 / 2   & 8 / 2 / 2     & 10 (83\%) \\
+analytical           & 11  & 10 / 1   & 7 / 2 / 2     & 11 (100\%) \\
+\midrule
+Total                & 762 & 702 / 60 & 540 / 125 / 97 & \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-  ybar, width=\columnwidth, height=5.2cm,
-  bar width=5pt, ymin=0, ymax=1.1,
-  symbolic x coords={S1,S2,S5,S3,S4,S6}, xtick=data,
-  ylabel={Score}, tick label style={font=\scriptsize}, label style={font=\footnotesize},
-  legend style={font=\scriptsize, at={(0.5,1.02)}, anchor=south, legend columns=3},
-  enlarge x limits=0.12, ymajorgrids=true, grid style={line width=.1pt, draw=gray!30}
-]
-\addplot[fill=blue!60] coordinates {(S3,0.609) (S4,0.321) (S6,0.429)};
-\addplot[fill=orange!80] coordinates {(S1,0.929) (S2,0.814) (S5,0.944) (S3,0.872) (S4,0.876) (S6,0.946)};
-\addplot[fill=green!50!black] coordinates {(S3,0.574) (S4,0.598) (S6,0.603)};
-\legend{Faithfulness, Answer relevancy, Context precision}
-\end{axis}
-\end{tikzpicture}
-\caption{Mean scores per system (17 clean questions). Faithfulness and context precision are undefined for S1, S2 and S5.}
-\label{fig:bars}
-\end{figure}
+\subsection{QLoRA Fine-Tuning}
+Both adapters use Unsloth and TRL on a single GPU with a 4-bit Qwen2.5-1.5B-Instruct base; LoRA rank 16, $\alpha=32$, dropout 0.05 on all attention and MLP projections; effective batch 16; learning rate $2\times10^{-4}$ with cosine decay and 5\% warm-up; 8-bit AdamW; maximum length 1024; three epochs. \textbf{Adapter~A}, used in the system-level study, was trained on the 702 examples of split~A with minority categories oversampled three times and loss over the full sequence; its final step-150 checkpoint was deployed. Training loss fell from 1.87 to 0.23 while validation loss was 0.577, 0.496 and 0.515 at steps 50, 100 and 150, so validation loss was lowest at step 100. \textbf{Adapters~B}, used in the generator-level study, are three retrained models (seeds 42--44) on split~B with loss on answer tokens only, no oversampling, and early stopping on validation loss (patience 3). Validation loss was lowest after only 11 steps (1.088--1.093) and training stopped at step 44 in all seeds; a run took about five minutes on a free-tier T4.
 
-\begin{table}[t]
-\caption{Paired differences (first minus second) with 95\% bootstrap CI. F: faithfulness, R: answer relevancy.}
-\label{tab:paired}
+%==============================================================
+\section{Evaluation Design}\label{sec:eval}
+
+\textbf{System-level study (Study~A).} We compare six systems: cloud only (S1), fine-tuned only (S2), base Qwen only (S5), RAG with the cloud model (S3), RAG with the fine-tuned model (S4) and RAG with the base model (S6). S2/S5 and S4/S6 differ only in the adapter. The question set comes from a bank of 32 gold questions, each compared with all 762 training and validation questions by normalised exact match, BGE cosine similarity $\ge0.82$ and an LLM check of whether memorising one would answer the other. Three exact matches and 12 paraphrases were excluded, leaving \textbf{17 screened questions} (11 conceptual, 6 numerical). All 102 answers were scored with RAGAS~\cite{es2024ragas} v0.4.3: faithfulness, answer relevancy and LLM context precision with reference. Faithfulness and context precision need retrieved context, so they are undefined for S1, S2 and S5. The judge is \texttt{openai/gpt-oss-120b} on Groq (temperature 0, low reasoning effort); an earlier judge was replaced because of a token-rate cap, and all reported scores come from this single judge. We report means with 95\% bootstrap intervals over questions (10{,}000 resamples) and paired differences over questions scored for both systems.
+
+\textbf{Numerical benchmark.} Because RAGAS is a weak proxy for calculation, we generated 27 new problems (page replacement, disk scheduling, CPU scheduling; nine each) whose wording differs from the training templates, with ground truth from deterministic simulators. An answer is \emph{strict}-correct if its last number equals the truth and \emph{lenient}-correct if the truth appears among the numbers of its last 250 characters. Wilson intervals and an exact sign test are reported.
+
+\textbf{Generator-level study (Study~B).} To isolate the generator from retrieval and from the judge, we gave each model the gold passage of 97 held-out items and compared its answer with the reference. Examples were re-split \emph{by passage} (Table~\ref{tab:audit}), with refusal examples grouped by question, so no passage is shared between splits and no training question is a near-duplicate (Jaccard $\ge0.9$) of a held-out one. Model selection used only validation data. The un-tuned base and the three adapters were scored under both system prompts with greedy decoding (at most 400 tokens). Metrics are exact match (EM), token-F1, ROUGE-L~\cite{lin2004rouge}, number recall (share of the reference's numbers present in the answer, numerical items only), refusal precision/recall/F1 with \texttt{OUT\_OF\_CONTEXT} as the positive class, false-refusal rate, and answer-token perplexity. Fine-tuned scores are averaged over seeds per item and compared with the base by a paired bootstrap over items (5{,}000 resamples; smallest attainable $p=2\times10^{-4}$).
+
+\textbf{Protocol safeguards.} We cleared conversation memory before every request (earlier turns had leaked one system's answer into the next prompt), lowered the repetition penalty to 1.1 and removed the n-gram constraint (both apply to the prompt as well as the output and prevent quoting retrieved text), saved answers before judging, and corrected three wrong gold numerical references by simulation.
+
+%==============================================================
+\section{Results}\label{sec:results}
+
+\subsection{System-Level Study}\label{sec:resA}
+Table~\ref{tab:A} gives the six-system results. The cloud model with retrieval (S3) is the most faithful system. Paired over questions, S4 is lower than S3 on faithfulness by 0.268 (95\% CI $-0.445$ to $-0.106$); answer relevancy and context precision do not differ detectably. Against its own base (S4 $-$ S6), the fine-tuned model shows no detectable faithfulness gain ($-0.108$, CI $-0.285$ to $+0.050$) and lower answer relevancy ($-0.070$, CI $-0.108$ to $-0.033$); without retrieval the relevancy gap is $-0.130$ (S2 $-$ S5, CI $-0.186$ to $-0.080$). Adding retrieval did not change the base model's relevancy (S6 $-$ S5: $+0.002$, CI $-0.011$ to $+0.015$). Context precision is about 0.6 for the three RAG systems with no detectable differences, so retrieval, not the generator, is the common ceiling. One cloud refusal (\texttt{OUT\_OF\_CONTEXT} on the 8-bit address question) was scored 0 for relevancy; dropping it raises S3 relevancy from 0.872 to 0.927 and makes S4 $-$ S3 significantly negative ($-0.056$, CI $-0.097$ to $-0.020$), so the relevancy comparison depends on that rule.
+
+\begin{table*}[t]
+\caption{System-level study: 17 overlap-screened questions, mean [95\% bootstrap CI]. $n=16$ for S3 faithfulness (one refusal is not scorable). Faithfulness and context precision are undefined without retrieval. Latency is the median per answer on a CPU-only laptop (local) or including network time (cloud); means are inflated by machine stalls and are not reported.}
+\label{tab:A}
 \centering
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{llc}
+\begin{tabular}{llcccc}
 \toprule
-Comparison & Metric & Difference [CI] \\
+ & System & Faithfulness & Answer relevancy & Context precision & Latency (s) \\
 \midrule
-S4 $-$ S3 (fine-tuned vs cloud, RAG) & F & $-0.27$ [$-0.45$, $-0.11$] \\
-S4 $-$ S3 & R & $+0.00$ [$-0.08$, $+0.14$] \\
-\quad same, refusal question dropped & R & $-0.06$ [$-0.10$, $-0.02$] \\
-S4 $-$ S6 (fine-tuning, with RAG) & F & $-0.11$ [$-0.29$, $+0.05$] \\
-S4 $-$ S6 & R & $-0.07$ [$-0.11$, $-0.03$] \\
-S2 $-$ S5 (fine-tuning, no RAG) & R & $-0.13$ [$-0.19$, $-0.08$] \\
-S6 $-$ S5 (RAG on base model) & R & $+0.00$ [$-0.01$, $+0.02$] \\
-S4 $-$ S2 (RAG on fine-tuned) & R & $+0.06$ [$-0.00$, $+0.13$] \\
-S2 $-$ S1 (fine-tuned vs cloud) & R & $-0.12$ [$-0.18$, $-0.06$] \\
+S1 & Cloud only         & n/a & 0.929 [0.910, 0.948] & n/a & 1.2 \\
+S2 & Fine-tuned only    & n/a & 0.814 [0.759, 0.864] & n/a & 28.2 \\
+S5 & Base Qwen only     & n/a & 0.944 [0.929, 0.959] & n/a & 37.4 \\
+S3 & RAG $+$ cloud      & 0.609 [0.424, 0.785] & 0.872 [0.754, 0.942] & 0.574 [0.363, 0.775] & 1.9 \\
+S4 & RAG $+$ fine-tuned & 0.321 [0.164, 0.490] & 0.876 [0.843, 0.907] & 0.598 [0.382, 0.804] & 55.9 \\
+S6 & RAG $+$ base Qwen  & 0.429 [0.256, 0.607] & 0.946 [0.923, 0.966] & 0.603 [0.392, 0.804] & 48.3 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-The main findings are:
-\begin{itemize}
-  \item \textbf{The cloud model with retrieval is the most faithful.} S4 is $0.27$ lower than S3 (interval excludes zero).
-  \item \textbf{Fine-tuning did not improve these metrics.} Against the same base model, the fine-tuned model has lower answer relevancy without retrieval ($-0.13$) and with retrieval ($-0.07$), and its faithfulness is not detectably higher (S4 $-$ S6 $= -0.11$, interval includes zero).
-  \item \textbf{Retrieval changed little} for the base model (S6 $-$ S5 $\approx 0$) or the cloud model (S3 $-$ S1 $=-0.06$, interval includes zero). Context precision is about 0.57--0.60 for all three RAG systems, with no detectable differences; retrieval is weak in absolute terms.
-  \item \textbf{The S3--S4 relevancy comparison depends on one scoring rule.} Counting S3's single refusal as 0 gives a tie; dropping that question gives S4 $0.06$ lower (Table~\ref{tab:paired}).
-\end{itemize}
-
-\subsection{Calculation Benchmark}
-Table~\ref{tab:bench} gives accuracy on the 27 problems. The cloud model solves most of them; both Qwen variants mostly fail. Fine-tuned Qwen is correct on more problems than base Qwen under the lenient criterion (8 versus 4; they disagree on six problems, five in favour of the fine-tuned model), but a sign test gives $p=0.22$, so we do not claim a gain. By category (lenient, out of 9), the cloud model scored 7 (CPU scheduling), 9 (disk) and 7 (page replacement); fine-tuned Qwen 2, 1 and 5; base Qwen 1, 0 and 3. Manual inspection confirmed that Qwen's failures are genuine procedural or arithmetic errors, for example computing each seek distance from the head's starting position. Qwen output is capped at 256 tokens, which truncated some long solutions and may understate its accuracy.
+\textbf{Calculation.} Table~\ref{tab:num} shows that the cloud model solves most problems (22 of 27 strict), whereas both Qwen models mostly fail; manual spot checks show genuine procedural errors, such as measuring every seek from the head's starting position. The fine-tuned model is directionally better than the base on the lenient measure (8 versus 4 correct; five problems fine-tuned only, one base only; exact sign test $p=0.22$), which is not statistically established at $n=27$.
 
 \begin{table}[t]
-\caption{Calculation accuracy, 27 problems, no retrieval: correct/total = proportion [95\% Wilson CI].}
-\label{tab:bench}
+\caption{Judge-free numerical benchmark: problems solved out of 27 (no retrieval) [Wilson 95\% CI of the proportion].}
+\label{tab:num}
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
@@ -281,65 +186,105 @@ Table~\ref{tab:bench} gives accuracy on the 27 problems. The cloud model solves 
 \toprule
 System & Strict (last number) & Lenient (final 250 chars) \\
 \midrule
-S1 Cloud & 22/27 = 0.81 [0.63, 0.92] & 23/27 = 0.85 [0.68, 0.94] \\
-S2 Fine-tuned & 1/27 = 0.04 [0.01, 0.18] & 8/27 = 0.30 [0.16, 0.48] \\
-S5 Base Qwen & 0/27 = 0.00 [0.00, 0.12] & 4/27 = 0.15 [0.06, 0.32] \\
+S1 Cloud only      & 22 [0.63, 0.92] & 23 [0.68, 0.94] \\
+S2 Fine-tuned only & 1 [0.01, 0.18]  & 8 [0.16, 0.48] \\
+S5 Base Qwen only  & 0 [0.00, 0.12]  & 4 [0.06, 0.32] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Latency}
-Table~\ref{tab:lat} gives median time per answer on a CPU-only laptop. The local models take tens of seconds per answer, against a few seconds for the cloud model. These are single-run figures; means were inflated by stalls when the machine slept or ran on battery power, so we report medians.
+\subsection{Generator-Level Study}\label{sec:resB}
+Table~\ref{tab:B} and Fig.~\ref{fig:B} compare the base model with the three adapters on 97 held-out items. Under the training prompt, fine-tuning improves every overlap metric: token-F1 from 0.321 to $0.393\pm0.035$, ROUGE-L from 0.232 to $0.301\pm0.040$ and EM from 0.021 to $0.107\pm0.042$, with test perplexity falling from 2.83 to 2.53--2.55. Paired bootstrap confirms the gains (F1 $+0.072$, 95\% CI 0.039 to 0.104; ROUGE-L $+0.069$, CI 0.036 to 0.102; EM $+0.086$, CI 0.034 to 0.141; all $p<10^{-3}$). Answers become shorter (47 words versus 84; the mean reference has 67). By category, numerical problems improve from 0.268 to 0.376 F1 and recall from 0.416 to 0.466; the four reasoning categories have two test items each and are not interpreted.
 
 \begin{table}[t]
-\caption{Median latency per answer (seconds), single run, CPU only.}
-\label{tab:lat}
+\caption{Generator-level study: 97 held-out items; fine-tuned = mean $\pm$ s.d.\ over three seeds. Base is deterministic. Refusal metrics rest on 5 positive items. Perplexity uses the training prompt.}
+\label{tab:B}
 \centering
-\begin{tabular}{lcccccc}
+\small
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{lcccc}
 \toprule
- & S1 & S2 & S5 & S3 & S4 & S6 \\
+ & \multicolumn{2}{c}{Training prompt} & \multicolumn{2}{c}{Deployed prompt} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Metric & Base & Fine-tuned & Base & Fine-tuned \\
 \midrule
-Median (s) & 1.2 & 28.2 & 37.4 & 1.9 & 55.9 & 48.3 \\
+EM            & 0.021 & $0.107\pm0.042$ & 0.000 & $0.031\pm0.018$ \\
+Token-F1      & 0.321 & $0.393\pm0.035$ & 0.359 & $0.346\pm0.028$ \\
+ROUGE-L       & 0.232 & $0.301\pm0.040$ & 0.256 & $0.252\pm0.032$ \\
+Number recall & 0.573 & $0.529\pm0.032$ & 0.598 & $0.550\pm0.032$ \\
+Refusal F1    & 0.250 & $0.333\pm0.577$ & 0.000 & 0.000 \\
+False refusal & 0.022 & 0.000           & 0.000 & 0.000 \\
+Words/answer  & 84.3  & $47.2\pm6.4$    & 64.8  & $46.4\pm3.2$ \\
+Perplexity    & 2.83  & 2.53--2.55      & \multicolumn{2}{c}{n/a} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, width=\columnwidth, height=4.6cm, bar width=5pt, ymin=0, ymax=0.8,
+  symbolic x coords={EM,F1,ROUGE-L,NumRec}, xtick=data, enlarge x limits=0.15,
+  ylabel={Score}, tick label style={font=\scriptsize}, label style={font=\footnotesize},
+  legend style={font=\tiny, at={(0.5,1.03)}, anchor=south, legend columns=2},
+  ymajorgrids=true, grid style={line width=.1pt, draw=gray!30}
+]
+\addplot[fill=gray!60] coordinates {(EM,0.021) (F1,0.321) (ROUGE-L,0.232) (NumRec,0.573)};
+\addplot[fill=blue!60, error bars/.cd, y dir=both, y explicit] coordinates {
+ (EM,0.107) +- (0,0.042) (F1,0.393) +- (0,0.035) (ROUGE-L,0.301) +- (0,0.040) (NumRec,0.529) +- (0,0.032)};
+\addplot[fill=gray!25] coordinates {(EM,0.000) (F1,0.359) (ROUGE-L,0.256) (NumRec,0.598)};
+\addplot[fill=blue!25, error bars/.cd, y dir=both, y explicit] coordinates {
+ (EM,0.031) +- (0,0.018) (F1,0.346) +- (0,0.028) (ROUGE-L,0.252) +- (0,0.032) (NumRec,0.550) +- (0,0.032)};
+\legend{Base (train prompt), Tuned (train prompt), Base (deployed), Tuned (deployed)}
+\end{axis}
+\end{tikzpicture}
+\caption{Generator-level study: base versus fine-tuned scores under the training prompt (dark) and the deployed prompt (light). Error bars: s.d.\ over three seeds. NumRec: number recall.}
+\label{fig:B}
+\end{figure}
+
+\textbf{Prompt dependence.} Under the deployed prompt, which is the one used in the system-level study, the advantage disappears: F1 is 0.346 against 0.359 for the base model, within one seed s.d. (no paired test was run).
+
+\textbf{Refusal.} Under the training prompt one of three adapters refused all five out-of-context items with no false refusals, whereas the other two never refused (hence $0.333\pm0.577$). The seed chosen on validation answered all five. No adapter produced a false refusal. Under the deployed prompt, which contains no refusal instruction, no model refused. Abstention is therefore learnable from this data but unstable.
+
+\textbf{Qualitative errors.} The highest-F1 outputs are verbatim copies of definitions present in the passage, showing that the model learned to quote when it can. The lowest-F1 outputs are recall answers whose reference is not in the passage (fluent but off-point text) and single-word ``Yes''/``No'' replies to edge-case questions, one with the right polarity yet F1 of 0.02, which illustrates how token-F1 penalises terse correct answers.
+
 %==============================================================
-\section{Discussion}
+\section{Discussion}\label{sec:discussion}
+\textbf{What fine-tuning bought.} On gold passages and under the training prompt, the adapters give a reliable gain in overlap with reference answers and lower perplexity, mostly through shorter answers closer to the reference length and by copying from the passage; with real retrieved passages and the deployed prompt (Study~A), the same adapter does not beat its base on LLM-judged relevancy or faithfulness. The two studies agree once the prompt is accounted for: the adapter has learned the dataset's format under the prompt it was trained with. The dataset's curated, repeatedly reused passages differ from retrieved textbook chunks, which may explain why the gain does not transfer.
 
-\textbf{What the data support.} The cloud model with retrieval is clearly the most faithful system. The 1.5B model benefited neither in text quality nor, detectably, in calculation accuracy from our fine-tuning. We did not test why. A plausible hypothesis is that the fine-tuned model answers tersely in a textbook style while the relevancy metric favours longer, more generic answers; the training prompt also differs from the inference prompt, and the adapter was trained on a 4-bit base but run in 32-bit precision. These explanations are untested.
+\textbf{Why refusal is unstable.} We did not isolate the cause, but the audit suggests four contributing factors: only 14 distinct refusal questions; early stopping after one third of an epoch; nearly half of the recall answers teaching the opposite behaviour (answer although the passage lacks the answer); and loss-based checkpoint selection, which cannot see a handful of short refusals. The all-or-nothing outcome across seeds points to a threshold effect.
 
-\textbf{Dataset implications.} The dataset's numerical half is highly templated (nine question openings), its passages are short and repeated, and its conceptual categories are small. These properties may limit what a model can learn from it, but the study does not isolate them.
+\textbf{Retrieval and the judge.} Context precision of about 0.6 limits all RAG systems; for the opening question retrieval returned an anecdote about trains at a crossing rather than the formal definition. The judge belongs to the same family as the cloud generator, which may favour S1 and S3, so the cloud lead in faithfulness could be overstated; the S4--S6 comparison is unaffected because both are Qwen-based. Faithfulness also measures support by the retrieved context, not truth.
 
-\textbf{Pitfalls.} Several implementation details changed results more than model choice, and we record them for others. (i) A strong repetition penalty and an n-gram ban, which also apply to the prompt, prevented the model from quoting retrieved text and produced incoherent answers in an early run. (ii) Chains kept conversation memory, so one system's answer leaked into the next system's prompt. (iii) Rate-limit error messages and empty completions were stored as answers. (iv) One API path returned no retrieved context, which would have scored faithfulness against nothing. (v) Three gold reference answers were wrong. (vi) Judge token quotas truncated scoring runs. None of these is visible from aggregate scores alone.
-
-\subsection{Limitations}
-\begin{itemize}
-  \item \textbf{Small clean set.} Seventeen questions (six numerical) and 27 calculation problems give wide intervals; only large differences are detectable.
-  \item \textbf{Single judge, no human evaluation.} The judge is one LLM, and judge access was split across several API keys; no human ratings were collected.
-  \item \textbf{Same-family bias.} A judge from the Qwen family would be expected to favour Qwen-based systems, so the cloud model's lead on faithfulness is conservative; we did not measure this bias.
-  \item \textbf{Calculation coverage.} Correctness of RAG systems and of the full question set was not measured; the benchmark covers three problem families without retrieval, and Qwen output was capped at 256 tokens.
-  \item \textbf{Overlap check is approximate.} It relies on an LLM judgement and may over- or under-flag.
-  \item \textbf{Prompt and precision mismatch,} and a single CPU-only machine for latency.
-  \item \textbf{One textbook, one adapter,} trained once; we did not vary training settings or compare checkpoints.
-\end{itemize}
+\textbf{Implications.} For educators who need privacy or offline use, the local system is functional but slow on CPU (median 56~s per answer versus 1.9~s) and does not match the cloud system's faithfulness or calculation accuracy. We recommend showing the retrieved passages beside each answer, serving the adapter only with the prompt it was trained on, and keeping instructor oversight until refusal is demonstrated on a larger set of unanswerable questions.
 
 %==============================================================
-\section{Conclusion and Future Work}
-On 17 questions that do not overlap the training data, retrieval with a 20B cloud model was the most faithful configuration, and a LoRA adapter trained on our 762-example dataset did not improve a 1.5B model's text quality and did not significantly improve its calculation accuracy. The study's main value is therefore comparative and methodological: a documented dataset and adapter, a judge-free calculation benchmark, and an evaluation protocol that exposed several silent failure modes. Future work: a larger clean test set with human ratings and a second judge from another model family; a more diverse and larger training set built from retrieved chunks; matching training and inference prompts and comparing checkpoints; longer generation limits for calculations; and stronger retrieval, since context precision is the weakest metric.
+\section{Limitations}\label{sec:limits}
+The system-level study has 17 questions (6 numerical), so intervals are wide; the numerical benchmark has 27 problems and covers only the no-retrieval systems. Both studies rely on lexical or single-judge metrics, with no human evaluation. Qwen output was capped at 256 tokens; the adapter was trained on a 4-bit base but run in fp32 on CPU; and latency comes from one machine with interruptions. The generator-level test has 97 items, five refusal items and two items in each reasoning category, and its three seeds share one split. Passages are short curated entries, so Study~B shows generalisation to unseen passages, not unseen topics. One textbook, one model family and English only. We did not run ablations, so explanations of the refusal result are hypotheses.
+
+%==============================================================
+\section{Conclusion}\label{sec:conclusion}
+We built a RAG tutor for operating systems with interchangeable local and cloud generators and evaluated it under explicit leakage control. The cloud model with retrieval is the most faithful system. For the 1.5B model, LoRA fine-tuning on 762 examples yields a statistically reliable gain in answer overlap on held-out passages (token-F1 $+0.072$) but no gain in LLM-judged quality with retrieved passages, an unstable refusal behaviour, and a dependence on the system prompt. The accompanying audit explains these limits and gives concrete priorities: passages that actually contain each answer, far more diverse unanswerable questions, generation-based checkpoint selection, and prompt consistency between training and serving. OS is the first course in our plan: because the pipeline needs only a textbook and a question set, we intend to extend it to further courses built on their standard books, applying the same overlap screening and audit to each.
 
 \section*{Reproducibility}
-Code, dataset files, the adapter, raw answers, scores and the benchmark are in the project repository, with a write-up of every setting and correction. Replace this paragraph with the public repository or dataset link before submission.
+Code, datasets, adapters, answers and scores are in the project repository; replace this sentence with the public link before submission. Study~B used Python 3.13, PyTorch 2.11, Transformers 5.17, TRL 1.15, PEFT 0.21 and Unsloth 2026.10.10 on one NVIDIA T4; Study~A used RAGAS 0.4.3 and Qdrant on a CPU-only laptop.
 
 \begin{thebibliography}{00}
-\bibitem{lewis2020rag} P.~Lewis \emph{et al.}, ``Retrieval-augmented generation for knowledge-intensive NLP tasks,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2020.
-\bibitem{hu2022lora} E.~J. Hu \emph{et al.}, ``LoRA: Low-rank adaptation of large language models,'' in \emph{Int. Conf. on Learning Representations (ICLR)}, 2022.
-\bibitem{dettmers2023qlora} T.~Dettmers, A.~Pagnoni, A.~Holtzman, and L.~Zettlemoyer, ``QLoRA: Efficient finetuning of quantized LLMs,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
-\bibitem{es2024ragas} S.~Es, J.~James, L.~Espinosa-Anke, and S.~Schockaert, ``RAGAS: Automated evaluation of retrieval augmented generation,'' in \emph{Proc. EACL: System Demonstrations}, 2024.
-\bibitem{zheng2023judge} L.~Zheng \emph{et al.}, ``Judging LLM-as-a-judge with MT-Bench and Chatbot Arena,'' in \emph{NeurIPS Datasets and Benchmarks Track}, 2023.
-\bibitem{ji2023hallucination} Z.~Ji \emph{et al.}, ``Survey of hallucination in natural language generation,'' \emph{ACM Computing Surveys}, vol.~55, no.~12, 2023.
-\bibitem{gao2023ragsurvey} Y.~Gao \emph{et al.}, ``Retrieval-augmented generation for large language models: A survey,'' arXiv:2312.10997, 2023.
+\bibitem{lewis2020rag} P.~Lewis \emph{et al.}, ``Retrieval-augmented generation for knowledge-intensive NLP tasks,'' in \emph{Proc. NeurIPS}, 2020.
+\bibitem{karpukhin2020dpr} V.~Karpukhin \emph{et al.}, ``Dense passage retrieval for open-domain question answering,'' in \emph{Proc. EMNLP}, 2020.
+\bibitem{hu2022lora} E.~J. Hu \emph{et al.}, ``LoRA: Low-rank adaptation of large language models,'' in \emph{Proc. ICLR}, 2022.
+\bibitem{dettmers2023qlora} T.~Dettmers, A.~Pagnoni, A.~Holtzman, and L.~Zettlemoyer, ``QLoRA: Efficient finetuning of quantized LLMs,'' in \emph{Proc. NeurIPS}, 2023.
 \bibitem{qwen25} Qwen Team, ``Qwen2.5 technical report,'' arXiv:2412.15115, 2024.
+\bibitem{zhou2023lima} C.~Zhou \emph{et al.}, ``LIMA: Less is more for alignment,'' in \emph{Proc. NeurIPS}, 2023.
+\bibitem{rajpurkar2018squad2} P.~Rajpurkar, R.~Jia, and P.~Liang, ``Know what you don't know: Unanswerable questions for SQuAD,'' in \emph{Proc. ACL (Short Papers)}, 2018.
+\bibitem{kasneci2023edu} E.~Kasneci \emph{et al.}, ``ChatGPT for good? On opportunities and challenges of large language models for education,'' \emph{Learning and Individual Differences}, vol.~103, 2023.
+\bibitem{ji2023hallucination} Z.~Ji \emph{et al.}, ``Survey of hallucination in natural language generation,'' \emph{ACM Comput. Surv.}, vol.~55, no.~12, 2023.
+\bibitem{es2024ragas} S.~Es, J.~James, L.~Espinosa-Anke, and S.~Schockaert, ``RAGAS: Automated evaluation of retrieval augmented generation,'' in \emph{Proc. EACL: System Demonstrations}, 2024.
+\bibitem{zheng2023judge} L.~Zheng \emph{et al.}, ``Judging LLM-as-a-judge with MT-Bench and Chatbot Arena,'' in \emph{NeurIPS Datasets and Benchmarks}, 2023.
+\bibitem{lin2004rouge} C.-Y. Lin, ``ROUGE: A package for automatic evaluation of summaries,'' in \emph{Text Summarization Branches Out}, 2004.
+\bibitem{magar2022contamination} I.~Magar and R.~Schwartz, ``Data contamination: From memorization to exploitation,'' in \emph{Proc. ACL (Short Papers)}, 2022.
+\bibitem{efron1993bootstrap} B.~Efron and R.~J. Tibshirani, \emph{An Introduction to the Bootstrap}. New York, NY, USA: Chapman \& Hall, 1993.
 \bibitem{xiao2023cpack} S.~Xiao \emph{et al.}, ``C-Pack: Packaged resources to advance general Chinese embedding,'' arXiv:2309.07597, 2023.
 \bibitem{gptoss} OpenAI, ``gpt-oss-120b and gpt-oss-20b model card,'' arXiv:2508.10925, 2025.
 \bibitem{galvin} A.~Silberschatz, P.~B. Galvin, and G.~Gagne, \emph{Operating System Concepts}. Hoboken, NJ, USA: Wiley.
